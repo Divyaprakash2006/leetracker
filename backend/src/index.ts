@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // Load environment variables FIRST before any other imports that use them
 dotenv.config();
@@ -21,6 +23,10 @@ import solutionViewerRoutes from './routes/solutionViewerRoutes';
 console.log('🔍 Environment check:');
 console.log('   MONGODB_URI:', process.env.MONGODB_URI ? 'Loaded ✅' : 'Missing ❌');
 console.log('   PORT:', process.env.PORT || '5000');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -825,6 +831,16 @@ app.get('/api/test-leetcode', async (req: Request, res: Response) => {
     });
   }
 });
+
+if (fs.existsSync(frontendDistPath)) {
+  console.log('🧱 Serving frontend from:', frontendDistPath);
+  app.use(express.static(frontendDistPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else {
+  console.warn('⚠️ Frontend build directory not found at:', frontendDistPath);
+}
 
 app.listen(PORT, () => {
   console.log(`\n🚀 LeetCode Tracker Backend Server`);

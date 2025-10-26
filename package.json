@@ -9,7 +9,10 @@
     "start:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "render:prepare": "npm install --prefix backend && npm install --prefix frontend",
+    "render:build": "npm run render:prepare && npm run build --prefix frontend",
+    "render:start": "npm run start --prefix backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
