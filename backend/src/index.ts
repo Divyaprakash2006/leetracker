@@ -31,8 +31,47 @@ const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://localhost:5001',
+  'http://localhost:5173'
+];
+
+const envOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+const renderExternalUrl = process.env.RENDER_EXTERNAL_URL?.replace(/\/+$/, '');
+if (renderExternalUrl) {
+  defaultOrigins.push(renderExternalUrl);
+}
+
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5001', 'http://localhost:5000', 'http://localhost:5173'],
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    try {
+      const hostname = new URL(origin).hostname;
+      if (/\.onrender\.com$/i.test(hostname)) {
+        return callback(null, true);
+      }
+    } catch (error) {
+      console.warn('⚠️ Invalid origin header detected:', origin, error);
+      return callback(null, false);
+    }
+
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
