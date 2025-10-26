@@ -6,7 +6,8 @@ const sanitizeBaseUrl = (url?: string | null) => {
 };
 
 const resolveBaseUrl = () => {
-  const rawEnvUrl = sanitizeBaseUrl((import.meta as any).env?.VITE_API_URL);
+  const envSource = (import.meta as any).env ?? {};
+  const rawEnvUrl = sanitizeBaseUrl(envSource.VITE_API_URL);
 
   if (rawEnvUrl) {
     return rawEnvUrl;
