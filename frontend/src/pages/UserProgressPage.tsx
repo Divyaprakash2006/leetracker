@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { apiClient } from '../config/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -68,15 +69,15 @@ export const UserProgressPage = () => {
 
   useEffect(() => {
     if (username) {
-      fetchUserData();
+      fetchUserData(username);
     }
   }, [username]);
 
-  const fetchUserData = async () => {
+  const fetchUserData = async (targetUsername: string) => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:5001/api/user/${username}`);
+      const response = await axios.get(apiClient.getUser(targetUsername));
       setUserData(response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch user data');
@@ -242,7 +243,7 @@ export const UserProgressPage = () => {
                 📋 All Submissions
               </button>
               <button
-                onClick={fetchUserData}
+                onClick={() => username && fetchUserData(username)}
                 className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-colors"
               >
                 🔄 Refresh

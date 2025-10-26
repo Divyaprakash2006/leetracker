@@ -1,31 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from '../config/constants';
+import { apiClient } from '../config/api';
 
 interface Submission {
   id: string;
   title: string;
-  titleSlug: string;
+  titleSlug?: string;
   timestamp: string;
-  timeAgo: string;
   lang: string;
-  runtime: string;
-  memory: string;
-  status: string;
-  problemUrl: string;
-  solutionUrl: string;
-  submissionUrl: string;
+  runtime?: string;
+  memory?: string;
+  status?: string;
+  problemUrl?: string;
+  solutionUrl?: string;
+  submissionUrl?: string;
+  timeAgo?: string;
   timestampMs?: number;
   solvedAt?: string;
+  code?: string;
 }
 
 interface StoredSolution {
   submissionId: string;
   problemName: string;
   problemSlug: string;
-  problemUrl: string;
-  language: string;
+  problemUrl?: string;
+  language?: string;
   code?: string;
   runtime?: string;
   memory?: string;
@@ -73,15 +74,15 @@ export const SubmissionsPage = () => {
     return new Date(timestampMs).toLocaleString();
   };
 
-  useEffect(() => {
-    if (username) {
-      fetchAllData();
+  const fetchAllData = async (targetUsername = username) => {
+    if (!targetUsername) {
+      setError('Username is required');
+      return;
     }
-  }, [username]);
 
-  const fetchAllData = async () => {
     setLoading(true);
     setError('');
+
     try {
       const fetchStoredSolutions = async (): Promise<StoredSolution[]> => {
         const aggregated: StoredSolution[] = [];
@@ -90,8 +91,8 @@ export const SubmissionsPage = () => {
         let total = Number.POSITIVE_INFINITY;
 
         while (skip < total) {
-          const response = await axios.get(`${API_URL}/api/user/${username}/solutions`, {
-            params: { limit: pageSize, skip }
+          const response = await axios.get(apiClient.getUserSolutions(targetUsername), {
+            params: { limit: pageSize, skip },
           });
 
           if (!response.data?.success || !Array.isArray(response.data.solutions)) {
@@ -115,63 +116,77 @@ export const SubmissionsPage = () => {
         return aggregated;
       };
 
-      const legacyPromise = axios.get(`${API_URL}/api/user/${username}`);
-      const storedPromise = fetchStoredSolutions();
-      const [legacyResponse, storedSolutionsRaw] = await Promise.all([legacyPromise, storedPromise]);
-
-      setUserData(legacyResponse.data);
+      const [legacyResponse, storedSolutionsRaw] = await Promise.all([
+        axios.get(apiClient.getUser(targetUsername)),
+        fetchStoredSolutions(),
+      ]);
 
       const legacySubmissionsRaw: Submission[] = legacyResponse.data?.recentSubmissions || [];
       const legacyMapped: Submission[] = legacySubmissionsRaw.map((legacy) => {
-        const timestampMs = Number(legacy.timestamp) * 1000;
+        const timestampValue = Number(legacy.timestamp) * 1000;
+        const timestampMs = Number.isFinite(timestampValue) ? timestampValue : Date.now();
+        const id =
+          legacy.id ||
+          (legacy as any).submissionId ||
+          `${targetUsername}-${legacy.titleSlug || legacy.title || 'submission'}-${legacy.timestamp}`;
+
         return {
           ...legacy,
+          id,
+          title: legacy.title || (legacy as any).problemName || 'Unknown Problem',
+          lang: legacy.lang || 'Unknown',
           timestamp: timestampMs.toString(),
           timestampMs,
           solvedAt: formatSolvedAt(timestampMs),
-          timeAgo: formatTimeAgo(timestampMs)
+          timeAgo: formatTimeAgo(timestampMs),
+          status: legacy.status || 'Accepted',
         };
       });
 
-      if (storedSolutionsRaw.length > 0) {
-        const storedMapped: Submission[] = storedSolutionsRaw.map((sol) => {
-          const timestampMs = sol.submittedAt ? new Date(sol.submittedAt).getTime() : sol.timestamp * 1000;
-          return {
-            id: sol.submissionId,
-            title: sol.problemName,
-            titleSlug: sol.problemSlug,
-            timestamp: timestampMs.toString(),
-            timestampMs,
-            solvedAt: formatSolvedAt(timestampMs),
-            timeAgo: formatTimeAgo(timestampMs),
-            lang: sol.language || 'Unknown',
-            runtime: sol.runtime || 'N/A',
-            memory: sol.memory || 'N/A',
-            status: sol.status || 'Accepted',
-            problemUrl: sol.problemUrl || (sol.problemSlug ? `https://leetcode.com/problems/${sol.problemSlug}/` : ''),
-            solutionUrl: '',
-            submissionUrl: `https://leetcode.com/submissions/detail/${sol.submissionId}/`,
-          };
-        });
+      const storedMapped: Submission[] = (storedSolutionsRaw || []).map((sol) => {
+        const timestampMs = sol.submittedAt ? new Date(sol.submittedAt).getTime() : sol.timestamp * 1000;
+        const safeTimestamp = Number.isFinite(timestampMs) ? timestampMs : Date.now();
 
-        const combinedSolutions = [...storedMapped];
-        const existingIds = new Set(combinedSolutions.map(solution => solution.id));
-        legacyMapped.forEach((legacy) => {
-          if (!existingIds.has(legacy.id)) {
-            combinedSolutions.push(legacy);
-          }
-        });
+        return {
+          id: sol.submissionId,
+          title: sol.problemName || 'Unknown Problem',
+          titleSlug: sol.problemSlug,
+          timestamp: safeTimestamp.toString(),
+          timestampMs: safeTimestamp,
+          solvedAt: formatSolvedAt(safeTimestamp),
+          timeAgo: formatTimeAgo(safeTimestamp),
+          lang: sol.language || 'Unknown',
+          runtime: sol.runtime || 'N/A',
+          memory: sol.memory || 'N/A',
+          status: sol.status || 'Accepted',
+          problemUrl: sol.problemUrl || (sol.problemSlug ? `https://leetcode.com/problems/${sol.problemSlug}/` : ''),
+          solutionUrl: '',
+          submissionUrl: `https://leetcode.com/submissions/detail/${sol.submissionId}/`,
+          code: sol.code,
+        };
+      });
 
-        combinedSolutions.sort((a, b) => {
-          const bValue = b.timestampMs ?? Number(b.timestamp) ?? 0;
-          const aValue = a.timestampMs ?? Number(a.timestamp) ?? 0;
-          return bValue - aValue;
-        });
+      const combinedSolutions = [...storedMapped];
+      const existingIds = new Set(combinedSolutions.map((solution) => solution.id));
 
-        setAllSolutions(combinedSolutions);
-      } else {
-        setAllSolutions(legacyMapped);
-      }
+      legacyMapped.forEach((legacy) => {
+        if (!existingIds.has(legacy.id)) {
+          combinedSolutions.push(legacy);
+        }
+      });
+
+      combinedSolutions.sort((a, b) => {
+        const bValue = b.timestampMs ?? Number(b.timestamp) ?? 0;
+        const aValue = a.timestampMs ?? Number(a.timestamp) ?? 0;
+        return bValue - aValue;
+      });
+
+      setUserData({
+        ...(legacyResponse.data as UserData),
+        recentSubmissions: legacyMapped,
+      });
+
+      setAllSolutions(combinedSolutions.length > 0 ? combinedSolutions : legacyMapped);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch user data');
     } finally {
@@ -179,6 +194,11 @@ export const SubmissionsPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (username) {
+      fetchAllData(username);
+    }
+  }, [username]);
 
   if (loading) {
     return (
@@ -205,9 +225,10 @@ export const SubmissionsPage = () => {
     );
   }
 
-  const submissionsSource = allSolutions.length > 0 ? allSolutions : userData?.recentSubmissions || [];
+  const submissionsSource = allSolutions.length > 0 ? allSolutions : userData.recentSubmissions || [];
 
-  const filteredSubmissions = submissionsSource.filter(sub => {
+  const filteredSubmissions = submissionsSource.filter((sub) => {
+    if (!sub.lang) return filter === 'all';
     if (filter === 'all') return true;
     const lang = sub.lang.toLowerCase();
     if (filter === 'python') return lang.includes('python');
@@ -251,7 +272,7 @@ export const SubmissionsPage = () => {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={fetchAllData}
+            onClick={() => fetchAllData(username)}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
           >
             🔄 Refresh
@@ -266,7 +287,7 @@ export const SubmissionsPage = () => {
           <div className="flex-1">
             <h3 className="font-semibold text-gray-800 mb-1">Submission Tracking</h3>
             <p className="text-sm text-gray-700">
-              View all submission metadata including execution time, memory usage, and language. 
+              View all submission metadata including execution time, memory usage, and language.
               Click <span className="font-semibold text-indigo-600">"👁️ View Code"</span> to view the solution in the tracker.
             </p>
           </div>
@@ -365,48 +386,62 @@ export const SubmissionsPage = () => {
             <p className="text-gray-600">Try a different filter or refresh the data</p>
           </div>
         ) : (
-          filteredSubmissions.map((sub, idx) => (
+          filteredSubmissions.map((sub) => (
             <div
-              key={idx}
+              key={sub.id}
               className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-bold text-gray-800">{sub.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getLanguageColor(sub.lang)}`}>
-                      {sub.lang}
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getLanguageColor(sub.lang || 'Unknown')}`}>
+                      {sub.lang || 'Unknown'}
                     </span>
                     <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                      ✓ {sub.status}
+                      ✓ {sub.status || 'Accepted'}
                     </span>
                   </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-gray-600">
                       <span className="text-sm">🕒</span>
                       <div className="text-sm">
-                        <div>Solved: {sub.solvedAt || formatSolvedAt(Number(sub.timestampMs ?? sub.timestamp) || 0)}</div>
+                        <div>
+                          Solved: {sub.solvedAt || formatSolvedAt(Number(sub.timestampMs ?? sub.timestamp) || 0)}
+                        </div>
                         {sub.timeAgo && <div className="text-xs text-gray-500">({sub.timeAgo})</div>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <span className="text-sm">⚡</span>
-                      <span className="text-sm">Execution Time: {sub.runtime}</span>
+                      <span className="text-sm">Execution Time: {sub.runtime || 'N/A'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <span className="text-sm">💾</span>
-                      <span className="text-sm">Memory: {sub.memory}</span>
+                      <span className="text-sm">Memory: {sub.memory || 'N/A'}</span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => navigate(`/user/${username}/submission/${sub.id}`, { state: { submission: sub } })}
+                      onClick={() =>
+                        navigate(`/user/${username}/submission/${sub.id}`, { state: { submission: sub } })
+                      }
                       className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-semibold shadow-md"
                     >
                       👁️ View Code
                     </button>
+                    {sub.problemUrl && (
+                      <a
+                        href={sub.problemUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-semibold"
+                      >
+                        🔗 Problem
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -428,13 +463,13 @@ export const SubmissionsPage = () => {
           </div>
           <div>
             <div className="text-3xl font-bold">
-              {new Set(submissionsSource.map(s => s.lang)).size}
+              {new Set(submissionsSource.map((s) => s.lang || 'Unknown')).size}
             </div>
             <div className="text-sm text-blue-100 mt-1">Languages Used</div>
           </div>
           <div>
             <div className="text-3xl font-bold">
-              {new Set(submissionsSource.map(s => s.title)).size}
+              {new Set(submissionsSource.map((s) => s.title || 'Unknown Problem')).size}
             </div>
             <div className="text-sm text-blue-100 mt-1">Unique Problems</div>
           </div>

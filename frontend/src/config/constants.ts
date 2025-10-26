@@ -1,1 +1,3 @@
-export const API_URL = 'http://localhost:5001';
+import { API_BASE_URL } from './api';
+
+export const API_URL = API_BASE_URL;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackedUsers } from '../context/UserContext';
 import axios from 'axios';
+import { apiClient } from '../config/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -53,7 +54,7 @@ export const AnalyticsPage = () => {
     setLoading(true);
     try {
       const promises = trackedUsers.map(user =>
-        axios.get(`http://localhost:5001/api/user/${user.username}`)
+        axios.get(apiClient.getUser(user.username))
       );
       const responses = await Promise.all(promises);
       setUsersData(responses.map(r => r.data));

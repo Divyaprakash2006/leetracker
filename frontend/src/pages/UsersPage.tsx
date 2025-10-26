@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackedUsers } from '../context/UserContext';
 import axios from 'axios';
+import { apiClient } from '../config/api';
 import { Link } from 'react-router-dom';
 
 interface UserStats {
@@ -34,7 +35,7 @@ export const UsersPage = () => {
   const fetchUserData = async (username: string) => {
     setLoading(prev => ({ ...prev, [username]: true }));
     try {
-      const response = await axios.get(`http://localhost:5001/api/user/${username}`);
+  const response = await axios.get(apiClient.getUser(username));
       setUsersData(prev => ({ ...prev, [username]: response.data }));
     } catch (error) {
       console.error(`Error fetching data for ${username}:`, error);

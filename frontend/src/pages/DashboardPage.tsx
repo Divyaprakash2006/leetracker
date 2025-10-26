@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useTrackedUsers } from '../context/UserContext';
 import axios from 'axios';
-import { API_URL } from '../config/constants';
+import { apiClient } from '../config/api';
 
 interface UserStats {
   username: string;
@@ -35,7 +35,7 @@ export const DashboardPage = () => {
         const stats = await Promise.all(
           trackedUsers.map(async (user) => {
             try {
-              const response = await axios.get(`${API_URL}/api/user/${user.username}`);
+              const response = await axios.get(apiClient.getUser(user.username));
               const data = response.data;
               
               // Get problems data from the correct structure

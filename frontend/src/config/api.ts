@@ -33,9 +33,9 @@ const resolveBaseUrl = () => {
   return isDev ? 'http://localhost:5001' : '';
 };
 
-const API_BASE_URL = resolveBaseUrl();
+export const API_BASE_URL = resolveBaseUrl();
 
-const buildUrl = (path: string) => {
+export const buildApiUrl = (path: string) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
   if (!API_BASE_URL) {
@@ -57,11 +57,12 @@ const buildUrl = (path: string) => {
 };
 
 export const apiClient = {
-  getUser: (username: string) => buildUrl(`/api/user/${username}`),
-  getUserStats: (username: string) => buildUrl(`/api/user/${username}/stats`),
-  getUserSolutions: (username: string) => buildUrl(`/api/user/${username}/solutions`),
-  syncUser: (username: string) => buildUrl(`/api/user/${username}/sync`),
-  getSubmission: (submissionId: string) => buildUrl(`/api/submission/${submissionId}`),
-  testLeetCode: () => buildUrl('/api/test-leetcode'),
-  health: () => buildUrl('/health')
+  getUser: (username: string) => buildApiUrl(`/api/user/${username}`),
+  getUserStats: (username: string) => buildApiUrl(`/api/user/${username}/stats`),
+  getUserSolutions: (username: string) => buildApiUrl(`/api/user/${username}/solutions`),
+  syncUser: (username: string) => buildApiUrl(`/api/user/${username}/sync`),
+  getSubmission: (submissionId: string) => buildApiUrl(`/api/submission/${submissionId}`),
+  getSolutionViewer: (submissionId: string) => buildApiUrl(`/api/solutions/viewer/${submissionId}`),
+  testLeetCode: () => buildApiUrl('/api/test-leetcode'),
+  health: () => buildApiUrl('/health')
 };
