@@ -1,0 +1,234 @@
+/* SolutionViewer syntax highlighting - LeetCode style */
+pre code {
+  display: block;
+  padding: 1.5em;
+  font-family: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+  font-size: 14px;
+  font-feature-settings: "liga" 0;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  tab-size: 4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base theme */
+.hljs {
+  color: #383a42;
+  background: #ffffff;
+  padding: 1em;
+  text-shadow: 0 0 0.5px #38383840;
+  font-weight: 600;
+}
+
+/* Java Syntax Highlighting - Bold LeetCode Colors */
+
+/* Keywords - Bold Purple */
+.hljs-keyword,
+.language-java .hljs-keyword,
+code.hljs span[class~="hljs-keyword"] {
+  color: #c678dd !important; /* Purple */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #c678dd40;
+}
+
+/* Types - Bold Cyan */
+.hljs-type,
+.language-java .hljs-type,
+.language-java .hljs-built_in,
+code.hljs span[class~="hljs-type"] {
+  color: #56b6c2 !important; /* Cyan */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #56b6c240;
+}
+
+/* Class names - Bold Yellow */
+.hljs-title.class_,
+.language-java .hljs-title.class_,
+.language-java .hljs-class .hljs-title,
+code.hljs .className {
+  color: #e5c07b !important; /* Yellow */
+  font-weight: 700;
+  text-shadow: 0 0 0.5px #e5c07b40;
+}
+
+/* Method names - Bold Blue */
+.hljs-title.function_,
+.language-java .hljs-title.function_,
+.language-java .hljs-function .hljs-title,
+code.hljs .methodName {
+  color: #61afef !important; /* Blue */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #61afef40;
+}
+
+/* Numbers and literals - Bold Orange */
+.hljs-number,
+.language-java .hljs-number,
+.hljs-literal,
+.language-java .hljs-literal,
+code.hljs span[class~="hljs-number"] {
+  color: #d19a66 !important; /* Orange */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #d19a6640;
+}
+
+/* Strings and Characters - Bold Green */
+.hljs-string,
+.language-java .hljs-string,
+.hljs-regexp,
+.language-java .hljs-regexp,
+.hljs-char,
+.language-java .hljs-char,
+code.hljs span[class~="hljs-string"],
+code.hljs span[class~="hljs-char"] {
+  color: #98c379 !important; /* Green */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #98c37940;
+}
+
+/* Comments - Italic Gray */
+.hljs-comment,
+.language-java .hljs-comment,
+code.hljs span[class~="hljs-comment"] {
+  color: #5c6370 !important; /* Gray */
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Variables and parameters - Bold Red */
+.hljs-variable,
+.language-java .hljs-variable,
+.hljs-params,
+.language-java .hljs-params,
+code.hljs span[class~="hljs-variable"],
+code.hljs span[class~="hljs-params"] {
+  color: #e06c75 !important; /* Red */
+  font-weight: 600;
+  text-shadow: 0 0 0.5px #e06c7540;
+}
+
+/* Operators */
+.hljs-operator,
+.hljs-punctuation {
+  color: #374151; /* Dark Gray */
+}
+
+/* Special keywords (this, super, null, true, false) */
+.hljs-literal,
+.hljs-keyword.hljs-this {
+  color: #c2410c; /* Orange */
+}
+
+/* Function parameters */
+.hljs-params {
+  color: #dc2626; /* Red */
+  font-weight: normal;
+}
+
+/* Language support */
+.language-java .hljs-keyword,
+.language-javascript .hljs-keyword,
+.language-typescript .hljs-keyword,
+.language-python .hljs-keyword {
+  color: #9333ea; /* Purple */
+}
+
+.language-java .hljs-type,
+.language-javascript .hljs-type,
+.language-typescript .hljs-type {
+  color: #0891b2; /* Cyan */
+}
+
+.language-java .hljs-string,
+.language-javascript .hljs-string,
+.language-typescript .hljs-string {
+  color: #15803d; /* Green */
+}
+
+/* Additional Java-specific highlighting */
+.language-java .hljs-class .hljs-title {
+  color: #ca8a04; /* Yellow */
+}
+
+.language-java .hljs-function .hljs-title {
+  color: #2563eb; /* Blue */
+}
+
+.language-java .hljs-number {
+  color: #c2410c; /* Orange */
+}
+
+/* Ensure variables and parameters are red */
+.language-java .hljs-variable,
+.language-java .hljs-params {
+  color: #dc2626; /* Red */
+}
+
+/* Additional Java Specific Rules */
+
+/* Java specific keywords */
+.language-java .hljs-keyword[data-value="public"],
+.language-java .hljs-keyword[data-value="private"],
+.language-java .hljs-keyword[data-value="protected"],
+.language-java .hljs-keyword[data-value="class"],
+.language-java .hljs-keyword[data-value="extends"],
+.language-java .hljs-keyword[data-value="implements"],
+.language-java .hljs-keyword[data-value="interface"],
+.language-java .hljs-keyword[data-value="if"],
+.language-java .hljs-keyword[data-value="else"],
+.language-java .hljs-keyword[data-value="for"],
+.language-java .hljs-keyword[data-value="while"],
+.language-java .hljs-keyword[data-value="do"],
+.language-java .hljs-keyword[data-value="break"],
+.language-java .hljs-keyword[data-value="continue"],
+.language-java .hljs-keyword[data-value="return"],
+.language-java .hljs-keyword[data-value="new"],
+.language-java .hljs-keyword[data-value="this"],
+.language-java .hljs-keyword[data-value="super"] {
+  color: #c678dd !important; /* Purple */
+}
+
+/* Java primitive types */
+.language-java .hljs-keyword[data-value="void"],
+.language-java .hljs-keyword[data-value="boolean"],
+.language-java .hljs-keyword[data-value="char"],
+.language-java .hljs-keyword[data-value="byte"],
+.language-java .hljs-keyword[data-value="short"],
+.language-java .hljs-keyword[data-value="int"],
+.language-java .hljs-keyword[data-value="long"],
+.language-java .hljs-keyword[data-value="float"],
+.language-java .hljs-keyword[data-value="double"] {
+  color: #56b6c2 !important; /* Cyan */
+}
+
+/* Ensure all brackets and operators are dark */
+.language-java .hljs-punctuation,
+.language-java .hljs-operator {
+  color: #383a42 !important;
+}
+
+/* Line numbers */
+pre code.hljs {
+  counter-reset: line;
+}
+
+pre code.hljs .line {
+  counter-increment: line;
+  display: block;
+}
+
+pre code.hljs .line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.5em;
+  padding-right: 1em;
+  margin-right: 0.5em;
+  color: #9ca3af;
+  text-align: right;
+  border-right: 1px solid #e5e7eb;
+  user-select: none;
+}

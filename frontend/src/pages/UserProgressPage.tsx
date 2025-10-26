@@ -1,0 +1,347 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+} from 'chart.js';
+import { Bar, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface UserData {
+  username: string;
+  ranking: string | number;
+  country: string;
+  avatar: string;
+  contestRating: string | number;
+  contestStats: {
+    globalRanking: string | number;
+    attendedContests: number;
+    topPercentage: string | number;
+  };
+  problems: {
+    easy: number;
+    medium: number;
+    hard: number;
+    total: number;
+  };
+  dailyActivity: Array<{ date: string; count: number }>;
+  recentSubmissions: Array<{
+    title: string;
+    titleSlug: string;
+    timestamp: string;
+    timeAgo: string;
+    problemUrl: string;
+    solutionUrl: string;
+    submissionUrl: string;
+  }>;
+  stats: {
+    totalTime: string;
+    averagePerDay: string;
+    solveRate: string;
+  };
+}
+
+export const UserProgressPage = () => {
+  const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (username) {
+      fetchUserData();
+    }
+  }, [username]);
+
+  const fetchUserData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.get(`http://localhost:5001/api/user/${username}`);
+      setUserData(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch user data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
+        <p className="text-gray-600 mt-4">Loading user progress...</p>
+      </div>
+    );
+  }
+
+  if (error || !userData) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="text-6xl mb-4">❌</div>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
+        <p className="text-gray-600 mb-8">{error}</p>
+        <button
+          onClick={() => navigate('/users')}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Back to Users
+        </button>
+      </div>
+    );
+  }
+
+  // Problems Progress Bar Chart
+  const problemsChartData = {
+    labels: ['Easy', 'Medium', 'Hard'],
+    datasets: [
+      {
+        label: 'Problems Solved',
+        data: [userData.problems.easy, userData.problems.medium, userData.problems.hard],
+        backgroundColor: [
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(251, 191, 36, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+        ],
+        borderColor: [
+          'rgb(34, 197, 94)',
+          'rgb(251, 191, 36)',
+          'rgb(239, 68, 68)',
+        ],
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  // Daily Activity Line Chart
+  const activityChartData = {
+    labels: userData.dailyActivity?.map(d => d.date) || [],
+    datasets: [
+      {
+        label: 'Daily Submissions',
+        data: userData.dailyActivity?.map(d => d.count) || [],
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true,
+      },
+    ],
+  };
+
+  // Problem Distribution Horizontal Bar
+  const distributionData = {
+    labels: ['Total Solved', 'Easy', 'Medium', 'Hard'],
+    datasets: [
+      {
+        label: 'Count',
+        data: [
+          userData.problems.total,
+          userData.problems.easy,
+          userData.problems.medium,
+          userData.problems.hard,
+        ],
+        backgroundColor: [
+          'rgba(99, 102, 241, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(251, 191, 36, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+        ],
+        borderColor: [
+          'rgb(99, 102, 241)',
+          'rgb(34, 197, 94)',
+          'rgb(251, 191, 36)',
+          'rgb(239, 68, 68)',
+        ],
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+  const horizontalChartOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate('/users')}
+        className="mb-6 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+      >
+        ← Back to Users
+      </button>
+
+      {/* Profile Header */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+          <div className="flex items-center gap-4">
+            {userData.avatar && (
+              <img
+                src={userData.avatar}
+                alt={userData.username}
+                className="w-20 h-20 rounded-full border-4 border-white shadow-lg"
+              />
+            )}
+            <div className="text-white flex-1">
+              <h1 className="text-4xl font-bold">{userData.username}</h1>
+              <p className="text-blue-100 mt-2">
+                🌍 {userData.country} • 🏆 Rank #{userData.ranking}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate(`/user/${username}/submissions`)}
+                className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold transition-colors"
+              >
+                📋 All Submissions
+              </button>
+              <button
+                onClick={fetchUserData}
+                className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-colors"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-6">
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-3xl font-bold text-blue-600">{userData.problems.total}</div>
+            <div className="text-sm text-gray-600 mt-1">Total Solved</div>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <div className="text-3xl font-bold text-yellow-600">{userData.contestRating}</div>
+            <div className="text-sm text-gray-600 mt-1">Contest Rating</div>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div className="text-3xl font-bold text-purple-600">{userData.contestStats.attendedContests}</div>
+            <div className="text-sm text-gray-600 mt-1">Contests</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">{userData.stats?.totalTime || 'N/A'}</div>
+            <div className="text-sm text-gray-600 mt-1">Est. Time Spent</div>
+          </div>
+          <div className="text-center p-4 bg-indigo-50 rounded-lg">
+            <div className="text-2xl font-bold text-indigo-600">{userData.stats?.averagePerDay || '0'}</div>
+            <div className="text-sm text-gray-600 mt-1">Avg Per Day</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Problem Distribution Horizontal Bar */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Problem Distribution</h3>
+          <div className="h-64">
+            <Bar data={distributionData} options={horizontalChartOptions} />
+          </div>
+        </div>
+
+        {/* Difficulty Breakdown Vertical Bar */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Difficulty Breakdown</h3>
+          <div className="h-64">
+            <Bar data={problemsChartData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Activity Chart */}
+      {userData.dailyActivity && userData.dailyActivity.length > 0 && (
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">📈 Daily Activity (Last 30 Days)</h3>
+          <div className="h-80">
+            <Line data={activityChartData} options={chartOptions} />
+          </div>
+        </div>
+      )}
+
+      {/* Recent Submissions */}
+      {userData.recentSubmissions && userData.recentSubmissions.length > 0 && (
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">🕐 Recent Submissions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {userData.recentSubmissions.map((sub, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex-1">
+                  <div className="font-medium text-gray-800">{sub.title}</div>
+                  <div className="text-sm text-gray-500">{sub.timeAgo}</div>
+                </div>
+                <div className="ml-4 flex gap-2">
+                  <a
+                    href={sub.problemUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold"
+                  >
+                    Problem
+                  </a>
+                  <a
+                    href={sub.solutionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold"
+                  >
+                    Solutions
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
