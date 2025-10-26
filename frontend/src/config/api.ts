@@ -8,26 +8,51 @@ const sanitizeBaseUrl = (url?: string | null) => {
 const resolveBaseUrl = () => {
   const envSource = (import.meta as any).env ?? {};
   const rawEnvUrl = sanitizeBaseUrl(envSource.VITE_API_URL);
+  const isDev = Boolean(envSource?.DEV);
+
+  const isAbsoluteUrl = (url: string) => /^https?:\/\//i.test(url);
+  const isLocalAbsoluteUrl = (url: string) => /^https?:\/\/(localhost|127(?:\.\d+){3}|0\.0\.0\.0)(:\d+)?(?:\/.*)?$/i.test(url);
 
   if (rawEnvUrl) {
-    return rawEnvUrl;
-  }
+    if (!isAbsoluteUrl(rawEnvUrl)) {
+      // Relative base (e.g., "/api") should be honoured in all environments
+      return rawEnvUrl;
+    }
 
-  if ((import.meta as any).env?.DEV) {
-    return 'http://localhost:5001';
+    if (isDev || !isLocalAbsoluteUrl(rawEnvUrl)) {
+      // Accept custom absolute URLs in dev or any non-local absolute URL in prod
+      return rawEnvUrl;
+    }
   }
 
   if (typeof window !== 'undefined' && window.location?.origin) {
     return window.location.origin.replace(/\/+$/, '');
   }
 
-  return 'http://localhost:5001';
+  // Fallback for SSR/build contexts - use local dev API as a sensible default
+  return isDev ? 'http://localhost:5001' : '';
 };
 
 const API_BASE_URL = resolveBaseUrl();
 
 const buildUrl = (path: string) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (!API_BASE_URL) {
+    return normalizedPath;
+  }
+
+  if (API_BASE_URL.startsWith('/')) {
+    return `${API_BASE_URL}${normalizedPath}`;
+  }
+
+  if (typeof window !== 'undefined') {
+    const currentOrigin = window.location?.origin?.replace(/\/+$/, '') ?? '';
+    if (currentOrigin && API_BASE_URL === currentOrigin) {
+      return normalizedPath;
+    }
+  }
+
   return `${API_BASE_URL}${normalizedPath}`;
 };
 
