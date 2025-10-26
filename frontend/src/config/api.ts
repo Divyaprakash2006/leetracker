@@ -69,5 +69,9 @@ export const apiClient = {
   getSubmission: (submissionId: string) => buildApiUrl(`/api/submission/${submissionId}`),
   getSolutionViewer: (submissionId: string) => buildApiUrl(`/api/solutions/viewer/${submissionId}`),
   testLeetCode: () => buildApiUrl('/api/test-leetcode'),
-  health: () => buildApiUrl('/health')
+  health: () => buildApiUrl('/health'),
+  listTrackedUsers: () => buildApiUrl('/api/tracked-users'),
+  addTrackedUser: () => buildApiUrl('/api/tracked-users'),
+  removeTrackedUser: (username: string) => buildApiUrl(`/api/tracked-users/${encodeURIComponent(username)}`),
+  touchTrackedUser: (username: string) => buildApiUrl(`/api/tracked-users/${encodeURIComponent(username)}/viewed`)
 };

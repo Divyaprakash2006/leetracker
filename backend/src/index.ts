@@ -18,6 +18,7 @@ import { startAutoSync } from './services/cronService';
 import { solutionViewerService } from './services/solutionViewerService';
 import solutionRoutes from './routes/solutionRoutes';
 import solutionViewerRoutes from './routes/solutionViewerRoutes';
+import trackedUserRoutes from './routes/trackedUserRoutes';
 
 // Debug: Check if MONGODB_URI is loaded
 console.log('🔍 Environment check:');
@@ -93,6 +94,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Routes
 app.use('/api/solutions/viewer', solutionViewerRoutes); // Must come before solutionRoutes to avoid route conflicts
 app.use('/api/solution', solutionRoutes);
+app.use('/api/tracked-users', trackedUserRoutes);
 
 // Connect to MongoDB
 connectDB();

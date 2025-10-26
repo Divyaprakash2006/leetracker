@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import axios from 'axios';
+import { apiClient } from '../config/api';
 
 interface TrackedUser {
   username: string;
@@ -8,8 +10,11 @@ interface TrackedUser {
 
 interface UserContextType {
   trackedUsers: TrackedUser[];
-  addUser: (username: string) => void;
-  removeUser: (username: string) => void;
+  loading: boolean;
+  error: string | null;
+  refreshTrackedUsers: () => Promise<void>;
+  addUser: (username: string) => Promise<void>;
+  removeUser: (username: string) => Promise<void>;
   isUserTracked: (username: string) => boolean;
 }
 
@@ -17,40 +22,156 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [trackedUsers, setTrackedUsers] = useState<TrackedUser[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('trackedUsers');
-    if (stored) {
-      setTrackedUsers(JSON.parse(stored));
+  const persistToLocalStorage = useCallback((users: TrackedUser[]) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('trackedUsers', JSON.stringify(users));
     }
   }, []);
 
-  // Save to localStorage whenever trackedUsers changes
-  useEffect(() => {
-    localStorage.setItem('trackedUsers', JSON.stringify(trackedUsers));
-  }, [trackedUsers]);
-
-  const addUser = (username: string) => {
-    if (!isUserTracked(username)) {
-      setTrackedUsers([...trackedUsers, { 
-        username, 
-        addedAt: Date.now(),
-        lastUpdated: Date.now()
-      }]);
+  const loadLocalCache = useCallback((): TrackedUser[] => {
+    if (typeof window === 'undefined') {
+      return [];
     }
-  };
 
-  const removeUser = (username: string) => {
-    setTrackedUsers(trackedUsers.filter(u => u.username !== username));
-  };
+    try {
+      const stored = localStorage.getItem('trackedUsers');
+      return stored ? JSON.parse(stored) : [];
+    } catch (storageError) {
+      console.warn('⚠️ Failed to parse trackedUsers from localStorage', storageError);
+      return [];
+    }
+  }, []);
 
-  const isUserTracked = (username: string) => {
-    return trackedUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
-  };
+  const normalizeTrackedUsers = useCallback((users: any[]): TrackedUser[] => {
+    return users
+      .filter(Boolean)
+      .map((user) => ({
+        username: user.username,
+        addedAt: user.addedAt ? new Date(user.addedAt).getTime() : Date.now(),
+        lastUpdated: user.updatedAt ? new Date(user.updatedAt).getTime() : undefined,
+      }))
+      .sort((a, b) => a.addedAt - b.addedAt);
+  }, []);
+
+  const refreshTrackedUsers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(apiClient.listTrackedUsers(), {
+        timeout: 10000,
+      });
+
+      const users = normalizeTrackedUsers(response.data?.users || []);
+      setTrackedUsers(users);
+      persistToLocalStorage(users);
+    } catch (err: any) {
+      console.error('❌ Failed to load tracked users from API:', err?.message || err);
+      setError(err?.response?.data?.message || 'Failed to load tracked users');
+
+      // Fallback to local cache if available
+      const cached = loadLocalCache();
+      if (cached.length > 0) {
+        setTrackedUsers(cached);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [loadLocalCache, normalizeTrackedUsers, persistToLocalStorage]);
+
+  useEffect(() => {
+    const cached = loadLocalCache();
+    if (cached.length > 0) {
+      setTrackedUsers(cached);
+    }
+
+    refreshTrackedUsers();
+  }, [loadLocalCache, refreshTrackedUsers]);
+
+  useEffect(() => {
+    persistToLocalStorage(trackedUsers);
+  }, [trackedUsers, persistToLocalStorage]);
+
+  const isUserTracked = useCallback(
+    (username: string) =>
+      trackedUsers.some((user) => user.username.toLowerCase() === username.toLowerCase()),
+    [trackedUsers]
+  );
+
+  const addUser = useCallback(async (username: string) => {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new Error('Username is required');
+    }
+
+    if (isUserTracked(trimmed)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.post(apiClient.addTrackedUser(), { username: trimmed });
+      const userPayload = response.data?.user || { username: trimmed, addedAt: new Date().toISOString() };
+      const newUser: TrackedUser = {
+        username: userPayload.username,
+        addedAt: userPayload.addedAt ? new Date(userPayload.addedAt).getTime() : Date.now(),
+        lastUpdated: userPayload.updatedAt ? new Date(userPayload.updatedAt).getTime() : Date.now(),
+      };
+
+      setTrackedUsers((prev) => {
+        const next = [...prev, newUser].sort((a, b) => a.addedAt - b.addedAt);
+        persistToLocalStorage(next);
+        return next;
+      });
+    } catch (err: any) {
+      console.error('❌ Failed to add tracked user:', err?.message || err);
+      const errorMessage = err?.response?.data?.message || 'Failed to add tracked user';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [persistToLocalStorage, isUserTracked]);
+
+  const removeUser = useCallback(async (username: string) => {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.delete(apiClient.removeTrackedUser(trimmed));
+      setTrackedUsers((prev) => {
+        const next = prev.filter((user) => user.username.toLowerCase() !== trimmed.toLowerCase());
+        persistToLocalStorage(next);
+        return next;
+      });
+    } catch (err: any) {
+      console.error('❌ Failed to remove tracked user:', err?.message || err);
+      const errorMessage = err?.response?.data?.message || 'Failed to remove tracked user';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [persistToLocalStorage]);
 
   return (
-    <UserContext.Provider value={{ trackedUsers, addUser, removeUser, isUserTracked }}>
+    <UserContext.Provider
+      value={{
+        trackedUsers,
+        loading,
+        error,
+        refreshTrackedUsers,
+        addUser,
+        removeUser,
+        isUserTracked,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

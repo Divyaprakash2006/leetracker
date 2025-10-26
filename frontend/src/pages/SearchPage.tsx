@@ -86,11 +86,16 @@ export const SearchPage = () => {
     }
   };
 
-  const handleTrackUser = () => {
+  const handleTrackUser = async () => {
     if (userData) {
-      addUser(userData.username);
-      alert(`Started tracking ${userData.username}!`);
-      navigate('/users');
+      try {
+        await addUser(userData.username);
+        alert(`Started tracking ${userData.username}!`);
+        navigate('/users');
+      } catch (trackError: any) {
+        console.error('❌ Failed to track user:', trackError);
+        setError(trackError?.message || 'Failed to add user to tracked list');
+      }
     }
   };
 

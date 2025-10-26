@@ -48,12 +48,17 @@ export const UsersPage = () => {
     fetchUserData(username);
   };
 
-  const handleRemove = (username: string) => {
+  const handleRemove = async (username: string) => {
     if (window.confirm(`Stop tracking ${username}?`)) {
-      removeUser(username);
-      const newData = { ...usersData };
-      delete newData[username];
-      setUsersData(newData);
+      try {
+        await removeUser(username);
+        const newData = { ...usersData };
+        delete newData[username];
+        setUsersData(newData);
+      } catch (err) {
+        console.error('❌ Failed to remove tracked user:', err);
+        alert(`Failed to remove ${username}. Please try again.`);
+      }
     }
   };
 
