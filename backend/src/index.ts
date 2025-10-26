@@ -367,10 +367,16 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
     
     // Check if user exists
     if (!data || !data.matchedUser) {
-      console.log('❌ User not found in response');
-      return res.status(404).json({ 
-        error: 'User not found',
-        message: `LeetCode user "${username}" does not exist` 
+      console.log('❌ User not found in response:', username);
+      return res.status(404).json({
+        success: false,
+        error: 'user_not_found',
+        message: `User "${username}" does not exist on LeetCode`,
+        suggestions: [
+          'Check the username for typos',
+          'Make sure the user exists on LeetCode',
+          'Try searching for a different user'
+        ]
       });
     }
 
@@ -474,17 +480,29 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
       console.error('Request details:', error.request);
     }
     
-    if (error.response?.status === 404) {
+    if (error.response?.status === 404 || error.message.includes('does not exist')) {
       return res.status(404).json({ 
-        error: 'User not found',
-        message: 'LeetCode user does not exist' 
+        success: false,
+        error: 'user_not_found',
+        message: `User "${req.params.username}" does not exist on LeetCode`,
+        suggestions: [
+          'Check the username for typos',
+          'Make sure the user exists on LeetCode',
+          'Try searching for a different user'
+        ]
       });
     }
     
     res.status(500).json({ 
-      error: 'Server error',
+      success: false,
+      error: 'server_error',
       message: 'Failed to fetch data from LeetCode API',
-      details: error.response?.data?.errors?.[0]?.message || error.message
+      details: error.response?.data?.errors?.[0]?.message || error.message,
+      suggestions: [
+        'Try again in a moment',
+        'Check if LeetCode.com is accessible',
+        'Verify your internet connection'
+      ]
     });
   }
 });

@@ -43,6 +43,7 @@ export const SearchPage = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const { addUser, isUserTracked } = useTrackedUsers();
   const navigate = useNavigate();
 
@@ -61,6 +62,7 @@ export const SearchPage = () => {
     const username = extractUsername(input);
     setLoading(true);
     setError('');
+    setSuggestions([]);
     setUserData(null);
 
     try {
@@ -75,12 +77,16 @@ export const SearchPage = () => {
       setUserData(response.data);
     } catch (err: any) {
       console.error('❌ Error:', err);
-      const errorMessage = err.response?.data?.message 
-        || err.response?.data?.error 
-        || err.message 
-        || 'Failed to fetch data from LeetCode API';
+      const responseData = err.response?.data;
+      const errorMessage = responseData?.message || err.message || 'Failed to fetch data from LeetCode API';
+      const newSuggestions = responseData?.suggestions || [];
       
-      setError(`Error: ${errorMessage}`);
+      setError(errorMessage);
+      setSuggestions(newSuggestions);
+      
+      if (newSuggestions.length > 0) {
+        console.log('💡 Suggestions:', newSuggestions);
+      }
     } finally {
       setLoading(false);
     }
@@ -133,16 +139,26 @@ export const SearchPage = () => {
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-400 rounded-lg">
               <div className="text-red-700 font-semibold mb-2">❌ {error}</div>
-              <div className="text-red-600 text-sm space-y-1">
-                <p>💡 Tips:</p>
-                <ul className="list-disc list-inside">
-                  <li>Make sure the backend server is running on port 5001</li>
-                  <li>Check browser Console (F12) for more details</li>
-                  <li>Try a different username (e.g., "awice")</li>
-                  <li>Wait a moment and try again (API rate limiting)</li>
-                  <li>Open http://localhost:5001/api/test-leetcode to test LeetCode connectivity</li>
-                </ul>
-              </div>
+              {suggestions && suggestions.length > 0 ? (
+                <div className="text-red-600 text-sm space-y-1">
+                  <p>💡 Suggestions:</p>
+                  <ul className="list-disc list-inside">
+                    {suggestions.map((tip, i) => (
+                      <li key={i}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="text-red-600 text-sm space-y-1">
+                  <p>💡 Tips:</p>
+                  <ul className="list-disc list-inside">
+                    <li>Check if the username is spelled correctly</li>
+                    <li>Try a different username (e.g., "awice")</li>
+                    <li>Wait a moment and try again (API rate limiting)</li>
+                    <li>Make sure you have internet connectivity</li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
