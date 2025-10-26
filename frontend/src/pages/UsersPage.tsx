@@ -35,7 +35,7 @@ export const UsersPage = () => {
   const fetchUserData = async (username: string) => {
     setLoading(prev => ({ ...prev, [username]: true }));
     try {
-  const response = await axios.get(apiClient.getUser(username));
+      const response = await axios.get(apiClient.getUser(username));
       setUsersData(prev => ({ ...prev, [username]: response.data }));
     } catch (error) {
       console.error(`Error fetching data for ${username}:`, error);

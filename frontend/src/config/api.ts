@@ -43,7 +43,12 @@ export const buildApiUrl = (path: string) => {
   }
 
   if (API_BASE_URL.startsWith('/')) {
-    return `${API_BASE_URL}${normalizedPath}`;
+    if (normalizedPath.startsWith(API_BASE_URL)) {
+      return normalizedPath;
+    }
+
+    const joined = `${API_BASE_URL}${normalizedPath}`;
+    return joined.replace(/\/+/g, '/');
   }
 
   if (typeof window !== 'undefined') {
