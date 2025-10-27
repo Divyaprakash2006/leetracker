@@ -212,7 +212,6 @@ export const SubmissionsPage = () => {
   if (error || !userData) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="text-6xl mb-4">❌</div>
         <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
         <p className="text-gray-600 mb-8">{error}</p>
         <button
@@ -256,7 +255,7 @@ export const SubmissionsPage = () => {
             onClick={() => navigate('/users')}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
           >
-            ← Back
+            Back
           </button>
           {userData.avatar && (
             <img
@@ -275,7 +274,7 @@ export const SubmissionsPage = () => {
             onClick={() => fetchAllData(username)}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
           >
-            🔄 Refresh
+            Refresh
           </button>
         </div>
       </div>
@@ -283,12 +282,11 @@ export const SubmissionsPage = () => {
       {/* Info Banner */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">
-          <span className="text-2xl">📊</span>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-800 mb-1">Submission Tracking</h3>
             <p className="text-sm text-gray-700">
               View all submission metadata including execution time, memory usage, and language.
-              Click <span className="font-semibold text-indigo-600">"👁️ View Code"</span> to view the solution in the tracker.
+              Click <span className="font-semibold text-indigo-600">"View Code"</span> to view the solution in the tracker.
             </p>
           </div>
         </div>
@@ -298,7 +296,6 @@ export const SubmissionsPage = () => {
       {userData.streak?.currentStreak && userData.streak.currentStreak > 0 ? (
         <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg p-6 mb-6 text-white">
           <div className="flex items-center gap-4">
-            <div className="text-6xl">🔥</div>
             <div className="flex-1">
               <h3 className="text-2xl font-bold mb-1">LeetCode Streak</h3>
               <p className="text-sm text-orange-100">Matches your current solving streak on leetcode.com</p>
@@ -311,13 +308,8 @@ export const SubmissionsPage = () => {
         </div>
       ) : (
         <div className="bg-gray-100 border border-gray-200 rounded-xl p-6 mb-6 text-gray-600">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⏳</span>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700">No active streak</h3>
-              <p className="text-sm">Solve a problem on LeetCode today to start your streak.</p>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-700">No active streak</h3>
+          <p className="text-sm">Solve a problem on LeetCode today to start your streak.</p>
         </div>
       )}
 
@@ -342,7 +334,7 @@ export const SubmissionsPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            🐍 Python
+            Python
           </button>
           <button
             onClick={() => setFilter('javascript')}
@@ -352,7 +344,7 @@ export const SubmissionsPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            📜 JavaScript
+            JavaScript
           </button>
           <button
             onClick={() => setFilter('cpp')}
@@ -362,7 +354,7 @@ export const SubmissionsPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            ⚡ C++
+            C++
           </button>
           <button
             onClick={() => setFilter('java')}
@@ -372,7 +364,7 @@ export const SubmissionsPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            ☕ Java
+            Java
           </button>
         </div>
       </div>
@@ -381,7 +373,6 @@ export const SubmissionsPage = () => {
       <div className="space-y-4">
         {filteredSubmissions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-            <div className="text-6xl mb-4">📭</div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">No Submissions Found</h3>
             <p className="text-gray-600">Try a different filter or refresh the data</p>
           </div>
@@ -393,19 +384,18 @@ export const SubmissionsPage = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-bold text-gray-800">{sub.title}</h3>
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getLanguageColor(sub.lang || 'Unknown')}`}>
                       {sub.lang || 'Unknown'}
                     </span>
                     <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                      ✓ {sub.status || 'Accepted'}
+                        {sub.status || 'Accepted'}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">🕒</span>
                       <div className="text-sm">
                         <div>
                           Solved: {sub.solvedAt || formatSolvedAt(Number(sub.timestampMs ?? sub.timestamp) || 0)}
@@ -414,11 +404,9 @@ export const SubmissionsPage = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">⚡</span>
                       <span className="text-sm">Execution Time: {sub.runtime || 'N/A'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">💾</span>
                       <span className="text-sm">Memory: {sub.memory || 'N/A'}</span>
                     </div>
                   </div>
@@ -430,7 +418,7 @@ export const SubmissionsPage = () => {
                       }
                       className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-semibold shadow-md"
                     >
-                      👁️ View Code
+                        View Code
                     </button>
                     {sub.problemUrl && (
                       <a
@@ -439,7 +427,7 @@ export const SubmissionsPage = () => {
                         rel="noopener noreferrer"
                         className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-semibold"
                       >
-                        🔗 Problem
+                          View Problem
                       </a>
                     )}
                   </div>

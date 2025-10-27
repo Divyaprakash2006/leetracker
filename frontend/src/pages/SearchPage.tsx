@@ -66,17 +66,17 @@ export const SearchPage = () => {
     setUserData(null);
 
     try {
-      console.log(`🔍 Fetching user: ${username}`);
-      console.log(`📡 URL: ${apiClient.getUser(username)}`);
+      console.log(` Fetching user: ${username}`);
+      console.log(` URL: ${apiClient.getUser(username)}`);
       
       const response = await axios.get(apiClient.getUser(username), {
         timeout: 15000
       });
       
-      console.log('✅ Response received:', response.data);
+  console.log('Response received:', response.data);
       setUserData(response.data);
     } catch (err: any) {
-      console.error('❌ Error:', err);
+  console.error('Error:', err);
       const responseData = err.response?.data;
       const errorMessage = responseData?.message || err.message || 'Failed to fetch data from LeetCode API';
       const newSuggestions = responseData?.suggestions || [];
@@ -85,7 +85,7 @@ export const SearchPage = () => {
       setSuggestions(newSuggestions);
       
       if (newSuggestions.length > 0) {
-        console.log('💡 Suggestions:', newSuggestions);
+        console.log('Suggestions:', newSuggestions);
       }
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ export const SearchPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-3">
-            🔍 Search LeetCode User
+            Search LeetCode User
           </h1>
           <p className="text-gray-600">
             Enter a username or profile URL to view detailed statistics
@@ -138,10 +138,10 @@ export const SearchPage = () => {
           </div>
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-400 rounded-lg">
-              <div className="text-red-700 font-semibold mb-2">❌ {error}</div>
+              <div className="text-red-700 font-semibold mb-2">Error: {error}</div>
               {suggestions && suggestions.length > 0 ? (
                 <div className="text-red-600 text-sm space-y-1">
-                  <p>💡 Suggestions:</p>
+                  <p> Suggestions:</p>
                   <ul className="list-disc list-inside">
                     {suggestions.map((tip, i) => (
                       <li key={i}>{tip}</li>
@@ -150,7 +150,7 @@ export const SearchPage = () => {
                 </div>
               ) : (
                 <div className="text-red-600 text-sm space-y-1">
-                  <p>💡 Tips:</p>
+                  <p> Tips:</p>
                   <ul className="list-disc list-inside">
                     <li>Check if the username is spelled correctly</li>
                     <li>Try a different username (e.g., "awice")</li>
@@ -177,7 +177,7 @@ export const SearchPage = () => {
             <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4">
                     {userData.avatar && (
                       <img
                         src={userData.avatar}
@@ -186,9 +186,9 @@ export const SearchPage = () => {
                       />
                     )}
                     <div className="text-white">
-                      <h2 className="text-3xl font-bold">👤 {userData.username}</h2>
+                      <h2 className="text-3xl font-bold">{userData.username}</h2>
                       <p className="text-blue-100 mt-1">
-                        🌍 {userData.country} • 🏆 Ranking: #{userData.ranking}
+                        {userData.country} • Ranking: #{userData.ranking}
                       </p>
                     </div>
                   </div>
@@ -197,12 +197,12 @@ export const SearchPage = () => {
                       onClick={handleTrackUser}
                       className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-colors"
                     >
-                      + Track User
+                      Track User
                     </button>
                   )}
                   {isUserTracked(userData.username) && (
                     <div className="px-6 py-3 bg-green-500 text-white rounded-lg font-semibold">
-                      ✓ Tracking
+                      Tracking
                     </div>
                   )}
                 </div>
@@ -252,12 +252,12 @@ export const SearchPage = () => {
             {userData.recentSubmissions && userData.recentSubmissions.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">🕐 Recent Submissions</h3>
+                  <h3 className="text-xl font-bold text-gray-800">Recent Submissions</h3>
                   <button
                     onClick={() => navigate(`/user/${userData.username}/submissions`)}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold transition-colors"
                   >
-                    📋 View All Submissions
+                    View All Submissions
                   </button>
                 </div>
                 <div className="space-y-2">

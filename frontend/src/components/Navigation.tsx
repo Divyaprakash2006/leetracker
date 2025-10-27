@@ -4,10 +4,10 @@ export const Navigation = () => {
   const location = useLocation();
   
   const navItems = [
-    { path: '/', label: '🏠 Dashboard', icon: '📊' },
-    { path: '/users', label: '👥 Tracked Users', icon: '👥' },
-    { path: '/analytics', label: '📈 Analytics', icon: '📈' },
-    { path: '/search', label: '🔍 Search', icon: '🔍' }
+    { path: '/', label: 'Dashboard' },
+    { path: '/users', label: 'Tracked Users' },
+    { path: '/analytics', label: 'Analytics' },
+    { path: '/search', label: 'Search' }
   ];
 
   return (
@@ -16,7 +16,7 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-white text-2xl font-bold flex items-center gap-2">
-              🎯 LeetTrack
+               LeetTrack
             </Link>
           </div>
           
@@ -31,8 +31,7 @@ export const Navigation = () => {
                     : 'text-white hover:bg-blue-700'
                 }`}
               >
-                <span className="mr-1">{item.icon}</span>
-                {item.label.split(' ')[1]}
+                {item.label}
               </Link>
             ))}
           </div>

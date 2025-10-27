@@ -77,7 +77,6 @@ export const AnalyticsPage = () => {
   if (usersData.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="text-6xl mb-4">📊</div>
         <h2 className="text-3xl font-bold text-gray-800 mb-4">No Data Available</h2>
         <p className="text-gray-600">Track some users to see analytics</p>
       </div>
@@ -195,7 +194,7 @@ export const AnalyticsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">📈 Analytics Dashboard</h1>
+  <h1 className="text-4xl font-bold text-gray-800 mb-8">Analytics Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -241,7 +240,7 @@ export const AnalyticsPage = () => {
       {/* Daily Activity Chart */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">📅 Daily Activity (Last 30 Days)</h3>
+          <h3 className="text-xl font-bold text-gray-800">Daily Activity (Last 30 Days)</h3>
           <select
             value={selectedUser}
             onChange={(e) => setSelectedUser(e.target.value)}
@@ -262,7 +261,7 @@ export const AnalyticsPage = () => {
 
       {/* Leaderboard */}
       <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">🏆 Leaderboard</h3>
+  <h3 className="text-xl font-bold text-gray-800 mb-4">Leaderboard</h3>
         <div className="space-y-2">
           {usersData
             .sort((a, b) => b.problems.total - a.problems.total)

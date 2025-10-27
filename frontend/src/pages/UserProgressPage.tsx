@@ -98,7 +98,6 @@ export const UserProgressPage = () => {
   if (error || !userData) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="text-6xl mb-4">❌</div>
         <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
         <p className="text-gray-600 mb-8">{error}</p>
         <button
@@ -215,7 +214,7 @@ export const UserProgressPage = () => {
         onClick={() => navigate('/users')}
         className="mb-6 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
       >
-        ← Back to Users
+        Back to Users
       </button>
 
       {/* Profile Header */}
@@ -232,7 +231,7 @@ export const UserProgressPage = () => {
             <div className="text-white flex-1">
               <h1 className="text-4xl font-bold">{userData.username}</h1>
               <p className="text-blue-100 mt-2">
-                🌍 {userData.country} • 🏆 Rank #{userData.ranking}
+                {userData.country} • Rank #{userData.ranking}
               </p>
             </div>
             <div className="flex gap-3">
@@ -240,13 +239,13 @@ export const UserProgressPage = () => {
                 onClick={() => navigate(`/user/${username}/submissions`)}
                 className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold transition-colors"
               >
-                📋 All Submissions
+                View All Submissions
               </button>
               <button
                 onClick={() => username && fetchUserData(username)}
                 className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold transition-colors"
               >
-                🔄 Refresh
+                Refresh
               </button>
             </div>
           </div>
@@ -281,7 +280,7 @@ export const UserProgressPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Problem Distribution Horizontal Bar */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Problem Distribution</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Problem Distribution</h3>
           <div className="h-64">
             <Bar data={distributionData} options={horizontalChartOptions} />
           </div>
@@ -289,7 +288,7 @@ export const UserProgressPage = () => {
 
         {/* Difficulty Breakdown Vertical Bar */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Difficulty Breakdown</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Difficulty Breakdown</h3>
           <div className="h-64">
             <Bar data={problemsChartData} options={chartOptions} />
           </div>
@@ -299,7 +298,7 @@ export const UserProgressPage = () => {
       {/* Daily Activity Chart */}
       {userData.dailyActivity && userData.dailyActivity.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">📈 Daily Activity (Last 30 Days)</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Daily Activity (Last 30 Days)</h3>
           <div className="h-80">
             <Line data={activityChartData} options={chartOptions} />
           </div>
@@ -309,7 +308,7 @@ export const UserProgressPage = () => {
       {/* Recent Submissions */}
       {userData.recentSubmissions && userData.recentSubmissions.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">🕐 Recent Submissions</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Submissions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {userData.recentSubmissions.map((sub, idx) => (
               <div

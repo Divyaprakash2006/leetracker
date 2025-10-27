@@ -56,7 +56,7 @@ export const UsersPage = () => {
         delete newData[username];
         setUsersData(newData);
       } catch (err) {
-        console.error('❌ Failed to remove tracked user:', err);
+        console.error('Failed to remove tracked user:', err);
         alert(`Failed to remove ${username}. Please try again.`);
       }
     }
@@ -66,7 +66,6 @@ export const UsersPage = () => {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="text-6xl mb-4">📭</div>
           <h2 className="text-3xl font-bold text-gray-800 mb-4">No Users Tracked</h2>
           <p className="text-gray-600 mb-8">
             Start tracking LeetCode users to monitor their progress and compare statistics
@@ -75,7 +74,7 @@ export const UsersPage = () => {
             to="/search"
             className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
           >
-            🔍 Search Users
+            Search Users
           </Link>
         </div>
       </div>
@@ -86,7 +85,7 @@ export const UsersPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-gray-800">👥 Tracked Users</h1>
+          <h1 className="text-4xl font-bold text-gray-800">Tracked Users</h1>
           <p className="text-gray-600 mt-2">
             Monitoring {trackedUsers.length} {trackedUsers.length === 1 ? 'user' : 'users'}
           </p>
@@ -95,7 +94,7 @@ export const UsersPage = () => {
           to="/search"
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
         >
-          + Add User
+          Add User
         </Link>
       </div>
 
@@ -125,7 +124,7 @@ export const UsersPage = () => {
                       )}
                       <div className="text-white flex-1">
                         <h3 className="text-xl font-bold">{data.username}</h3>
-                        <p className="text-sm text-blue-100">🌍 {data.country}</p>
+                        <p className="text-sm text-blue-100">{data.country}</p>
                       </div>
                     </div>
                   </div>
@@ -170,13 +169,13 @@ export const UsersPage = () => {
                         to={`/user/${user.username}`}
                         className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold text-center"
                       >
-                        📊 Progress
+                        View Progress
                       </Link>
                       <Link
                         to={`/user/${user.username}/submissions`}
                         className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold text-center"
                       >
-                        📋 Submissions
+                        View Submissions
                       </Link>
                     </div>
                     <div className="flex gap-2">
@@ -184,13 +183,13 @@ export const UsersPage = () => {
                         onClick={() => handleRefresh(user.username)}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold"
                       >
-                        🔄 Refresh
+                        Refresh
                       </button>
                       <button
                         onClick={() => handleRemove(user.username)}
                         className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold"
                       >
-                        🗑️ Remove
+                        Remove
                       </button>
                     </div>
                   </div>

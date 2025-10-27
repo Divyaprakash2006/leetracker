@@ -20,8 +20,6 @@ export const DashboardPage = () => {
   const [userStats, setUserStats] = useState<UserStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const medals = ['🥇', '🥈', '🥉'];
-
   // Fetch user stats on mount and refresh periodically
   useEffect(() => {
     const fetchStats = async () => {
@@ -104,7 +102,7 @@ export const DashboardPage = () => {
         {/* Hero Section */}
         <div className="text-center">
           <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            🎯 Welcome to LeetTrack
+             Welcome to LeetTrack
           </h1>
           <p className="text-xl text-gray-600">
             Track, analyze, and compare LeetCode progress in real-time
@@ -145,8 +143,8 @@ export const DashboardPage = () => {
                       to={`/user/${user.username}/submissions`}
                       className="bg-white/10 bg-opacity-30 rounded-xl p-4 text-center shadow-lg border border-white/20 hover:bg-white/20 transition group"
                     >
-                      <div className="text-4xl mb-2">
-                        {index < 3 ? medals[index] : `#${index + 1}`}
+                      <div className="text-xl font-semibold mb-2">
+                        #{index + 1}
                       </div>
                       <div className="mt-2 text-lg font-semibold truncate">{user.username}</div>
                       <div className="text-sm text-blue-100 mt-2 space-y-1">
@@ -155,9 +153,9 @@ export const DashboardPage = () => {
                         </div>
                         <div className="text-xs">Total Problems</div>
                         <div className="text-xs opacity-75 space-y-0.5">
-                          <div>🟢 Easy: {user.easySolved}</div>
-                          <div>🟡 Medium: {user.mediumSolved}</div>
-                          <div>🔴 Hard: {user.hardSolved}</div>
+                          <div>Easy: {user.easySolved}</div>
+                          <div>Medium: {user.mediumSolved}</div>
+                          <div>Hard: {user.hardSolved}</div>
                         </div>
                         {user.ranking < 999999 && (
                           <div className="text-xs mt-2 bg-white/20 rounded px-2 py-1">
@@ -169,7 +167,6 @@ export const DashboardPage = () => {
                   ))
                 ) : (
                   <div className="col-span-full text-center py-8">
-                    <div className="text-6xl mb-2">📋</div>
                     <div className="text-blue-100 mb-4">No tracked users yet. Search and add users to see the leaderboard.</div>
                     <Link
                       to="/search"
@@ -210,13 +207,13 @@ export const DashboardPage = () => {
                   to="/users"
                   className="block text-center px-4 py-2 bg-white text-indigo-600 font-semibold rounded-full hover:bg-blue-50 transition"
                 >
-                  Manage Users →
+                  Manage Users
                 </Link>
                 <Link
                   to="/search"
                   className="block text-center px-4 py-2 bg-white/20 text-white font-semibold rounded-full hover:bg-white/30 transition"
                 >
-                  + Add User
+                  Add User
                 </Link>
               </div>
             </div>
@@ -227,7 +224,6 @@ export const DashboardPage = () => {
         {trackedUsers.length === 0 && (
           <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
             <div className="flex items-start gap-4">
-              <div className="text-3xl">💡</div>
               <div>
                 <h4 className="text-lg font-bold text-gray-800 mb-2">Getting Started</h4>
                 <p className="text-gray-700 mb-4">
