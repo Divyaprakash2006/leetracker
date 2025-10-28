@@ -127,12 +127,6 @@ const calculateTotalTime = (dailyActivity: any[]): string => {
   return `${days} days ${estimatedHours % 24} hours`;
 };
 
-// Helper function to calculate average problems per day
-const calculateAveragePerDay = (total: number, days: number): string => {
-  if (days === 0) return '0';
-  return (total / days).toFixed(1);
-};
-
 // Helper function to get last solved date
 const calculateLastSolved = (calendar: string | null): string => {
   if (!calendar) return 'Never';
@@ -464,7 +458,6 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
       },
       stats: {
         totalTime: calculateTotalTime(dailyActivity),
-        averagePerDay: calculateAveragePerDay(problems.total, dailyActivity.length),
         solveRate: calculateSolveRate(problems)
       }
     };

@@ -53,9 +53,8 @@ interface UserData {
     solutionUrl: string;
     submissionUrl: string;
   }>;
-  stats: {
+  stats?: {
     totalTime: string;
-    averagePerDay: string;
     solveRate: string;
   };
 }
@@ -256,7 +255,7 @@ export const UserProgressPage = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-6">
+        <div className="grid grid-cols-3 gap-4 p-6">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-3xl font-bold text-blue-600">{userData.problems.total}</div>
             <div className="text-sm text-gray-600 mt-1">Total Solved</div>
@@ -268,14 +267,6 @@ export const UserProgressPage = () => {
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <div className="text-3xl font-bold text-purple-600">{userData.contestStats.attendedContests}</div>
             <div className="text-sm text-gray-600 mt-1">Contests</div>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{userData.stats?.totalTime || 'N/A'}</div>
-            <div className="text-sm text-gray-600 mt-1">Est. Time Spent</div>
-          </div>
-          <div className="text-center p-4 bg-indigo-50 rounded-lg">
-            <div className="text-2xl font-bold text-indigo-600">{userData.stats?.averagePerDay || '0'}</div>
-            <div className="text-sm text-gray-600 mt-1">Avg Per Day</div>
           </div>
         </div>
       </div>

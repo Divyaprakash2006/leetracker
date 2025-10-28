@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
+import https from 'https';
 
 dotenv.config();
 
@@ -42,20 +43,26 @@ if (!leetcodeSession) {
 
 const leetcodeAxios: AxiosInstance = axios.create({
   baseURL: LEETCODE_API,
-  timeout: 15000,
-  headers: leetcodeHeaders
+  timeout: 30000,
+  headers: leetcodeHeaders,
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false // Fix for self-signed certificate error
+  })
 });
 
 // General purpose axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  timeout: 15000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept-Language': 'en-US,en;q=0.9',
     'Cache-Control': 'no-cache',
     'Pragma': 'no-cache'
-  }
+  },
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false // Fix for self-signed certificate error
+  })
 });
 
 // Add interceptors for better error handling

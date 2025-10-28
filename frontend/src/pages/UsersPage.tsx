@@ -163,34 +163,58 @@ export const UsersPage = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="p-4 bg-white border-t border-gray-200 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
+                  {/* Action Buttons - iOS Style */}
+                  <div className="p-4 bg-white border-t border-gray-200 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <Link
                         to={`/user/${user.username}`}
-                        className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold text-center transition-colors shadow-md hover:shadow-lg"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl active:scale-95"
                       >
-                        View Progress
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                        <div className="relative flex items-center justify-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          <span>View Progress</span>
+                        </div>
                       </Link>
                       <Link
                         to={`/user/${user.username}/submissions`}
-                        className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold text-center transition-colors shadow-md hover:shadow-lg"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl active:scale-95"
                       >
-                        View Submissions
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                        <div className="relative flex items-center justify-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span>View Submissions</span>
+                        </div>
                       </Link>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => handleRefresh(user.username)}
-                        className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold transition-colors shadow-md hover:shadow-lg"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl active:scale-95"
                       >
-                        Refresh
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                        <div className="relative flex items-center justify-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span>Refresh</span>
+                        </div>
                       </button>
                       <button
                         onClick={() => handleRemove(user.username)}
-                        className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold transition-colors shadow-md hover:shadow-lg"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl active:scale-95"
                       >
-                        Remove
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                        <div className="relative flex items-center justify-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Remove</span>
+                        </div>
                       </button>
                     </div>
                   </div>

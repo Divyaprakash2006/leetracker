@@ -33,7 +33,6 @@ interface UserData {
   }>;
   stats: {
     totalTime: string;
-    averagePerDay: string;
     solveRate: string;
   };
 }
