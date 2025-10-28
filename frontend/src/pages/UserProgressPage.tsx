@@ -88,24 +88,27 @@ export const UserProgressPage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-        <p className="text-gray-600 mt-4">Loading user progress...</p>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   if (error || !userData) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
-        <p className="text-gray-600 mb-8">{error}</p>
-        <button
-          onClick={() => navigate('/users')}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Back to Users
-        </button>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
+          <p className="text-gray-600 mb-8">{error}</p>
+          <button
+            onClick={() => navigate('/users')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
+          >
+            Back to Users
+          </button>
+        </div>
       </div>
     );
   }
@@ -208,8 +211,9 @@ export const UserProgressPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Back Button */}
+    <div className="w-full min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Back Button */}
       <button
         onClick={() => navigate('/users')}
         className="mb-6 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
@@ -342,6 +346,7 @@ export const UserProgressPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

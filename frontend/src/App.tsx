@@ -14,29 +14,28 @@ const SubmissionViewerPage = lazy(() => import('./pages/SubmissionViewerPage').t
 function App() {
   const renderFallback = () => (
     <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-gray-600">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-        <span className="text-sm font-medium">Loading dashboard…</span>
-      </div>
+      <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
     </div>
   );
 
   return (
     <Router>
       <UserProvider>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
           <Navigation />
-          <Suspense fallback={renderFallback()}>
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/users" element={<UsersPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/user/:username" element={<UserProgressPage />} />
-              <Route path="/user/:username/submissions" element={<SubmissionsPage />} />
-              <Route path="/user/:username/submission/:submissionId" element={<SubmissionViewerPage />} />
-            </Routes>
-          </Suspense>
+          <div className="w-full">
+            <Suspense fallback={renderFallback()}>
+              <Routes>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/users" element={<UsersPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                <Route path="/user/:username" element={<UserProgressPage />} />
+                <Route path="/user/:username/submissions" element={<SubmissionsPage />} />
+                <Route path="/user/:username/submission/:submissionId" element={<SubmissionViewerPage />} />
+              </Routes>
+            </Suspense>
+          </div>
         </div>
       </UserProvider>
     </Router>

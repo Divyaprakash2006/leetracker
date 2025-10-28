@@ -54,7 +54,6 @@ export const SubmissionsPage = () => {
   const [allSolutions, setAllSolutions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState<'all' | 'python' | 'javascript' | 'cpp' | 'java'>('all');
 
   const formatTimeAgo = (timestampMs: number) => {
     const now = Date.now();
@@ -71,7 +70,15 @@ export const SubmissionsPage = () => {
 
   const formatSolvedAt = (timestampMs: number) => {
     if (!timestampMs || Number.isNaN(timestampMs)) return 'Unknown';
-    return new Date(timestampMs).toLocaleString();
+    return new Date(timestampMs).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   const fetchAllData = async (targetUsername = username) => {
@@ -202,40 +209,33 @@ export const SubmissionsPage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-        <p className="text-gray-600 mt-4">Loading submissions...</p>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   if (error || !userData) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
-        <p className="text-gray-600 mb-8">{error}</p>
-        <button
-          onClick={() => navigate('/users')}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Back to Users
-        </button>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
+          <p className="text-gray-600 mb-8">{error}</p>
+          <button
+            onClick={() => navigate('/users')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
+          >
+            Back to Users
+          </button>
+        </div>
       </div>
     );
   }
 
   const submissionsSource = allSolutions.length > 0 ? allSolutions : userData.recentSubmissions || [];
-
-  const filteredSubmissions = submissionsSource.filter((sub) => {
-    if (!sub.lang) return filter === 'all';
-    if (filter === 'all') return true;
-    const lang = sub.lang.toLowerCase();
-    if (filter === 'python') return lang.includes('python');
-    if (filter === 'javascript') return lang.includes('javascript') || lang.includes('js');
-    if (filter === 'cpp') return lang.includes('c++') || lang.includes('cpp');
-    if (filter === 'java') return lang.includes('java');
-    return true;
-  });
+  const filteredSubmissions = submissionsSource;
 
   const getLanguageColor = (lang: string) => {
     const l = lang.toLowerCase();
@@ -247,8 +247,9 @@ export const SubmissionsPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
+    <div className="w-full min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <button
@@ -272,23 +273,10 @@ export const SubmissionsPage = () => {
         <div className="flex gap-3">
           <button
             onClick={() => fetchAllData(username)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md"
           >
             Refresh
           </button>
-        </div>
-      </div>
-
-      {/* Info Banner */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 rounded-lg p-4 mb-6">
-        <div className="flex items-start gap-3">
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-800 mb-1">Submission Tracking</h3>
-            <p className="text-sm text-gray-700">
-              View all submission metadata including execution time, memory usage, and language.
-              Click <span className="font-semibold text-indigo-600">"View Code"</span> to view the solution in the tracker.
-            </p>
-          </div>
         </div>
       </div>
 
@@ -297,8 +285,7 @@ export const SubmissionsPage = () => {
         <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg p-6 mb-6 text-white">
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold mb-1">LeetCode Streak</h3>
-              <p className="text-sm text-orange-100">Matches your current solving streak on leetcode.com</p>
+              <h3 className="text-2xl font-bold">LeetCode Streak</h3>
             </div>
             <div className="text-center bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
               <div className="text-5xl font-bold">{userData.streak.currentStreak}</div>
@@ -312,62 +299,6 @@ export const SubmissionsPage = () => {
           <p className="text-sm">Solve a problem on LeetCode today to start your streak.</p>
         </div>
       )}
-
-      {/* Filter Buttons */}
-      <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            All ({submissionsSource.length})
-          </button>
-          <button
-            onClick={() => setFilter('python')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              filter === 'python'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Python
-          </button>
-          <button
-            onClick={() => setFilter('javascript')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              filter === 'javascript'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            JavaScript
-          </button>
-          <button
-            onClick={() => setFilter('cpp')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              filter === 'cpp'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            C++
-          </button>
-          <button
-            onClick={() => setFilter('java')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              filter === 'java'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Java
-          </button>
-        </div>
-      </div>
 
       {/* Submissions List */}
       <div className="space-y-4">
@@ -420,16 +351,6 @@ export const SubmissionsPage = () => {
                     >
                         View Code
                     </button>
-                    {sub.problemUrl && (
-                      <a
-                        href={sub.problemUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-semibold"
-                      >
-                          View Problem
-                      </a>
-                    )}
                   </div>
                 </div>
               </div>
@@ -462,6 +383,7 @@ export const SubmissionsPage = () => {
             <div className="text-sm text-blue-100 mt-1">Unique Problems</div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

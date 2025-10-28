@@ -67,18 +67,21 @@ export const AnalyticsPage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-        <p className="text-gray-600 mt-4">Loading analytics...</p>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   if (usersData.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">No Data Available</h2>
-        <p className="text-gray-600">Track some users to see analytics</p>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">No Data Available</h2>
+          <p className="text-gray-600">Track some users to see analytics</p>
+        </div>
       </div>
     );
   }
@@ -193,8 +196,9 @@ export const AnalyticsPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-  <h1 className="text-4xl font-bold text-gray-800 mb-8">Analytics Dashboard</h1>
+    <div className="w-full min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <h1 className="text-4xl font-bold text-gray-800 mb-8">Analytics Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -261,7 +265,7 @@ export const AnalyticsPage = () => {
 
       {/* Leaderboard */}
       <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-  <h3 className="text-xl font-bold text-gray-800 mb-4">Leaderboard</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Leaderboard</h3>
         <div className="space-y-2">
           {usersData
             .sort((a, b) => b.problems.total - a.problems.total)
@@ -290,6 +294,7 @@ export const AnalyticsPage = () => {
               </div>
             ))}
         </div>
+      </div>
       </div>
     </div>
   );

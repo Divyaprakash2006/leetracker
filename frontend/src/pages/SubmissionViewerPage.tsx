@@ -13,10 +13,9 @@ export const SubmissionViewerPage = () => {
   // Loading state
   if (isLoading && !submission) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center p-8">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-800">Loading submission...</h2>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -25,16 +24,18 @@ export const SubmissionViewerPage = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Submission</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={() => navigate(`/user/${username}/submissions`)}
-            className="w-full px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors"
-          >
-            Back to Submissions
-          </button>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Submission</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={() => navigate(`/user/${username}/submissions`)}
+              className="w-full px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors"
+            >
+              Back to Submissions
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -43,24 +44,26 @@ export const SubmissionViewerPage = () => {
   // No submission data
   if (!submission) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Submission Found</h2>
-          <p className="text-gray-600 mb-6">The requested submission could not be found.</p>
-          <button
-            onClick={() => navigate(`/user/${username}/submissions`)}
-            className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition-colors"
-          >
-            Back to Submissions
-          </button>
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">No Submission Found</h2>
+            <p className="text-gray-600 mb-6">The requested submission could not be found.</p>
+            <button
+              onClick={() => navigate(`/user/${username}/submissions`)}
+              className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition-colors"
+            >
+              Back to Submissions
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="w-full min-h-screen py-6">
+      <div className="max-w-7xl mx-auto px-4">
         
         <div className="flex items-center gap-4 mb-6">
           <button

@@ -64,15 +64,15 @@ export const UsersPage = () => {
 
   if (trackedUsers.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto text-center">
+      <div className="w-full min-h-screen py-16">
+        <div className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">No Users Tracked</h2>
           <p className="text-gray-600 mb-8">
             Start tracking LeetCode users to monitor their progress and compare statistics
           </p>
           <Link
             to="/search"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md"
           >
             Search Users
           </Link>
@@ -82,8 +82,9 @@ export const UsersPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="w-full min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gray-800">Tracked Users</h1>
           <p className="text-gray-600 mt-2">
@@ -98,96 +99,96 @@ export const UsersPage = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trackedUsers.map((user) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {trackedUsers.map((user) => {
           const data = usersData[user.username];
           const isLoading = loading[user.username];
 
           return (
-            <div key={user.username} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div key={user.username} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col">
               {isLoading ? (
-                <div className="p-8 text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-600 mt-4">Loading...</p>
+                <div className="flex-1 flex justify-center items-center min-h-[450px]">
+                  <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
                 </div>
               ) : data ? (
                 <>
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4">
-                    <div className="flex items-center gap-3">
+                  {/* Header with Gradient */}
+                  <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-6">
+                    <div className="flex items-center gap-4">
                       {data.avatar && (
                         <img
                           src={data.avatar}
                           alt={data.username}
-                          className="w-14 h-14 rounded-full border-2 border-white"
+                          className="w-16 h-16 rounded-full border-4 border-white shadow-lg"
                         />
                       )}
                       <div className="text-white flex-1">
-                        <h3 className="text-xl font-bold">{data.username}</h3>
-                        <p className="text-sm text-blue-100">{data.country}</p>
+                        <h3 className="text-2xl font-bold tracking-tight">{data.username}</h3>
+                        <p className="text-sm text-blue-100 mt-1">{data.country}</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Stats */}
-                  <div className="p-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-gray-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-gray-800">{data.problems.total}</div>
-                        <div className="text-xs text-gray-600">Total Solved</div>
+                  {/* Stats Cards */}
+                  <div className="p-6 bg-gray-50">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                        <div className="text-3xl font-bold text-gray-800">{data.problems.total}</div>
+                        <div className="text-sm text-gray-600 mt-1 font-medium">Total Solved</div>
                       </div>
-                      <div className="bg-yellow-50 p-3 rounded-lg text-center">
-                        <div className="text-xl font-bold text-yellow-600">{data.contestRating}</div>
-                        <div className="text-xs text-gray-600">Rating</div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-green-700">Easy</span>
-                        <span className="font-bold text-green-600">{data.problems.easy}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-yellow-700">Medium</span>
-                        <span className="font-bold text-yellow-600">{data.problems.medium}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-red-700">Hard</span>
-                        <span className="font-bold text-red-600">{data.problems.hard}</span>
+                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 text-center">
+                        <div className="text-3xl font-bold text-orange-600">{data.contestRating || 'N/A'}</div>
+                        <div className="text-sm text-gray-700 mt-1 font-medium">Rating</div>
                       </div>
                     </div>
 
-                    <div className="text-xs text-gray-500 text-center pt-2 border-t">
+                    {/* Difficulty Breakdown */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-green-700">Easy</span>
+                        <span className="text-lg font-bold text-green-600">{data.problems.easy}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-yellow-700">Medium</span>
+                        <span className="text-lg font-bold text-yellow-600">{data.problems.medium}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-red-700">Hard</span>
+                        <span className="text-lg font-bold text-red-600">{data.problems.hard}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-gray-500 text-center mt-4 font-medium">
                       Rank #{data.ranking}
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="p-4 bg-gray-50 flex flex-col gap-2">
-                    <div className="flex gap-2">
+                  {/* Action Buttons */}
+                  <div className="p-4 bg-white border-t border-gray-200 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <Link
                         to={`/user/${user.username}`}
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold text-center"
+                        className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold text-center transition-colors shadow-md hover:shadow-lg"
                       >
                         View Progress
                       </Link>
                       <Link
                         to={`/user/${user.username}/submissions`}
-                        className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold text-center"
+                        className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold text-center transition-colors shadow-md hover:shadow-lg"
                       >
                         View Submissions
                       </Link>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => handleRefresh(user.username)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold"
+                        className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold transition-colors shadow-md hover:shadow-lg"
                       >
                         Refresh
                       </button>
                       <button
                         onClick={() => handleRemove(user.username)}
-                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold"
+                        className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold transition-colors shadow-md hover:shadow-lg"
                       >
                         Remove
                       </button>
@@ -208,6 +209,7 @@ export const UsersPage = () => {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
