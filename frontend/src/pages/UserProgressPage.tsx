@@ -112,28 +112,6 @@ export const UserProgressPage = () => {
     );
   }
 
-  // Problems Progress Bar Chart
-  const problemsChartData = {
-    labels: ['Easy', 'Medium', 'Hard'],
-    datasets: [
-      {
-        label: 'Problems Solved',
-        data: [userData.problems.easy, userData.problems.medium, userData.problems.hard],
-        backgroundColor: [
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(251, 191, 36, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-        ],
-        borderColor: [
-          'rgb(34, 197, 94)',
-          'rgb(251, 191, 36)',
-          'rgb(239, 68, 68)',
-        ],
-        borderWidth: 2,
-      },
-    ],
-  };
-
   // Daily Activity Line Chart
   const activityChartData = {
     labels: userData.dailyActivity?.map(d => d.date) || [],
@@ -272,20 +250,12 @@ export const UserProgressPage = () => {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 mb-6">
         {/* Problem Distribution Horizontal Bar */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Problem Distribution</h3>
           <div className="h-64">
             <Bar data={distributionData} options={horizontalChartOptions} />
-          </div>
-        </div>
-
-        {/* Difficulty Breakdown Vertical Bar */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Difficulty Breakdown</h3>
-          <div className="h-64">
-            <Bar data={problemsChartData} options={chartOptions} />
           </div>
         </div>
       </div>
