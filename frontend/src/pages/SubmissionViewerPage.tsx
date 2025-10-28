@@ -117,20 +117,6 @@ export const SubmissionViewerPage = () => {
                 </div>
               </div>
             </div>
-
-            <div className="leetcode-card rounded-lg shadow p-6 border-2 border-leetcode-border hover:border-leetcode-orange/30 transition-all duration-300">
-              <h3 className="font-semibold text-leetcode-text-primary mb-4">Performance</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-4 bg-leetcode-darker rounded-lg border border-leetcode-border hover:border-leetcode-orange transition-all duration-300 group">
-                  <span className="text-leetcode-text text-sm">Execution Time</span>
-                  <span className="font-bold text-leetcode-orange text-xl group-hover:scale-110 transition-transform duration-300">{submission.runtime}</span>
-                </div>
-                <div className="flex justify-between items-center p-4 bg-leetcode-darker rounded-lg border border-leetcode-border hover:border-leetcode-yellow transition-all duration-300 group">
-                  <span className="text-leetcode-text text-sm">Memory</span>
-                  <span className="font-bold text-leetcode-yellow text-xl group-hover:scale-110 transition-transform duration-300">{submission.memory}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-6">

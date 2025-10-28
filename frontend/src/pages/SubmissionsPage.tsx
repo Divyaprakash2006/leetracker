@@ -288,26 +288,77 @@ export const SubmissionsPage = () => {
         </div>
       </div>
 
-      {/* Daily Streak Card */}
+      {/* Daily Streak Card - Mobile Optimized */}
       {userData.streak?.currentStreak && userData.streak.currentStreak > 0 ? (
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-pink-500 rounded-xl opacity-50 blur-xl"></div>
-          <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg p-6 mb-6 text-white">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold">LeetCode Streak</h3>
+        <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-xl shadow-2xl border border-gray-700/30 mb-4 md:mb-6">
+          {/* Smooth Animated Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-500/15 opacity-80"></div>
+          
+          {/* Subtle Animated Mesh */}
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-400/20 via-transparent to-transparent animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-amber-400/20 via-transparent to-transparent animate-pulse" style={{animationDelay: '1s'}}></div>
+          </div>
+          
+          {/* Smooth Glow Effect */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-orange-500/30 to-amber-500/30 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-yellow-500/30 to-orange-500/30 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10 p-4 sm:p-5 md:p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-5 md:gap-6">
+              {/* Left Side - Responsive Icon & Title */}
+              <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl md:rounded-2xl opacity-50 group-hover:opacity-75 blur transition-all duration-300"></div>
+                  <div className="relative w-12 h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-xl md:rounded-2xl shadow-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                    <svg className="w-6 h-6 sm:w-6.5 sm:h-6.5 md:w-7 md:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                    {/* Smooth shine */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent rounded-xl md:rounded-2xl"></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg sm:text-xl md:text-xl font-bold bg-gradient-to-r from-orange-300 via-amber-300 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg">
+                    LeetCode Streak
+                  </h3>
+                </div>
               </div>
-              <div className="text-center bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
-                <div className="text-5xl font-bold">{userData.streak.currentStreak}</div>
-                <div className="text-sm text-orange-100 mt-1">day streak</div>
+              
+              {/* Right Side - Responsive Counter */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-br from-orange-500/40 to-amber-500/40 rounded-xl md:rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 rounded-xl md:rounded-2xl px-5 py-3 sm:px-5.5 sm:py-3.5 md:px-6 md:py-4 border border-orange-500/30 backdrop-blur-md shadow-xl">
+                  <div className="text-center">
+                    <div className="text-4xl sm:text-4xl md:text-5xl font-black bg-gradient-to-br from-orange-300 via-amber-300 to-yellow-300 bg-clip-text text-transparent leading-tight drop-shadow-2xl">
+                      {userData.streak.currentStreak}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 sm:gap-1.5 mt-1">
+                      <div className="w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-amber-400 rounded-full shadow-lg shadow-orange-500/50"></div>
+                      <span className="text-xs font-semibold text-orange-200 uppercase tracking-wide whitespace-nowrap">day streak</span>
+                      <div className="w-1.5 h-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full shadow-lg shadow-amber-500/50"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="leetcode-card border-2 border-leetcode-border rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-leetcode-text-primary">No active streak</h3>
-          <p className="text-sm text-leetcode-text">Solve a problem on LeetCode today to start your streak.</p>
+        <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-xl shadow-xl border border-gray-700/30 p-4 sm:p-4.5 md:p-5 mb-4 md:mb-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-700/10 via-gray-600/5 to-transparent opacity-50"></div>
+          <div className="relative z-10 flex items-center gap-3 sm:gap-3.5 md:gap-4">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-gradient-to-br from-gray-700/80 to-gray-600/80 rounded-lg md:rounded-xl shadow-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+              <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg md:text-lg font-bold text-gray-300">No active streak</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Solve a problem on LeetCode today to start your streak.</p>
+            </div>
+          </div>
         </div>
       )}
 

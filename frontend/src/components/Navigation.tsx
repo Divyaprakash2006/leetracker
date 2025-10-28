@@ -6,6 +6,7 @@ export const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { trackedUsers } = useTrackedUsers();
   
   const navItems = [
@@ -24,6 +25,7 @@ export const Navigation = () => {
     if (user) {
       navigate(`/user/${user.username}`);
       setSearchQuery('');
+      setMobileMenuOpen(false);
     } else {
       alert(`User "${searchQuery}" is not being tracked. Please add them first from the Tracked Users page.`);
     }
@@ -33,12 +35,12 @@ export const Navigation = () => {
     <nav className="sticky top-0 z-50 bg-leetcode-card/80 backdrop-blur-xl shadow-lg border-b border-leetcode-border/50 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-leetcode-orange/5 via-transparent to-leetcode-orange/5"></div>
       <div className="absolute inset-0 animate-shimmer pointer-events-none"></div>
-      <div className="relative mx-auto max-w-[1200px] px-4">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl font-bold text-leetcode-text-primary group">
+      <div className="relative mx-auto max-w-[1200px] px-3 sm:px-4">
+        <div className="flex h-14 sm:h-16 items-center justify-between">
+          <div className="flex items-center gap-4 sm:gap-8">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl md:text-2xl font-bold text-leetcode-text-primary group">
               {/* LeetCode-style Logo with hover effect */}
-              <div className="relative w-7 h-7 sm:w-8 sm:h-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
+              <div className="relative w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
                 <div className="absolute inset-0 bg-leetcode-orange rounded-lg opacity-0 group-hover:opacity-30 blur-xl transition-all duration-500"></div>
                 <svg viewBox="0 0 24 24" className="w-full h-full relative z-10">
                   {/* Left bracket */}
@@ -92,46 +94,135 @@ export const Navigation = () => {
             </div>
           </div>
           
-          {/* LeetCode-style Search Box */}
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              {/* Animated gradient glow */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-full opacity-0 group-hover:opacity-75 blur-lg transition-all duration-500 animate-pulse"></div>
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSearch();
-                }}
-                className="relative flex items-center bg-leetcode-darker/90 backdrop-blur-sm rounded-full border-2 border-leetcode-border focus-within:border-leetcode-orange transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-leetcode-orange/20 focus-within:shadow-leetcode-orange/30"
-              >
-                <div className="pl-4 pr-2">
-                  <svg className="h-5 w-5 text-leetcode-text-secondary group-focus-within:text-leetcode-orange group-hover:scale-110 group-focus-within:rotate-90 transition-all duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search tracked users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-32 sm:w-48 lg:w-56 py-2 pr-4 bg-transparent text-xs sm:text-sm text-leetcode-text-primary placeholder-leetcode-text-secondary focus:outline-none focus:w-48 sm:focus:w-56 lg:focus:w-64 transition-all duration-300"
-                  style={{fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="pr-3 text-leetcode-text-secondary hover:text-leetcode-orange hover:scale-125 hover:rotate-90 transition-all duration-300 group/clear"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile Optimized Search - Hidden on small screens */}
+            <div className="hidden sm:block">
+              <div className="relative group">
+                {/* Gradient border glow */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 group-focus-within:opacity-100"></div>
+                
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch();
+                  }}
+                  className="relative flex items-center bg-gray-900/90 backdrop-blur-xl rounded-xl border border-gray-800 focus-within:border-gray-700 transition-all duration-300 shadow-xl overflow-hidden"
+                >
+                  {/* Background gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  {/* Search Icon */}
+                  <div className="relative z-10 pl-3 sm:pl-4 pr-2 py-2 sm:py-2.5">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 transition-colors duration-200 group-hover:text-orange-400 group-focus-within:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                  </button>
-                )}
-              </form>
+                  </div>
+                  
+                  {/* Optimized Input Field */}
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="relative z-10 w-24 sm:w-32 md:w-40 lg:w-48 py-2 sm:py-2.5 pr-2 sm:pr-3 bg-transparent text-xs sm:text-sm text-gray-200 placeholder-gray-500 font-normal focus:outline-none transition-all duration-300 focus:w-32 sm:focus:w-40 md:focus:w-48 lg:focus:w-56"
+                    style={{fontFamily: 'Inter, system-ui, -apple-system, sans-serif'}}
+                  />
+                  
+                  {/* Clear Button */}
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="relative z-10 pr-2 sm:pr-3"
+                    >
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
+                        <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 hover:text-gray-200 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                    </button>
+                  )}
+                </form>
+              </div>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 transition-colors duration-200"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-700/50">
+            <div className="space-y-3">
+              {/* Mobile Navigation Links */}
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    location.pathname === item.path
+                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-leetcode-orange border border-orange-500/30'
+                      : 'text-leetcode-text-secondary hover:bg-gray-800/50 hover:text-leetcode-text-primary'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              
+              {/* Mobile Search */}
+              <div className="pt-2 sm:hidden">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSearch();
+                  }}
+                  className="relative flex items-center bg-gray-900/90 backdrop-blur-xl rounded-lg border border-gray-800 focus-within:border-gray-700 transition-all duration-300 shadow-lg overflow-hidden"
+                >
+                  <div className="pl-3 pr-2 py-2.5">
+                    <svg className="h-5 w-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search tracked users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 py-2.5 pr-3 bg-transparent text-sm text-gray-200 placeholder-gray-500 font-normal focus:outline-none"
+                    style={{fontFamily: 'Inter, system-ui, -apple-system, sans-serif'}}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="pr-3"
+                    >
+                      <div className="w-6 h-6 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all duration-200">
+                        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                    </button>
+                  )}
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

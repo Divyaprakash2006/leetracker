@@ -122,113 +122,214 @@ export const UsersPage = () => {
                   </div>
                 ) : data ? (
                 <>
-                  {/* Header with Gradient */}
-                  <div className="bg-gradient-to-br from-leetcode-orange/20 via-leetcode-yellow/20 to-leetcode-orange/20 p-6 border-b border-leetcode-border">
-                    <div className="flex items-center gap-4">
+                  {/* Header with Avatar and User Info */}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-yellow-500/10 p-6">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-5">
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-yellow-400"></div>
+                    </div>
+                    
+                    <div className="relative flex items-start gap-4">
+                      {/* Avatar with Premium Ring */}
                       {data.avatar && (
                         <div className="relative group/avatar">
-                          <div className="absolute inset-0 bg-leetcode-orange rounded-full opacity-0 group-hover/avatar:opacity-50 blur-lg transition-all duration-300"></div>
+                          {/* Glow Ring */}
+                          <div className="absolute -inset-1 bg-gradient-to-br from-orange-400 via-yellow-400 to-orange-500 rounded-full opacity-75 blur-md group-hover/avatar:opacity-100 transition-all duration-300"></div>
+                          {/* Avatar */}
                           <img
                             src={data.avatar}
                             alt={data.username}
-                            className="relative w-16 h-16 rounded-full border-4 border-leetcode-orange shadow-lg transform group-hover/avatar:scale-110 transition-transform duration-300"
+                            className="relative w-20 h-20 rounded-full border-4 border-leetcode-card shadow-2xl transform group-hover/avatar:scale-105 transition-all duration-300 object-cover"
                           />
+                          {/* Online Indicator */}
+                          <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-leetcode-card shadow-lg"></div>
                         </div>
                       )}
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold tracking-tight text-leetcode-text-primary">{data.username}</h3>
-                        <p className="text-sm text-leetcode-text mt-1">{data.country}</p>
+                      
+                      {/* User Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-leetcode-text-primary truncate mb-1">
+                          {data.username}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-leetcode-text-secondary mb-3">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="truncate">{data.country}</span>
+                        </div>
+                        
+                        {/* Rank Badge - Professional iOS Style */}
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-gray-700/50 shadow-lg backdrop-blur-sm">
+                          <div className="flex items-center gap-1.5">
+                            <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rank</span>
+                          </div>
+                          <div className="h-4 w-px bg-gray-700/50"></div>
+                          <span className="text-sm font-bold text-transparent bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 bg-clip-text">
+                            #{data.ranking}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Stats Cards */}
-                  <div className="p-6">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border hover:border-leetcode-orange transition-all duration-300 leetcode-hover text-center group">
-                        <div className="text-3xl font-bold text-leetcode-orange group-hover:scale-110 transition-transform duration-300">{data.problems.total}</div>
-                        <div className="text-sm text-leetcode-text-secondary mt-1 font-medium">Total Solved</div>
+                  {/* Stats Section */}
+                  <div className="p-6 space-y-4">
+                    {/* Main Stats - iOS Cards */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative group/stat overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 p-4 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300 hover:scale-[1.02]">
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-400/5 to-transparent"></div>
+                        <div className="relative">
+                          <div className="text-xs font-semibold text-leetcode-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Total Solved
+                          </div>
+                          <div className="text-3xl font-black text-transparent bg-gradient-to-br from-orange-400 to-orange-600 bg-clip-text">
+                            {data.problems.total}
+                          </div>
+                        </div>
                       </div>
-                      <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border hover:border-leetcode-yellow transition-all duration-300 leetcode-hover text-center group">
-                        <div className="text-3xl font-bold text-leetcode-yellow group-hover:scale-110 transition-transform duration-300">{data.contestRating || 'N/A'}</div>
-                        <div className="text-sm text-leetcode-text-secondary mt-1 font-medium">Rating</div>
+
+                      <div className="relative group/stat overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 p-4 border border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300 hover:scale-[1.02]">
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent"></div>
+                        <div className="relative">
+                          <div className="text-xs font-semibold text-leetcode-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Rating
+                          </div>
+                          <div className="text-3xl font-black text-transparent bg-gradient-to-br from-yellow-400 to-yellow-600 bg-clip-text">
+                            {data.contestRating || 'N/A'}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Difficulty Breakdown */}
-                    <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border space-y-3">
-                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
-                        <span className="text-sm font-semibold text-leetcode-easy">Easy</span>
-                        <span className="text-lg font-bold text-leetcode-easy">{data.problems.easy}</span>
+                    {/* Difficulty Breakdown - Modern List */}
+                    <div className="rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 p-5 border border-gray-700/30 backdrop-blur-sm space-y-3">
+                      <div className="flex items-center justify-between group/item cursor-pointer hover:translate-x-1 transition-all duration-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-500/50"></div>
+                          <span className="text-sm font-bold text-green-400 uppercase tracking-wide">Easy</span>
+                        </div>
+                        <span className="text-xl font-black text-green-400">{data.problems.easy}</span>
                       </div>
-                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
-                        <span className="text-sm font-semibold text-leetcode-medium">Medium</span>
-                        <span className="text-lg font-bold text-leetcode-medium">{data.problems.medium}</span>
+                      
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
+                      
+                      <div className="flex items-center justify-between group/item cursor-pointer hover:translate-x-1 transition-all duration-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50"></div>
+                          <span className="text-sm font-bold text-yellow-400 uppercase tracking-wide">Medium</span>
+                        </div>
+                        <span className="text-xl font-black text-yellow-400">{data.problems.medium}</span>
                       </div>
-                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
-                        <span className="text-sm font-semibold text-leetcode-hard">Hard</span>
-                        <span className="text-lg font-bold text-leetcode-hard">{data.problems.hard}</span>
+                      
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
+                      
+                      <div className="flex items-center justify-between group/item cursor-pointer hover:translate-x-1 transition-all duration-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/50"></div>
+                          <span className="text-sm font-bold text-red-400 uppercase tracking-wide">Hard</span>
+                        </div>
+                        <span className="text-xl font-black text-red-400">{data.problems.hard}</span>
                       </div>
-                    </div>
-
-                    <div className="text-sm text-leetcode-text-secondary text-center mt-4 font-medium">
-                      Rank #{data.ranking}
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="p-4 border-t border-leetcode-border space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <Link
-                        to={`/user/${user.username}`}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-green to-leetcode-blue text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-green/30 active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          <span>View Progress</span>
-                        </div>
-                      </Link>
-                      <Link
-                        to={`/user/${user.username}/submissions`}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-orange to-leetcode-orange-dark text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-orange/30 active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <span>View Submissions</span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => handleRefresh(user.username)}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-yellow to-leetcode-orange text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-yellow/30 active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          <span>Refresh</span>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => handleRemove(user.username)}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-red to-red-700 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-red/30 active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          <span>Remove</span>
-                        </div>
-                      </button>
+                  {/* Action Buttons - Professional iOS Style */}
+                  <div className="p-4 bg-gradient-to-b from-transparent to-black/5">
+                    <div className="space-y-2.5">
+                      {/* Primary Actions */}
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <Link
+                          to={`/user/${user.username}`}
+                          className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          {/* Gradient Background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500"></div>
+                          {/* Shine Effect */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          {/* Shadow Glow */}
+                          <div className="absolute -inset-0.5 bg-gradient-to-br from-emerald-500/50 to-cyan-500/50 opacity-0 group-hover:opacity-70 blur-md transition-all duration-300 -z-10"></div>
+                          
+                          {/* Content */}
+                          <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span className="text-xs font-bold text-white tracking-wide">Progress</span>
+                          </div>
+                        </Link>
+
+                        <Link
+                          to={`/user/${user.username}/submissions`}
+                          className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          {/* Gradient Background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500"></div>
+                          {/* Shine Effect */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          {/* Shadow Glow */}
+                          <div className="absolute -inset-0.5 bg-gradient-to-br from-orange-500/50 to-yellow-500/50 opacity-0 group-hover:opacity-70 blur-md transition-all duration-300 -z-10"></div>
+                          
+                          {/* Content */}
+                          <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="text-xs font-bold text-white tracking-wide">Submissions</span>
+                          </div>
+                        </Link>
+                      </div>
+
+                      {/* Secondary Actions */}
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          onClick={() => handleRefresh(user.username)}
+                          className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          {/* Gradient Background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 via-orange-500 to-amber-600"></div>
+                          {/* Shine Effect */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          {/* Shadow Glow */}
+                          <div className="absolute -inset-0.5 bg-gradient-to-br from-yellow-500/50 to-orange-500/50 opacity-0 group-hover:opacity-70 blur-md transition-all duration-300 -z-10"></div>
+                          
+                          {/* Content */}
+                          <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                            <svg className="w-4 h-4 text-white group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span className="text-xs font-bold text-white tracking-wide">Refresh</span>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => handleRemove(user.username)}
+                          className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          {/* Gradient Background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-rose-500 to-pink-600"></div>
+                          {/* Shine Effect */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          {/* Shadow Glow */}
+                          <div className="absolute -inset-0.5 bg-gradient-to-br from-red-500/50 to-pink-500/50 opacity-0 group-hover:opacity-70 blur-md transition-all duration-300 -z-10"></div>
+                          
+                          {/* Content */}
+                          <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                            <svg className="w-4 h-4 text-white group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span className="text-xs font-bold text-white tracking-wide">Remove</span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </>

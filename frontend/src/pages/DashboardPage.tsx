@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTrackedUsers } from "../context/UserContext";
 import axios from "axios";
@@ -14,20 +14,6 @@ interface UserStats {
   hardSolved: number;
   ranking: number;
 }
-
-interface StatusCardProps {
-  label: string;
-  value: string | number;
-  description: string;
-}
-
-const StatusCard: React.FC<StatusCardProps> = ({ label, value, description }) => (
-  <div className="leetcode-card leetcode-hover p-6">
-    <h3 className="mb-1 text-sm font-medium uppercase tracking-wider text-leetcode-text-secondary">{label}</h3>
-    <div className="text-3xl font-bold text-leetcode-orange">{value}</div>
-    <p className="mt-1 text-sm text-leetcode-text">{description}</p>
-  </div>
-);
 
 export const DashboardPage: React.FC = () => {
   const { trackedUsers } = useTrackedUsers();
@@ -106,93 +92,147 @@ export const DashboardPage: React.FC = () => {
   }, [trackedUsers]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Animated Background */}
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-black">
+      {/* Animated Background - Modern Gradient Mesh */}
       <div className="fixed inset-0 -z-10">
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-leetcode-orange/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-leetcode-yellow/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-leetcode-green/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/20 via-gray-900 to-black"></div>
         
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#3a3a3a_1px,transparent_1px),linear-gradient(to_bottom,#3a3a3a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
+        {/* Animated gradient orbs */}
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-amber-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
         
-        {/* Floating Particles */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-leetcode-orange/40 rounded-full animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${10 + Math.random() * 20}s`,
-              }}
-            ></div>
-          ))}
-        </div>
+        {/* Mesh grid overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:64px_64px]"></div>
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-leetcode-dark via-leetcode-dark/95 to-leetcode-dark"></div>
+        {/* Radial gradient for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]"></div>
       </div>
 
       <div className="relative mx-auto max-w-[1200px] px-4 py-12">
         <div className="space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-xl leetcode-card px-8 py-12 shadow-lg border-2 border-leetcode-border">
-          <div className="absolute inset-0 bg-gradient-to-br from-leetcode-orange/10 to-transparent"></div>
-          <div className="relative z-10 mx-auto max-w-4xl space-y-8">
-            <div className="flex items-center gap-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-leetcode-orange shadow-lg">
-                <svg className="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl border border-gray-700/50">
+          {/* Animated Background Pattern */}
+          <div className="absolute inset-0 overflow-hidden opacity-20">
+            <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full blur-3xl animate-blob"></div>
+            <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-amber-500 to-orange-600 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+          </div>
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-yellow-500/10"></div>
+          
+          <div className="relative z-10 px-8 py-16">
+            <div className="mx-auto max-w-4xl">
+              {/* Icon & Title */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
+                <div className="relative group">
+                  <div className="w-24 h-24 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-3xl shadow-2xl flex items-center justify-center transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
+                    <svg className="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    {/* Shine Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-30 rounded-3xl"></div>
+                  </div>
+                  {/* Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity -z-10"></div>
+                </div>
+                
+                <div className="text-center md:text-left">
+                  <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent mb-3">
+                    LeetCode Stats
+                  </h1>
+                  <p className="text-xl text-gray-300 font-medium">
+                    Track your competitive programming progress
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold text-leetcode-text-primary">LeetCode Stats</h1>
-                <p className="mt-2 text-lg text-leetcode-text">
-                  Track your competitive programming progress
-                </p>
-              </div>
-            </div>
 
-            <div className="flex flex-col items-center gap-4">
-              <Link
-                to="/search"
-                className="rounded-full bg-leetcode-orange px-8 py-3 text-lg font-semibold text-white hover:bg-leetcode-orange-dark transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                Track Now
-              </Link>
-              
+              {/* CTA Button */}
+              <div className="flex justify-center">
+                <Link
+                  to="/search"
+                  className="group relative inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl text-white font-bold text-lg shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden"
+                >
+                  {/* Shine Animation */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                  <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="relative z-10">Track Now</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <StatusCard
-            label="Active Users"
-            value={trackedUsers.length}
-            description={`${trackedUsers.length} users being tracked`}
-          />
-          <StatusCard
-            label="Total Problems"
-            value={userStats.reduce((acc, user) => acc + user.totalSolved, 0)}
-            description="Combined problems solved"
-          />
+          {/* Active Users Card */}
+          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 shadow-2xl border border-gray-700/50 hover:border-orange-500/50 transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl shadow-lg flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Active Users</h3>
+              </div>
+              <p className="text-5xl font-black bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-2">
+                {trackedUsers.length}
+              </p>
+              <p className="text-gray-400 text-sm">{trackedUsers.length} users being tracked</p>
+            </div>
+          </div>
+
+          {/* Total Problems Card */}
+          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 shadow-2xl border border-gray-700/50 hover:border-amber-500/50 transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl shadow-lg flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Problems</h3>
+              </div>
+              <p className="text-5xl font-black bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent mb-2">
+                {userStats.reduce((acc, user) => acc + user.totalSolved, 0)}
+              </p>
+              <p className="text-gray-400 text-sm">Combined problems solved</p>
+            </div>
+          </div>
+
+          {/* Last Update Card */}
           {lastUpdate && (
-            <StatusCard
-              label="Last Update"
-              value={lastUpdate.toLocaleString('en-IN', { 
-                timeZone: 'Asia/Kolkata',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-              })}
-              description="Auto-updates every 5 minutes"
-            />
+            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 shadow-2xl border border-gray-700/50 hover:border-yellow-500/50 transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-lg flex items-center justify-center">
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Last Update</h3>
+                </div>
+                <p className="text-4xl font-black bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2">
+                  {lastUpdate.toLocaleString('en-IN', { 
+                    timeZone: 'Asia/Kolkata',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                  })}
+                </p>
+                <p className="text-gray-400 text-sm">Auto-updates every 5 minutes</p>
+              </div>
+            </div>
           )}
         </div>
 
@@ -235,117 +275,177 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : userStats.length > 0 ? (
               userStats.slice(0, 3).map((user, index) => {
-                // Rank badge colors
-                const rankColors = [
-                  { bg: 'bg-gradient-to-br from-yellow-400 to-yellow-600', text: 'text-yellow-900', border: 'border-yellow-300', badge: 'bg-yellow-500' },
-                  { bg: 'bg-gradient-to-br from-gray-300 to-gray-500', text: 'text-gray-900', border: 'border-gray-300', badge: 'bg-gray-400' },
-                  { bg: 'bg-gradient-to-br from-orange-400 to-orange-600', text: 'text-orange-900', border: 'border-orange-300', badge: 'bg-orange-500' }
+                // Rank badge colors - iOS style
+                const rankData = [
+                  {
+                    position: 1,
+                    medal: '🥇',
+                    gradient: 'from-yellow-400 via-amber-500 to-yellow-600',
+                    glow: 'shadow-yellow-500/50',
+                    border: 'border-yellow-400/30'
+                  },
+                  {
+                    position: 2,
+                    medal: '🥈',
+                    gradient: 'from-gray-300 via-gray-400 to-gray-500',
+                    glow: 'shadow-gray-400/50',
+                    border: 'border-gray-400/30'
+                  },
+                  {
+                    position: 3,
+                    medal: '🥉',
+                    gradient: 'from-orange-400 via-amber-600 to-orange-700',
+                    glow: 'shadow-orange-500/50',
+                    border: 'border-orange-400/30'
+                  }
                 ];
-                const colors = rankColors[index] || rankColors[2];
+                const rank = rankData[index];
 
                 return (
                   <div
                     key={user.username}
-                    className="group relative overflow-hidden rounded-2xl leetcode-card leetcode-hover shadow-xl border-2 border-leetcode-border"
+                    className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]"
                   >
-                    {/* Header with Gradient and Rank Badge */}
-                    <div className={`relative h-32 ${colors.bg}`}>
-                      {/* Rank Badge */}
-                      <div className="absolute right-4 top-4">
-                        <div className={`flex items-center justify-center w-12 h-12 rounded-full ${colors.badge} text-white font-bold text-lg shadow-lg border-3 border-leetcode-card`}>
-                          #{index + 1}
+                    {/* Glow effect on hover */}
+                    <div className={`absolute -inset-0.5 bg-gradient-to-br ${rank.gradient} opacity-0 group-hover:opacity-75 blur-xl transition-all duration-500 -z-10`}></div>
+                    
+                    {/* Main Card */}
+                    <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700/50 rounded-3xl overflow-hidden backdrop-blur-xl">
+                      {/* Header Section with Rank Badge */}
+                      <div className="relative h-24 bg-gradient-to-br from-gray-800/50 via-gray-700/30 to-gray-800/50 overflow-visible">
+                        {/* Animated pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-shimmer"></div>
                         </div>
-                      </div>
-                      
-                      {/* Avatar Circle */}
-                      <div className="absolute -bottom-12 left-6">
-                        <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-leetcode-card bg-gradient-to-br from-leetcode-orange to-leetcode-orange-dark text-4xl font-bold text-white shadow-xl">
-                          {user.username.charAt(0).toUpperCase()}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* User Info */}
-                    <div className="px-6 pt-16 pb-4">
-                      <h3 className="text-xl font-bold text-leetcode-text-primary truncate">{user.username}</h3>
-                      <p className="text-sm text-leetcode-text flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        India
-                      </p>
-                    </div>
-
-                    {/* Stats Cards */}
-                    <div className="px-6 pb-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        {/* Total Solved */}
-                        <div className="rounded-xl bg-leetcode-darker p-4 text-center border border-leetcode-border">
-                          <div className="text-3xl font-bold text-leetcode-orange">{user.totalSolved}</div>
-                          <div className="text-xs font-semibold text-leetcode-text mt-1">Total Solved</div>
-                        </div>
-                        {/* Rating */}
-                        <div className="rounded-xl bg-leetcode-darker p-4 text-center border border-leetcode-border">
-                          <div className="text-3xl font-bold text-leetcode-yellow">
-                            {user.ranking > 0 ? Math.floor(1500 + (user.totalSolved * 2)) : 'N/A'}
+                        
+                        {/* Rank Badge - Top Right */}
+                        <div className="absolute top-4 right-4 z-10">
+                          <div className={`relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${rank.gradient} shadow-2xl ${rank.glow} transform rotate-3 group-hover:rotate-6 transition-transform duration-300`}>
+                            <span className="text-2xl">{rank.medal}</span>
+                            <div className="absolute -inset-1 bg-gradient-to-br ${rank.gradient} opacity-20 blur-md -z-10"></div>
                           </div>
-                          <div className="text-xs font-semibold text-leetcode-text mt-1">Rating</div>
+                        </div>
+
+                        {/* Avatar - Fully visible */}
+                        <div className="absolute -bottom-16 left-6 z-20">
+                          <div className="relative group/avatar">
+                            {/* Avatar glow ring */}
+                            <div className={`absolute -inset-1 bg-gradient-to-br ${rank.gradient} rounded-full opacity-75 blur-md group-hover/avatar:opacity-100 transition-all duration-300`}></div>
+                            {/* Avatar */}
+                            <div className={`relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br ${rank.gradient} text-4xl font-black text-white shadow-2xl border-4 border-gray-900 transform group-hover/avatar:scale-110 transition-transform duration-300`}>
+                              {user.username.charAt(0).toUpperCase()}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Difficulty Breakdown */}
-                    <div className="px-6 pb-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-leetcode-easy">Easy</span>
-                          <span className="text-lg font-bold text-leetcode-easy">{user.easySolved}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-leetcode-medium">Medium</span>
-                          <span className="text-lg font-bold text-leetcode-medium">{user.mediumSolved}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-leetcode-hard">Hard</span>
-                          <span className="text-lg font-bold text-leetcode-hard">{user.hardSolved}</span>
+                      {/* User Info Section */}
+                      <div className="px-6 pt-20 pb-5">
+                        <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text truncate mb-1">
+                          {user.username}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          <span>India</span>
+                          <span className="mx-1.5">•</span>
+                          <span className="text-gray-500">Rank #{user.ranking.toLocaleString()}</span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Rank Info */}
-                    <div className="border-t border-leetcode-border px-6 py-3 bg-leetcode-darker">
-                      <p className="text-xs text-leetcode-text text-center font-medium">
-                        Global Rank #{user.ranking.toLocaleString()}
-                      </p>
-                    </div>
+                      {/* Stats Cards - iOS Style */}
+                      <div className="px-6 pb-5">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="relative group/stat overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 p-4 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-br from-orange-400/5 to-transparent"></div>
+                            <div className="relative">
+                              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Solved</div>
+                              <div className="text-3xl font-black text-transparent bg-gradient-to-br from-orange-400 to-orange-600 bg-clip-text">
+                                {user.totalSolved}
+                              </div>
+                            </div>
+                          </div>
 
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3 px-6 pb-6">
-                      <Link
-                        to={`/user/${user.username}`}
-                        className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-leetcode-green to-leetcode-blue py-3.5 text-center text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          <span>View Progress</span>
+                          <div className="relative group/stat overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 p-4 border border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent"></div>
+                            <div className="relative">
+                              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Rating</div>
+                              <div className="text-3xl font-black text-transparent bg-gradient-to-br from-yellow-400 to-yellow-600 bg-clip-text">
+                                {user.ranking > 0 ? Math.floor(1500 + (user.totalSolved * 2)) : 'N/A'}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </Link>
-                      <Link
-                        to={`/user/${user.username}/submissions`}
-                        className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-leetcode-orange to-leetcode-orange-dark py-3.5 text-center text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg active:scale-95"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div className="relative flex items-center justify-center gap-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <span>Submissions</span>
+                      </div>
+
+                      {/* Difficulty Breakdown - Compact */}
+                      <div className="px-6 pb-5">
+                        <div className="rounded-2xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 p-4 border border-gray-700/40 backdrop-blur-sm">
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between group/diff hover:translate-x-1 transition-all duration-200 cursor-pointer">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-500/50"></div>
+                                <span className="text-xs font-bold text-green-400 uppercase tracking-wide">Easy</span>
+                              </div>
+                              <span className="text-lg font-black text-green-400">{user.easySolved}</span>
+                            </div>
+                            
+                            <div className="h-px bg-gradient-to-r from-transparent via-gray-700/60 to-transparent"></div>
+                            
+                            <div className="flex items-center justify-between group/diff hover:translate-x-1 transition-all duration-200 cursor-pointer">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50"></div>
+                                <span className="text-xs font-bold text-yellow-400 uppercase tracking-wide">Medium</span>
+                              </div>
+                              <span className="text-lg font-black text-yellow-400">{user.mediumSolved}</span>
+                            </div>
+                            
+                            <div className="h-px bg-gradient-to-r from-transparent via-gray-700/60 to-transparent"></div>
+                            
+                            <div className="flex items-center justify-between group/diff hover:translate-x-1 transition-all duration-200 cursor-pointer">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/50"></div>
+                                <span className="text-xs font-bold text-red-400 uppercase tracking-wide">Hard</span>
+                              </div>
+                              <span className="text-lg font-black text-red-400">{user.hardSolved}</span>
+                            </div>
+                          </div>
                         </div>
-                      </Link>
+                      </div>
+
+                      {/* Action Buttons - Compact iOS Style */}
+                      <div className="px-6 pb-6">
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <Link
+                            to={`/user/${user.username}`}
+                            className="group/btn relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                            <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              <span className="text-xs font-bold text-white">Progress</span>
+                            </div>
+                          </Link>
+
+                          <Link
+                            to={`/user/${user.username}/submissions`}
+                            className="group/btn relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                            <div className="relative px-3 py-2.5 flex items-center justify-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="text-xs font-bold text-white">Submissions</span>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );

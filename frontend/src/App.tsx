@@ -23,7 +23,7 @@ function App() {
       <UserProvider>
         <div className="min-h-screen bg-leetcode-dark">
           <Navigation />
-          <div className="w-full">
+          <div className="w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
             <Suspense fallback={renderFallback()}>
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
