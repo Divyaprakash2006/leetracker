@@ -1,4 +1,4 @@
-/* SolutionViewer syntax highlighting - LeetCode style */
+/* SolutionViewer syntax highlighting - LeetCode Dark Theme */
 pre code {
   display: block;
   padding: 1.5em;
@@ -8,19 +8,19 @@ pre code {
   line-height: 1.6;
   letter-spacing: 0.2px;
   overflow-x: auto;
-  background-color: #ffffff;
+  background-color: #0a0a0a;
   border-radius: 8px;
   tab-size: 4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base theme */
+/* Base theme - Dark */
 .hljs {
-  color: #383a42;
-  background: #ffffff;
+  color: #eff2f699;
+  background: #0a0a0a;
   padding: 1em;
-  text-shadow: 0 0 0.5px #38383840;
+  text-shadow: 0 0 0.5px #ffffff20;
   font-weight: 600;
 }
 

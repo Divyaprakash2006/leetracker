@@ -178,32 +178,35 @@ export const SolutionViewer = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <span className="ml-3 text-gray-600">Loading solution...</span>
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-leetcode-yellow rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+        </div>
+        <span className="ml-3 text-leetcode-text">Loading solution...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+      <div className="bg-leetcode-red/10 border-2 border-leetcode-red/50 rounded-lg p-4 my-4">
         <div className="flex items-center">
-          <span className="text-red-500 text-xl mr-2">⚠️</span>
-          <h3 className="text-lg font-semibold text-red-800">Error Loading Solution</h3>
+          <span className="text-leetcode-red text-xl mr-2">⚠️</span>
+          <h3 className="text-lg font-semibold text-leetcode-red">Error Loading Solution</h3>
         </div>
-        <p className="text-red-600 mt-2">{error}</p>
+        <p className="text-leetcode-red/80 mt-2">{error}</p>
       </div>
     );
   }
 
   if (!solution?.code) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
+      <div className="bg-leetcode-yellow/10 border-2 border-leetcode-yellow/50 rounded-lg p-4 my-4">
         <div className="flex items-center">
-          <span className="text-yellow-500 text-xl mr-2">📝</span>
-          <h3 className="text-lg font-semibold text-yellow-800">No Solution Found</h3>
+          <span className="text-leetcode-yellow text-xl mr-2">📝</span>
+          <h3 className="text-lg font-semibold text-leetcode-yellow">No Solution Found</h3>
         </div>
-        <p className="text-yellow-600 mt-2">
+        <p className="text-leetcode-yellow/80 mt-2">
           The solution code could not be loaded. Please try again later.
         </p>
       </div>
@@ -211,30 +214,30 @@ export const SolutionViewer = ({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="border-b border-gray-200 bg-gray-50 p-4">
+    <div className="bg-leetcode-darker border border-leetcode-border rounded-lg shadow-sm">
+      <div className="border-b border-leetcode-border bg-leetcode-card p-4">
         <div className="flex items-center justify-between">
           <div>
             {solution.problemName && (
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-leetcode-text-primary">
                 {solution.problemName}
               </h2>
             )}
-            <div className="mt-1 text-sm text-gray-500">
-              Language: <span className="font-medium">{solution.language}</span>
+            <div className="mt-1 text-sm text-leetcode-text">
+              Language: <span className="font-medium text-leetcode-orange">{solution.language}</span>
               {solution.runtime && (
-                <span className="ml-4">Execution Time: <span className="font-medium">{solution.runtime}</span></span>
+                <span className="ml-4">Execution Time: <span className="font-medium text-leetcode-orange">{solution.runtime}</span></span>
               )}
               {solution.memory && (
-                <span className="ml-4">Memory: <span className="font-medium">{solution.memory}</span></span>
+                <span className="ml-4">Memory: <span className="font-medium text-leetcode-yellow">{solution.memory}</span></span>
               )}
             </div>
           </div>
           {solution.difficulty && (
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-              solution.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-              solution.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
+            <span className={`px-3 py-1 text-sm font-medium rounded-full border ${
+              solution.difficulty === 'Easy' ? 'bg-leetcode-easy/20 text-leetcode-easy border-leetcode-easy/50' :
+              solution.difficulty === 'Medium' ? 'bg-leetcode-medium/20 text-leetcode-medium border-leetcode-medium/50' :
+              'bg-leetcode-hard/20 text-leetcode-hard border-leetcode-hard/50'
             }`}>
               {solution.difficulty}
             </span>

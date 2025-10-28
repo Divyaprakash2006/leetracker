@@ -1,3 +1,116 @@
+/* postcss-import */
+/* @tailwind directives are processed by PostCSS/Tailwind - warnings can be ignored */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --leetcode-dark: #1a1a1a;
+    --leetcode-darker: #0a0a0a;
+    --leetcode-card: #262626;
+    --leetcode-border: #333333;
+    --leetcode-text: #eff2f699;
+    --leetcode-text-primary: #ffffff;
+    --leetcode-text-secondary: #a0a0a0;
+    --leetcode-orange: #ffa116;
+    --leetcode-green: #00b8a3;
+    --leetcode-yellow: #ffc01e;
+    --leetcode-red: #ef4743;
+  }
+  
+  body {
+    background-color: var(--leetcode-dark);
+    color: var(--leetcode-text-primary);
+  }
+}
+
+@layer utilities {
+  .leetcode-card {
+    background-color: var(--leetcode-card);
+    border: 1px solid var(--leetcode-border);
+    border-radius: 0.5rem;
+  }
+  
+  .leetcode-hover {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .leetcode-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 161, 22, 0.2);
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 3s infinite linear;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 161, 22, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 1000px 100%;
+  }
+  
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateY(-20px);
+      opacity: 0.8;
+    }
+  }
+  
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  .animate-float {
+    animation: float linear infinite;
+  }
+}

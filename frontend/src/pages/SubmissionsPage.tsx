@@ -211,7 +211,10 @@ export const SubmissionsPage = () => {
     return (
       <div className="w-full min-h-screen py-16">
         <div className="max-w-7xl mx-auto px-4 flex justify-center">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-leetcode-yellow rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+          </div>
         </div>
       </div>
     );
@@ -221,14 +224,16 @@ export const SubmissionsPage = () => {
     return (
       <div className="w-full min-h-screen py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Error Loading Data</h2>
-          <p className="text-gray-600 mb-8">{error}</p>
-          <button
-            onClick={() => navigate('/users')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
-          >
-            Back to Users
-          </button>
+          <div className="leetcode-card p-12 rounded-2xl border-2 border-leetcode-border max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-leetcode-text-primary mb-4">Error Loading Data</h2>
+            <p className="text-leetcode-text mb-8">{error}</p>
+            <button
+              onClick={() => navigate('/users')}
+              className="px-6 py-3 bg-gradient-to-r from-leetcode-orange to-leetcode-orange-dark text-white rounded-lg hover:scale-105 shadow-lg hover:shadow-leetcode-orange/30 transition-all duration-300"
+            >
+              Back to Users
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -239,11 +244,11 @@ export const SubmissionsPage = () => {
 
   const getLanguageColor = (lang: string) => {
     const l = lang.toLowerCase();
-    if (l.includes('python')) return 'bg-blue-100 text-blue-800';
-    if (l.includes('javascript') || l.includes('js')) return 'bg-yellow-100 text-yellow-800';
-    if (l.includes('java')) return 'bg-red-100 text-red-800';
-    if (l.includes('c++') || l.includes('cpp')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
+    if (l.includes('python')) return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
+    if (l.includes('javascript') || l.includes('js')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+    if (l.includes('java')) return 'bg-red-500/20 text-red-400 border-red-500/50';
+    if (l.includes('c++') || l.includes('cpp')) return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
+    return 'bg-leetcode-text-secondary/20 text-leetcode-text-secondary border-leetcode-border';
   };
 
   return (
@@ -254,26 +259,29 @@ export const SubmissionsPage = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/users')}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+            className="px-4 py-2 bg-leetcode-card text-leetcode-text-primary rounded-lg hover:bg-leetcode-darker border-2 border-leetcode-border hover:border-leetcode-orange transition-all duration-300"
           >
             Back
           </button>
           {userData.avatar && (
-            <img
-              src={userData.avatar}
-              alt={userData.username}
-              className="w-12 h-12 rounded-full border-2 border-blue-600"
-            />
+            <div className="relative group">
+              <div className="absolute inset-0 bg-leetcode-orange rounded-full opacity-0 group-hover:opacity-50 blur-lg transition-all duration-300"></div>
+              <img
+                src={userData.avatar}
+                alt={userData.username}
+                className="relative w-12 h-12 rounded-full border-2 border-leetcode-orange transform group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
           )}
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">{userData.username}'s Submissions</h1>
-            <p className="text-gray-600">Track Performance, Stats & Activity</p>
+            <h1 className="text-3xl font-bold text-leetcode-text-primary">{userData.username}'s Submissions</h1>
+            <p className="text-leetcode-text">Track Performance, Stats & Activity</p>
           </div>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => fetchAllData(username)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md"
+            className="px-6 py-3 bg-gradient-to-r from-leetcode-orange to-leetcode-orange-dark text-white rounded-lg hover:scale-105 font-semibold shadow-lg hover:shadow-leetcode-orange/30 transition-all duration-300"
           >
             Refresh
           </button>
@@ -282,75 +290,79 @@ export const SubmissionsPage = () => {
 
       {/* Daily Streak Card */}
       {userData.streak?.currentStreak && userData.streak.currentStreak > 0 ? (
-        <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg p-6 mb-6 text-white">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold">LeetCode Streak</h3>
-            </div>
-            <div className="text-center bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm">
-              <div className="text-5xl font-bold">{userData.streak.currentStreak}</div>
-              <div className="text-sm text-orange-100 mt-1">day streak</div>
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-pink-500 rounded-xl opacity-50 blur-xl"></div>
+          <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl shadow-lg p-6 mb-6 text-white">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold">LeetCode Streak</h3>
+              </div>
+              <div className="text-center bg-white bg-opacity-20 rounded-lg p-4 backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
+                <div className="text-5xl font-bold">{userData.streak.currentStreak}</div>
+                <div className="text-sm text-orange-100 mt-1">day streak</div>
+              </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-gray-100 border border-gray-200 rounded-xl p-6 mb-6 text-gray-600">
-          <h3 className="text-lg font-semibold text-gray-700">No active streak</h3>
-          <p className="text-sm">Solve a problem on LeetCode today to start your streak.</p>
+        <div className="leetcode-card border-2 border-leetcode-border rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-leetcode-text-primary">No active streak</h3>
+          <p className="text-sm text-leetcode-text">Solve a problem on LeetCode today to start your streak.</p>
         </div>
       )}
 
       {/* Submissions List */}
       <div className="space-y-4">
         {filteredSubmissions.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Submissions Found</h3>
-            <p className="text-gray-600">Try a different filter or refresh the data</p>
+          <div className="leetcode-card rounded-lg shadow-lg p-12 text-center border-2 border-leetcode-border">
+            <h3 className="text-2xl font-bold text-leetcode-text-primary mb-2">No Submissions Found</h3>
+            <p className="text-leetcode-text">Try a different filter or refresh the data</p>
           </div>
         ) : (
           filteredSubmissions.map((sub) => (
-            <div
-              key={sub.id}
-              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-bold text-gray-800">{sub.title}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getLanguageColor(sub.lang || 'Unknown')}`}>
-                      {sub.lang || 'Unknown'}
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+            <div key={sub.id} className="relative group/submission">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-lg opacity-0 group-hover/submission:opacity-20 blur-lg transition-all duration-500"></div>
+              <div className="relative leetcode-card rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 border-2 border-leetcode-border hover:border-leetcode-orange/50">
+            
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className="text-xl font-bold text-leetcode-text-primary group-hover/submission:text-leetcode-orange transition-colors duration-300">{sub.title}</h3>
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getLanguageColor(sub.lang || 'Unknown')}`}>
+                        {sub.lang || 'Unknown'}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-sm font-semibold bg-leetcode-green/20 text-leetcode-green border border-leetcode-green/50">
                         {sub.status || 'Accepted'}
-                    </span>
-                  </div>
+                      </span>
+                    </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <div className="text-sm">
-                        <div>
-                          Solved: {sub.solvedAt || formatSolvedAt(Number(sub.timestampMs ?? sub.timestamp) || 0)}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="flex items-center gap-2 text-leetcode-text">
+                        <div className="text-sm">
+                          <div>
+                            Solved: {sub.solvedAt || formatSolvedAt(Number(sub.timestampMs ?? sub.timestamp) || 0)}
+                          </div>
+                          {sub.timeAgo && <div className="text-xs text-leetcode-text-secondary">({sub.timeAgo})</div>}
                         </div>
-                        {sub.timeAgo && <div className="text-xs text-gray-500">({sub.timeAgo})</div>}
+                      </div>
+                      <div className="flex items-center gap-2 text-leetcode-text">
+                        <span className="text-sm">Execution Time: <span className="text-leetcode-orange font-semibold">{sub.runtime || 'N/A'}</span></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-leetcode-text">
+                        <span className="text-sm">Memory: <span className="text-leetcode-yellow font-semibold">{sub.memory || 'N/A'}</span></span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">Execution Time: {sub.runtime || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">Memory: {sub.memory || 'N/A'}</span>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() =>
-                        navigate(`/user/${username}/submission/${sub.id}`, { state: { submission: sub } })
-                      }
-                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-semibold shadow-md"
-                    >
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/user/${username}/submission/${sub.id}`, { state: { submission: sub } })
+                        }
+                        className="px-4 py-2 bg-gradient-to-r from-leetcode-orange to-leetcode-orange-dark text-white rounded-lg hover:scale-105 text-sm font-semibold shadow-lg hover:shadow-leetcode-orange/30 transition-all duration-300"
+                      >
                         View Code
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -360,27 +372,30 @@ export const SubmissionsPage = () => {
       </div>
 
       {/* Summary */}
-      <div className="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-3xl font-bold">{submissionsSource.length}</div>
-            <div className="text-sm text-blue-100 mt-1">Total Submissions</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">{filteredSubmissions.length}</div>
-            <div className="text-sm text-blue-100 mt-1">Filtered Results</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">
-              {new Set(submissionsSource.map((s) => s.lang || 'Unknown')).size}
+      <div className="mt-8 relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-lg opacity-30 blur-xl"></div>
+        <div className="relative bg-gradient-to-r from-leetcode-orange/20 via-leetcode-yellow/20 to-leetcode-orange/20 rounded-lg shadow-lg p-6 border-2 border-leetcode-border">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="group/stat hover:scale-110 transition-transform duration-300">
+              <div className="text-3xl font-bold text-leetcode-orange">{submissionsSource.length}</div>
+              <div className="text-sm text-leetcode-text mt-1">Total Submissions</div>
             </div>
-            <div className="text-sm text-blue-100 mt-1">Languages Used</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">
-              {new Set(submissionsSource.map((s) => s.title || 'Unknown Problem')).size}
+            <div className="group/stat hover:scale-110 transition-transform duration-300">
+              <div className="text-3xl font-bold text-leetcode-yellow">{filteredSubmissions.length}</div>
+              <div className="text-sm text-leetcode-text mt-1">Filtered Results</div>
             </div>
-            <div className="text-sm text-blue-100 mt-1">Unique Problems</div>
+            <div className="group/stat hover:scale-110 transition-transform duration-300">
+              <div className="text-3xl font-bold text-leetcode-green">
+                {new Set(submissionsSource.map((s) => s.lang || 'Unknown')).size}
+              </div>
+              <div className="text-sm text-leetcode-text mt-1">Languages Used</div>
+            </div>
+            <div className="group/stat hover:scale-110 transition-transform duration-300">
+              <div className="text-3xl font-bold text-leetcode-blue">
+                {new Set(submissionsSource.map((s) => s.title || 'Unknown Problem')).size}
+              </div>
+              <div className="text-sm text-leetcode-text mt-1">Unique Problems</div>
+            </div>
           </div>
         </div>
       </div>

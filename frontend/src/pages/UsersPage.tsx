@@ -66,16 +66,21 @@ export const UsersPage = () => {
     return (
       <div className="w-full min-h-screen py-16">
         <div className="max-w-2xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">No Users Tracked</h2>
-          <p className="text-gray-600 mb-8">
-            Start tracking LeetCode users to monitor their progress and compare statistics
-          </p>
-          <Link
-            to="/search"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md"
-          >
-            Search Users
-          </Link>
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-2xl opacity-20 blur-xl"></div>
+            <div className="relative leetcode-card p-12 rounded-2xl border-2 border-leetcode-border">
+              <h2 className="text-3xl font-bold text-leetcode-text-primary mb-4">No Users Tracked</h2>
+              <p className="text-leetcode-text mb-8">
+                Start tracking LeetCode users to monitor their progress and compare statistics
+              </p>
+              <Link
+                to="/search"
+                className="inline-block px-6 py-3 bg-gradient-to-r from-leetcode-orange to-leetcode-orange-dark text-white rounded-lg hover:scale-105 font-semibold shadow-lg hover:shadow-leetcode-orange/30 transition-all duration-300"
+              >
+                Search Users
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -85,19 +90,19 @@ export const UsersPage = () => {
     <div className="w-full min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-800">Tracked Users</h1>
-          <p className="text-gray-600 mt-2">
-            Monitoring {trackedUsers.length} {trackedUsers.length === 1 ? 'user' : 'users'}
-          </p>
+          <div>
+            <h1 className="text-4xl font-bold text-leetcode-text-primary bg-gradient-to-r from-leetcode-text-primary via-leetcode-orange to-leetcode-text-primary bg-clip-text hover:text-transparent transition-all duration-500">Tracked Users</h1>
+            <p className="text-leetcode-text mt-2">
+              Monitoring {trackedUsers.length} {trackedUsers.length === 1 ? 'user' : 'users'}
+            </p>
+          </div>
+          <Link
+            to="/search"
+            className="px-6 py-3 bg-gradient-to-r from-leetcode-orange to-leetcode-orange-dark text-white rounded-lg hover:scale-105 font-semibold shadow-lg hover:shadow-leetcode-orange/30 transition-all duration-300"
+          >
+            Add User
+          </Link>
         </div>
-        <Link
-          to="/search"
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
-        >
-          Add User
-        </Link>
-      </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {trackedUsers.map((user) => {
@@ -105,70 +110,78 @@ export const UsersPage = () => {
           const isLoading = loading[user.username];
 
           return (
-            <div key={user.username} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col">
-              {isLoading ? (
-                <div className="flex-1 flex justify-center items-center min-h-[450px]">
-                  <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-                </div>
-              ) : data ? (
+            <div key={user.username} className="relative group/card">
+              <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-2xl opacity-0 group-hover/card:opacity-30 blur-xl transition-all duration-500"></div>
+              <div className="relative leetcode-card rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-leetcode-border hover:border-leetcode-orange/50 flex flex-col">
+                {isLoading ? (
+                  <div className="flex-1 flex justify-center items-center min-h-[450px]">
+                    <div className="relative">
+                      <div className="w-10 h-10 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
+                      <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-leetcode-yellow rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+                    </div>
+                  </div>
+                ) : data ? (
                 <>
                   {/* Header with Gradient */}
-                  <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-6">
+                  <div className="bg-gradient-to-br from-leetcode-orange/20 via-leetcode-yellow/20 to-leetcode-orange/20 p-6 border-b border-leetcode-border">
                     <div className="flex items-center gap-4">
                       {data.avatar && (
-                        <img
-                          src={data.avatar}
-                          alt={data.username}
-                          className="w-16 h-16 rounded-full border-4 border-white shadow-lg"
-                        />
+                        <div className="relative group/avatar">
+                          <div className="absolute inset-0 bg-leetcode-orange rounded-full opacity-0 group-hover/avatar:opacity-50 blur-lg transition-all duration-300"></div>
+                          <img
+                            src={data.avatar}
+                            alt={data.username}
+                            className="relative w-16 h-16 rounded-full border-4 border-leetcode-orange shadow-lg transform group-hover/avatar:scale-110 transition-transform duration-300"
+                          />
+                        </div>
                       )}
-                      <div className="text-white flex-1">
-                        <h3 className="text-2xl font-bold tracking-tight">{data.username}</h3>
-                        <p className="text-sm text-blue-100 mt-1">{data.country}</p>
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-bold tracking-tight text-leetcode-text-primary">{data.username}</h3>
+                        <p className="text-sm text-leetcode-text mt-1">{data.country}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Stats Cards */}
-                  <div className="p-6 bg-gray-50">
+                  <div className="p-6">
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
-                        <div className="text-3xl font-bold text-gray-800">{data.problems.total}</div>
-                        <div className="text-sm text-gray-600 mt-1 font-medium">Total Solved</div>
+                      <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border hover:border-leetcode-orange transition-all duration-300 leetcode-hover text-center group">
+                        <div className="text-3xl font-bold text-leetcode-orange group-hover:scale-110 transition-transform duration-300">{data.problems.total}</div>
+                        <div className="text-sm text-leetcode-text-secondary mt-1 font-medium">Total Solved</div>
                       </div>
-                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 text-center">
-                        <div className="text-3xl font-bold text-orange-600">{data.contestRating || 'N/A'}</div>
-                        <div className="text-sm text-gray-700 mt-1 font-medium">Rating</div>
+                      <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border hover:border-leetcode-yellow transition-all duration-300 leetcode-hover text-center group">
+                        <div className="text-3xl font-bold text-leetcode-yellow group-hover:scale-110 transition-transform duration-300">{data.contestRating || 'N/A'}</div>
+                        <div className="text-sm text-leetcode-text-secondary mt-1 font-medium">Rating</div>
                       </div>
                     </div>
 
                     {/* Difficulty Breakdown */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-green-700">Easy</span>
-                        <span className="text-lg font-bold text-green-600">{data.problems.easy}</span>
+                    <div className="bg-leetcode-darker p-4 rounded-xl shadow-sm border border-leetcode-border space-y-3">
+                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
+                        <span className="text-sm font-semibold text-leetcode-easy">Easy</span>
+                        <span className="text-lg font-bold text-leetcode-easy">{data.problems.easy}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-yellow-700">Medium</span>
-                        <span className="text-lg font-bold text-yellow-600">{data.problems.medium}</span>
+                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
+                        <span className="text-sm font-semibold text-leetcode-medium">Medium</span>
+                        <span className="text-lg font-bold text-leetcode-medium">{data.problems.medium}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-red-700">Hard</span>
-                        <span className="text-lg font-bold text-red-600">{data.problems.hard}</span>
+                      <div className="flex items-center justify-between group hover:scale-105 transition-transform duration-300">
+                        <span className="text-sm font-semibold text-leetcode-hard">Hard</span>
+                        <span className="text-lg font-bold text-leetcode-hard">{data.problems.hard}</span>
                       </div>
                     </div>
 
-                    <div className="text-sm text-gray-500 text-center mt-4 font-medium">
+                    <div className="text-sm text-leetcode-text-secondary text-center mt-4 font-medium">
                       Rank #{data.ranking}
                     </div>
                   </div>
 
-                  {/* Action Buttons - iOS Style */}
-                  <div className="p-4 bg-white border-t border-gray-200 space-y-3">
+                  {/* Action Buttons */}
+                  <div className="p-4 border-t border-leetcode-border space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <Link
                         to={`/user/${user.username}`}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-green to-leetcode-blue text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-green/30 active:scale-95"
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                         <div className="relative flex items-center justify-center gap-1.5">
@@ -180,7 +193,7 @@ export const UsersPage = () => {
                       </Link>
                       <Link
                         to={`/user/${user.username}/submissions`}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-orange to-leetcode-orange-dark text-white rounded-2xl text-sm font-semibold text-center transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-orange/30 active:scale-95"
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                         <div className="relative flex items-center justify-center gap-1.5">
@@ -194,7 +207,7 @@ export const UsersPage = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => handleRefresh(user.username)}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-yellow to-leetcode-orange text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-yellow/30 active:scale-95"
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                         <div className="relative flex items-center justify-center gap-1.5">
@@ -206,7 +219,7 @@ export const UsersPage = () => {
                       </button>
                       <button
                         onClick={() => handleRemove(user.username)}
-                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                        className="group relative overflow-hidden px-4 py-3 bg-gradient-to-br from-leetcode-red to-red-700 text-white rounded-2xl text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl hover:shadow-leetcode-red/30 active:scale-95"
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                         <div className="relative flex items-center justify-center gap-1.5">
@@ -219,17 +232,18 @@ export const UsersPage = () => {
                     </div>
                   </div>
                 </>
-              ) : (
-                <div className="p-8 text-center">
-                  <p className="text-gray-600">Failed to load data</p>
-                  <button
-                    onClick={() => handleRefresh(user.username)}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
+                ) : (
+                  <div className="p-8 text-center">
+                    <p className="text-leetcode-text">Failed to load data</p>
+                    <button
+                      onClick={() => handleRefresh(user.username)}
+                      className="mt-4 px-4 py-2 bg-leetcode-orange text-white rounded-lg hover:bg-leetcode-orange-dark hover:scale-105 transition-all duration-300"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

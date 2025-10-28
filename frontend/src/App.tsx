@@ -14,14 +14,14 @@ const SubmissionViewerPage = lazy(() => import('./pages/SubmissionViewerPage').t
 function App() {
   const renderFallback = () => (
     <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="w-8 h-8 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
     </div>
   );
 
   return (
     <Router>
       <UserProvider>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen bg-leetcode-dark">
           <Navigation />
           <div className="w-full">
             <Suspense fallback={renderFallback()}>
