@@ -1,36 +1,82 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
+    darkMode: ["class"],
+    content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        leetcode: {
-          dark: '#1a1a1a',
-          darker: '#0a0a0a',
-          card: '#262626',
-          border: '#333333',
-          text: '#eff2f699',
-          'text-primary': '#ffffff',
-          'text-secondary': '#a0a0a0',
-          orange: '#ffa116',
-          'orange-dark': '#ff8c00',
-          green: '#00b8a3',
-          yellow: '#ffc01e',
-          red: '#ef4743',
-          blue: '#2cbb5d',
-          easy: '#00b8a3',
-          medium: '#ffc01e',
-          hard: '#ef4743',
-        }
-      },
-      backgroundColor: {
-        'leetcode-dark': '#1a1a1a',
-        'leetcode-card': '#262626',
-      }
-    },
+  	extend: {
+  		colors: {
+  			leetcode: {
+  				dark: '#1a1a1a',
+  				darker: '#0a0a0a',
+  				card: '#262626',
+  				border: '#333333',
+  				text: '#eff2f699',
+  				'text-primary': '#ffffff',
+  				'text-secondary': '#a0a0a0',
+  				orange: '#ffa116',
+  				'orange-dark': '#ff8c00',
+  				green: '#00b8a3',
+  				yellow: '#ffc01e',
+  				red: '#ef4743',
+  				blue: '#2cbb5d',
+  				easy: '#00b8a3',
+  				medium: '#ffc01e',
+  				hard: '#ef4743'
+  			},
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			chart: {
+  				'1': 'hsl(var(--chart-1))',
+  				'2': 'hsl(var(--chart-2))',
+  				'3': 'hsl(var(--chart-3))',
+  				'4': 'hsl(var(--chart-4))',
+  				'5': 'hsl(var(--chart-5))'
+  			}
+  		},
+  		backgroundColor: {
+  			'leetcode-dark': '#1a1a1a',
+  			'leetcode-card': '#262626'
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		}
+  	}
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 }

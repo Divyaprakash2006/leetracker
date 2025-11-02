@@ -20,9 +20,9 @@ import solutionRoutes from './routes/solutionRoutes';
 import solutionViewerRoutes from './routes/solutionViewerRoutes';
 import trackedUserRoutes from './routes/trackedUserRoutes';
 
-// Debug: Check if MONGODB_URI is loaded
+// Debug: Check environment configuration
 console.log('🔍 Environment check:');
-console.log('   MONGODB_URI:', process.env.MONGODB_URI ? 'Loaded ✅' : 'Missing ❌');
+console.log('   LOCAL_MONGODB_URI:', process.env.LOCAL_MONGODB_URI ? 'Loaded ✅' : 'Using default mongodb://127.0.0.1:27017/leetracker');
 console.log('   PORT:', process.env.PORT || '5000');
 
 const __filename = fileURLToPath(import.meta.url);
@@ -322,15 +322,8 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
     
-    console.log(`🔍 Fetching data for user: ${username}`);
-    
-    // Add a small delay to handle rate limiting
-    await delay(500);
-    
     const query = getUserQuery(username).query;
     const variables = getUserQuery(username).variables;
-
-    console.log('📤 Sending GraphQL query for user:', username);
     
     // Make request to LeetCode GraphQL API with retry logic
     let retries = 2;
@@ -358,11 +351,9 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
     }
 
     const data = leetcodeData.data;
-    console.log('📊 Data received for user:', username);
     
     // Check if user exists
     if (!data || !data.matchedUser) {
-      console.log('❌ User not found in response:', username);
       return res.status(404).json({
         success: false,
         error: 'user_not_found',
@@ -388,11 +379,11 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
     };
 
     if (user.submitStats?.acSubmissionNum) {
-      user.submitStats.acSubmissionNum.forEach((item: any) => {
+      for (const item of user.submitStats.acSubmissionNum) {
         if (item.difficulty === 'Easy') problems.easy = item.count || 0;
         if (item.difficulty === 'Medium') problems.medium = item.count || 0;
         if (item.difficulty === 'Hard') problems.hard = item.count || 0;
-      });
+      }
       problems.total = problems.easy + problems.medium + problems.hard;
     }
 
@@ -404,19 +395,21 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
         const today = Math.floor(Date.now() / 1000);
         const thirtyDaysAgo = today - (30 * 24 * 60 * 60);
         
-        Object.entries(calendar).forEach(([timestamp, count]: [string, any]) => {
+        for (const timestamp in calendar) {
           const ts = parseInt(timestamp);
           if (ts >= thirtyDaysAgo) {
             dailyActivity.push({
               date: new Date(ts * 1000).toISOString().split('T')[0],
-              count: count
+              count: calendar[timestamp]
             });
           }
-        });
+        }
       } catch (e) {
         console.error('Error parsing submission calendar:', e);
       }
     }
+    
+    const streak = calculateStreak(user.submissionCalendar);
 
     // Format response
     const result = {
@@ -452,8 +445,8 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
         submissionUrl: `https://leetcode.com/submissions/detail/${sub.id}/`
       })),
       streak: {
-        currentStreak: calculateStreak(user.submissionCalendar).currentStreak,
-        maxStreak: calculateStreak(user.submissionCalendar).maxStreak,
+        currentStreak: streak.currentStreak,
+        maxStreak: streak.maxStreak,
         lastSolvedDate: calculateLastSolved(user.submissionCalendar)
       },
       stats: {

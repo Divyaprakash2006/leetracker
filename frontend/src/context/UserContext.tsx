@@ -4,6 +4,7 @@ import { apiClient } from '../config/api';
 
 interface TrackedUser {
   username: string;
+  userId: string;
   addedAt: number;
   lastUpdated?: number;
 }
@@ -50,6 +51,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       .filter(Boolean)
       .map((user) => ({
         username: user.username,
+        userId: user.userId || user.username,
         addedAt: user.addedAt ? new Date(user.addedAt).getTime() : Date.now(),
         lastUpdated: user.updatedAt ? new Date(user.updatedAt).getTime() : undefined,
       }))
@@ -114,9 +116,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const response = await axios.post(apiClient.addTrackedUser(), { username: trimmed });
-      const userPayload = response.data?.user || { username: trimmed, addedAt: new Date().toISOString() };
+      const userPayload = response.data?.user || { username: trimmed, userId: trimmed, addedAt: new Date().toISOString() };
       const newUser: TrackedUser = {
         username: userPayload.username,
+        userId: userPayload.userId || userPayload.username,
         addedAt: userPayload.addedAt ? new Date(userPayload.addedAt).getTime() : Date.now(),
         lastUpdated: userPayload.updatedAt ? new Date(userPayload.updatedAt).getTime() : Date.now(),
       };

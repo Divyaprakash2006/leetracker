@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITrackedUser extends Document {
   username: string;
+  userId: string;
   normalizedUsername: string;
   addedAt: Date;
   lastViewedAt?: Date;
@@ -13,6 +14,7 @@ export interface ITrackedUser extends Document {
 const TrackedUserSchema = new Schema<ITrackedUser>(
   {
     username: { type: String, required: true, trim: true },
+    userId: { type: String, required: true, trim: true },
     normalizedUsername: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     addedAt: { type: Date, default: Date.now },
     lastViewedAt: { type: Date },

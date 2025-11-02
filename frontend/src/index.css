@@ -4,22 +4,75 @@
 
 @layer base {
   :root {
-    --leetcode-dark: #1a1a1a;
-    --leetcode-darker: #0a0a0a;
-    --leetcode-card: #262626;
-    --leetcode-border: #333333;
-    --leetcode-text: #eff2f699;
-    --leetcode-text-primary: #ffffff;
-    --leetcode-text-secondary: #a0a0a0;
-    --leetcode-orange: #ffa116;
-    --leetcode-green: #00b8a3;
-    --leetcode-yellow: #ffc01e;
-    --leetcode-red: #ef4743;
+    --surface-background: #f5f7fb;
+    --surface-panel: #ffffff;
+    --surface-muted: #f0f2f8;
+    --surface-border: #d7dbe8;
+    --surface-border-strong: #c2c9dd;
+    --surface-shadow: rgba(15, 23, 42, 0.08);
+
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-tertiary: #6b7280;
+    --text-subtle: #9ca3af;
+
+    --brand-primary: #2563eb;
+    --brand-primary-strong: #1d4ed8;
+    --brand-accent: #0ea5e9;
+    --brand-success: #10b981;
+    --brand-warning: #f59e0b;
+    --brand-danger: #ef4444;
+
+    --card: var(--surface-panel);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-panel);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--brand-primary);
+    --primary-foreground: #ffffff;
+    --secondary: var(--surface-muted);
+    --secondary-foreground: var(--text-secondary);
+    --muted: var(--surface-muted);
+    --muted-foreground: var(--text-tertiary);
+    --accent: var(--brand-accent);
+    --accent-foreground: #ffffff;
+    --destructive: var(--brand-danger);
+    --destructive-foreground: #ffffff;
+    --border: var(--surface-border);
+    --input: var(--surface-border);
+    --ring: rgba(37, 99, 235, 0.15);
+    --radius: 0.6rem;
   }
-  
+
   body {
-    background-color: var(--leetcode-dark);
-    color: var(--leetcode-text-primary);
+    background-color: var(--surface-background);
+    color: var(--text-primary);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -110,5 +163,56 @@
   
   .animate-float {
     animation: float linear infinite;
+  }
+}
+
+
+
+@layer components {
+  .btn-leetcode {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+    background: linear-gradient(135deg, #ffa116, #ffbe3c);
+    color: #111827;
+  }
+
+  .btn-leetcode:hover {
+    background: linear-gradient(135deg, #ff9416, #ffb12f);
+    box-shadow: 0 12px 24px -12px rgba(255, 161, 22, 0.45);
+  }
+
+  .btn-leetcode:focus-visible {
+    @apply outline-none ring-2 ring-offset-2;
+    box-shadow: 0 0 0 3px rgba(255, 161, 22, 0.35);
+  }
+
+  .btn-black {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+    background: #0f172a;
+  }
+
+  .btn-black:hover {
+    background: #020617;
+    box-shadow: 0 12px 24px -12px rgba(15, 23, 42, 0.6);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition duration-200 shadow-sm disabled:cursor-not-allowed disabled:opacity-60;
+    background: #ffffff;
+  }
+
+  .btn-outline:hover {
+    @apply border-orange-200 text-orange-600;
+    box-shadow: 0 12px 24px -12px rgba(255, 161, 22, 0.25);
+  }
+}
+
+ 
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

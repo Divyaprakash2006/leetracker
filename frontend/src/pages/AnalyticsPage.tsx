@@ -56,11 +56,19 @@ export const AnalyticsPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen py-16">
+      <div className="w-full min-h-screen py-16 bg-leetcode-bg">
         <div className="max-w-7xl mx-auto px-4 flex justify-center">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-leetcode-yellow rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+          <div className="flex flex-col items-center">
+            {/* LeetCode-themed spinner */}
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-leetcode-border border-t-leetcode-orange rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-leetcode-yellow rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+            </div>
+            
+            {/* Loading text with LeetCode orange */}
+            <p className="mt-4 text-lg font-medium text-leetcode-text">
+              Loading analytics...
+            </p>
           </div>
         </div>
       </div>
@@ -69,11 +77,11 @@ export const AnalyticsPage = () => {
 
   if (usersData.length === 0) {
     return (
-      <div className="w-full min-h-screen py-16">
+      <div className="w-full min-h-screen py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="leetcode-card p-12 rounded-2xl border-2 border-leetcode-border max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-leetcode-text-primary mb-4">No Data Available</h2>
-            <p className="text-leetcode-text">Track some users to see analytics</p>
+          <div className="bg-white rounded-2xl shadow-lg p-12 border-2 border-gray-300 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">No Data Available</h2>
+            <p className="text-gray-600">Track some users to see analytics</p>
           </div>
         </div>
       </div>
@@ -93,46 +101,65 @@ export const AnalyticsPage = () => {
 
   // Difficulty distribution chart data for recharts
   const difficultyData = [
-    { name: 'Easy', value: totalStats.easy, color: '#00b8a3' },
-    { name: 'Medium', value: totalStats.medium, color: '#ffc01e' },
-    { name: 'Hard', value: totalStats.hard, color: '#ef4743' },
+    { name: 'Easy', value: totalStats.easy, color: '#34C759' },
+    { name: 'Medium', value: totalStats.medium, color: '#FFC107' },
+    { name: 'Hard', value: totalStats.hard, color: '#FF69B4' },
   ];
 
-
   // Daily activity chart data for recharts
-  const getDailyActivityData = () => {
-    if (selectedUser === 'all') {
-      const combinedActivity: Record<string, number> = {};
-      usersData.forEach(user => {
-        user.dailyActivity?.forEach(day => {
-          combinedActivity[day.date] = (combinedActivity[day.date] || 0) + day.count;
-        });
-      });
-      
-      const sortedDates = Object.keys(combinedActivity).sort();
-      return sortedDates.map(date => ({
-        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        submissions: combinedActivity[date],
-      }));
-    } else {
-      const userData = usersData.find(u => u.username === selectedUser);
-      if (!userData?.dailyActivity) {
-        return [];
+const getDailyActivityData = () => {
+  // Helper function to format dates as "Month Day" (e.g., "Nov 1")
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateStr);
+        return dateStr;
       }
-      
-      return userData.dailyActivity.map(d => ({
-        date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        submissions: d.count,
-      }));
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', // "Nov"
+        day: 'numeric'  // "1"
+      });
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return dateStr;
     }
   };
+
+  if (selectedUser === 'all') {
+    const combinedActivity: Record<string, number> = {};
+    usersData.forEach(user => {
+      user.dailyActivity?.forEach(day => {
+        combinedActivity[day.date] = (combinedActivity[day.date] || 0) + day.count;
+      });
+    });
+    
+    const sortedDates = Object.keys(combinedActivity).sort();
+    return sortedDates.map(date => ({
+      date: formatDate(date),
+      submissions: combinedActivity[date],
+    }));
+  } else {
+    const userData = usersData.find(u => u.username === selectedUser);
+    if (!userData?.dailyActivity) {
+      return [];
+    }
+    
+    return userData.dailyActivity
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(d => ({
+        date: formatDate(d.date),
+        submissions: d.count,
+      }));
+  }
+};
 
   // Custom tooltip for charts
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="leetcode-card p-3 border-2 border-leetcode-border rounded-lg shadow-lg">
-          <p className="text-leetcode-text-primary font-semibold">{label}</p>
+        <div className="bg-white rounded-lg shadow-lg p-4 border-2 border-gray-300">
+          <p className="text-gray-900 font-semibold">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {entry.value}
@@ -145,23 +172,23 @@ export const AnalyticsPage = () => {
   };
 
   return (
-    <div className="w-full min-h-screen py-8">
+    <div className="w-full min-h-screen py-8 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-leetcode-text-primary bg-gradient-to-r from-leetcode-text-primary via-leetcode-orange to-leetcode-text-primary bg-clip-text hover:text-transparent transition-all duration-500 mb-8">Analytics Dashboard</h1>
+        <h1 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-blue-500 via-blue-300 to-blue-500 bg-clip-text hover:text-transparent transition-all duration-500 mb-8">Analytics Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="leetcode-card rounded-lg shadow-lg p-6 border-2 border-leetcode-border hover:border-leetcode-orange transition-all duration-300 group">
-          <div className="text-sm text-leetcode-text-secondary mb-2">Total Users</div>
-          <div className="text-3xl font-bold text-leetcode-orange group-hover:scale-110 transition-transform duration-300">{usersData.length}</div>
+        <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-gray-300 hover:border-blue-500 transition-all duration-300 group">
+          <div className="text-sm text-gray-600 mb-2">Total Users</div>
+          <div className="text-3xl font-bold text-blue-500 group-hover:scale-110 transition-transform duration-300">{usersData.length}</div>
         </div>
-        <div className="leetcode-card rounded-lg shadow-lg p-6 border-2 border-leetcode-border hover:border-leetcode-yellow transition-all duration-300 group">
-          <div className="text-sm text-leetcode-text-secondary mb-2">Total Problems</div>
-          <div className="text-3xl font-bold text-leetcode-yellow group-hover:scale-110 transition-transform duration-300">{totalStats.total}</div>
+        <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-gray-300 hover:border-yellow-500 transition-all duration-300 group">
+          <div className="text-sm text-gray-600 mb-2">Total Problems</div>
+          <div className="text-3xl font-bold text-yellow-500 group-hover:scale-110 transition-transform duration-300">{totalStats.total}</div>
         </div>
-        <div className="leetcode-card rounded-lg shadow-lg p-6 border-2 border-leetcode-border hover:border-leetcode-red transition-all duration-300 group">
-          <div className="text-sm text-leetcode-text-secondary mb-2">Hard Problems</div>
-          <div className="text-3xl font-bold text-leetcode-red group-hover:scale-110 transition-transform duration-300">{totalStats.hard}</div>
+        <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-gray-300 hover:border-red-500 transition-all duration-300 group">
+          <div className="text-sm text-gray-600 mb-2">Hard Problems</div>
+          <div className="text-3xl font-bold text-red-500 group-hover:scale-110 transition-transform duration-300">{totalStats.hard}</div>
         </div>
       </div>
 
@@ -170,18 +197,18 @@ export const AnalyticsPage = () => {
         {/* Difficulty Distribution */}
         <div className="relative group/chart">
           {/* Glow effect on hover */}
-          <div className="absolute -inset-1 bg-gradient-to-br from-green-500/20 via-yellow-500/20 to-red-500/20 rounded-2xl opacity-0 group-hover/chart:opacity-100 blur-xl transition-all duration-500"></div>
+          <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/20 via-blue-300/20 to-blue-500/20 rounded-2xl opacity-0 group-hover/chart:opacity-100 blur-xl transition-all duration-500"></div>
           
-          <div className="relative leetcode-card rounded-2xl shadow-2xl p-8 border border-leetcode-border/50 hover:border-leetcode-orange/30 transition-all duration-500 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 border border-gray-300/50 hover:border-blue-500/30 transition-all duration-500 backdrop-blur-sm">
             {/* Header */}
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-leetcode-text-primary mb-2 flex items-center gap-2">
-                <svg className="w-6 h-6 text-leetcode-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Difficulty Distribution
               </h3>
-              <p className="text-sm text-leetcode-text-secondary">Problems solved by difficulty level</p>
+              <p className="text-sm text-gray-600">Problems solved by difficulty level</p>
             </div>
 
             {/* Chart Container */}
@@ -191,16 +218,16 @@ export const AnalyticsPage = () => {
                   <defs>
                     {/* Gradient definitions for iOS-style colors */}
                     <linearGradient id="easyGradient" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#00d4aa" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#00b88f" stopOpacity={1} />
+                      <stop offset="0%" stopColor="#34C759" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#2E865F" stopOpacity={1} />
                     </linearGradient>
                     <linearGradient id="mediumGradient" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#ffd43b" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#ffc01e" stopOpacity={1} />
+                      <stop offset="0%" stopColor="#FFC107" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#FFA07A" stopOpacity={1} />
                     </linearGradient>
                     <linearGradient id="hardGradient" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#ff6b6b" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#ef4743" stopOpacity={1} />
+                      <stop offset="0%" stopColor="#FF69B4" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#FF3E80" stopOpacity={1} />
                     </linearGradient>
                   </defs>
                   <Pie
@@ -247,12 +274,12 @@ export const AnalyticsPage = () => {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center">
                   <div className="relative">
-                    <div className="text-6xl font-black text-transparent bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 bg-clip-text animate-gradient">
+                    <div className="text-6xl font-black text-transparent bg-gradient-to-br from-blue-500 via-blue-300 to-blue-500 bg-clip-text animate-gradient">
                       {totalStats.total}
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 opacity-20 blur-2xl -z-10"></div>
+                    <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-blue-300 to-blue-500 opacity-20 blur-2xl -z-10"></div>
                   </div>
-                  <div className="text-xs text-leetcode-text-secondary mt-3 font-semibold tracking-wider uppercase">Total Problems</div>
+                  <div className="text-xs text-gray-600 mt-3 font-semibold tracking-wider uppercase">Total Problems</div>
                 </div>
               </div>
             </div>
@@ -268,7 +295,7 @@ export const AnalyticsPage = () => {
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-500/50"></div>
-                    <div className="text-xs font-medium text-leetcode-text-secondary uppercase tracking-wide">Easy</div>
+                    <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Easy</div>
                   </div>
                   <div className="text-2xl font-bold text-green-500">{totalStats.easy}</div>
                 </div>
@@ -283,7 +310,7 @@ export const AnalyticsPage = () => {
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50"></div>
-                    <div className="text-xs font-medium text-leetcode-text-secondary uppercase tracking-wide">Medium</div>
+                    <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Medium</div>
                   </div>
                   <div className="text-2xl font-bold text-yellow-500">{totalStats.medium}</div>
                 </div>
@@ -298,7 +325,7 @@ export const AnalyticsPage = () => {
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/50"></div>
-                    <div className="text-xs font-medium text-leetcode-text-secondary uppercase tracking-wide">Hard</div>
+                    <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Hard</div>
                   </div>
                   <div className="text-2xl font-bold text-red-500">{totalStats.hard}</div>
                 </div>
@@ -312,16 +339,16 @@ export const AnalyticsPage = () => {
           {/* Glow effect on hover */}
           <div className="absolute -inset-1 bg-gradient-to-br from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl opacity-0 group-hover/chart:opacity-100 blur-xl transition-all duration-500"></div>
           
-          <div className="relative leetcode-card rounded-2xl shadow-2xl p-8 border border-leetcode-border/50 hover:border-leetcode-orange/30 transition-all duration-500 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 border border-gray-300/50 hover:border-yellow-500/30 transition-all duration-500 backdrop-blur-sm">
             {/* Header */}
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-leetcode-text-primary mb-2 flex items-center gap-2">
-                <svg className="w-6 h-6 text-leetcode-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 User Comparison
               </h3>
-              <p className="text-sm text-leetcode-text-secondary">Total problems solved by each user</p>
+              <p className="text-sm text-gray-600">Total problems solved by each user</p>
             </div>
 
             {/* Chart Container */}
@@ -334,9 +361,9 @@ export const AnalyticsPage = () => {
                   <defs>
                     {/* Gradient for bars */}
                     <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ffd43b" stopOpacity={1} />
-                      <stop offset="50%" stopColor="#ffc01e" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.9} />
+                      <stop offset="0%" stopColor="#FFC107" stopOpacity={1} />
+                      <stop offset="50%" stopColor="#FFA07A" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#FF8C69" stopOpacity={0.9} />
                     </linearGradient>
                   </defs>
                   
@@ -413,27 +440,27 @@ export const AnalyticsPage = () => {
 
       {/* Daily Activity Chart */}
       <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-leetcode-orange via-leetcode-yellow to-leetcode-orange rounded-lg opacity-20 blur-xl"></div>
-        <div className="relative leetcode-card rounded-lg shadow-lg p-6 border-2 border-leetcode-border">
+        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-blue-300 to-blue-500 rounded-lg opacity-20 blur-xl"></div>
+        <div className="relative bg-white rounded-lg shadow-lg p-6 border-2 border-gray-300">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-leetcode-text-primary">Daily Activity</h3>
+            <h3 className="text-xl font-bold text-gray-900">Daily Activity</h3>
             <div className="relative inline-block">
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="h-10 w-full min-w-[240px] appearance-none rounded-lg border-2 border-orange-500/50 bg-leetcode-card px-4 py-2 pr-10 text-sm font-medium text-leetcode-text-primary shadow-lg transition-all hover:border-orange-500 hover:bg-leetcode-darker focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 cursor-pointer"
+                className="h-10 w-full min-w-[240px] appearance-none rounded-lg border-2 border-blue-500/50 bg-white px-4 py-2 pr-10 text-sm font-medium text-gray-900 shadow-lg transition-all hover:border-blue-500 hover:bg-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 cursor-pointer"
                 style={{
                   colorScheme: 'dark'
                 }}
               >
-                <option value="all" className="bg-leetcode-darker text-leetcode-text-primary font-semibold py-2">
+                <option value="all" className="bg-white text-gray-900 font-semibold py-2">
                   All Users Combined
                 </option>
                 {usersData.map(user => (
                   <option 
                     key={user.username} 
                     value={user.username} 
-                    className="bg-leetcode-darker text-leetcode-text font-normal py-2"
+                    className="bg-white text-gray-600 font-normal py-2"
                   >
                     {user.username}
                   </option>
@@ -441,7 +468,7 @@ export const AnalyticsPage = () => {
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg
-                  className="h-4 w-4 text-orange-500"
+                  className="h-4 w-4 text-blue-500"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -464,9 +491,9 @@ export const AnalyticsPage = () => {
               >
                 <defs>
                   <linearGradient id="colorSubmissions" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ffc01e" stopOpacity={0.5}/>
-                    <stop offset="50%" stopColor="#ffc01e" stopOpacity={0.25}/>
-                    <stop offset="100%" stopColor="#ffc01e" stopOpacity={0.05}/>
+                    <stop offset="0%" stopColor="#FFC107" stopOpacity={0.5}/>
+                    <stop offset="50%" stopColor="#FFA07A" stopOpacity={0.25}/>
+                    <stop offset="100%" stopColor="#FF8C69" stopOpacity={0.05}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="0" stroke="transparent" />
@@ -498,19 +525,19 @@ export const AnalyticsPage = () => {
                 />
                 <Tooltip 
                   content={<CustomTooltip />}
-                  cursor={{ stroke: '#ffc01e', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  cursor={{ stroke: '#FFC107', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area 
                   type="natural" 
                   dataKey="submissions" 
-                  stroke="#ffc01e" 
+                  stroke="#FFC107" 
                   strokeWidth={2.5}
                   fillOpacity={1} 
                   fill="url(#colorSubmissions)" 
                   dot={false}
                   activeDot={{ 
                     r: 5, 
-                    fill: '#ffc01e',
+                    fill: '#FFC107',
                     stroke: '#1a1a1a',
                     strokeWidth: 2
                   }}
@@ -522,33 +549,33 @@ export const AnalyticsPage = () => {
       </div>
 
       {/* Leaderboard */}
-      <div className="leetcode-card rounded-lg shadow-lg p-6 mt-6 border-2 border-leetcode-border hover:border-leetcode-orange/30 transition-all duration-300">
-        <h3 className="text-xl font-bold text-leetcode-text-primary mb-4">Leaderboard</h3>
+      <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border-2 border-gray-300 hover:border-blue-500/30 transition-all duration-300">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Leaderboard</h3>
         <div className="space-y-2">
           {usersData
             .sort((a, b) => b.problems.total - a.problems.total)
             .map((user, index) => (
               <div
                 key={user.username}
-                className="flex items-center justify-between p-4 bg-leetcode-darker rounded-lg border border-leetcode-border hover:border-leetcode-orange transition-all duration-300 leetcode-hover group"
+                className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-300 hover:border-blue-500 transition-all duration-300 leetcode-hover group"
               >
                 <div className="flex items-center gap-4">
                   <div className={`text-2xl font-bold ${
-                    index === 0 ? 'text-leetcode-yellow' :
-                    index === 1 ? 'text-leetcode-text-secondary' :
-                    index === 2 ? 'text-leetcode-orange' :
-                    'text-leetcode-text'
+                    index === 0 ? 'text-yellow-500' :
+                    index === 1 ? 'text-gray-600' :
+                    index === 2 ? 'text-red-500' :
+                    'text-gray-900'
                   }`}>
                     #{index + 1}
                   </div>
                   <div>
-                    <div className="font-semibold text-leetcode-text-primary group-hover:text-leetcode-orange transition-colors duration-300">{user.username}</div>
-                    <div className="text-sm text-leetcode-text">
-                      <span className="text-leetcode-easy">E:{user.problems.easy}</span> <span className="text-leetcode-medium">M:{user.problems.medium}</span> <span className="text-leetcode-hard">H:{user.problems.hard}</span>
+                    <div className="font-semibold text-gray-900 group-hover:text-blue-500 transition-colors duration-300">{user.username}</div>
+                    <div className="text-sm text-gray-600">
+                      <span className="text-green-500">E:{user.problems.easy}</span> <span className="text-yellow-500">M:{user.problems.medium}</span> <span className="text-red-500">H:{user.problems.hard}</span>
                     </div>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-leetcode-orange group-hover:scale-110 transition-transform duration-300">{user.problems.total}</div>
+                <div className="text-2xl font-bold text-blue-500 group-hover:scale-110 transition-transform duration-300">{user.problems.total}</div>
               </div>
             ))}
         </div>

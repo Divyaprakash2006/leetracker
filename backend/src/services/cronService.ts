@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import User from '../models/User';
 import { syncUserSolutions } from '../services/leetcodeService';
 import mongoose from 'mongoose';
+import { resolveMongoUri } from '../config/database';
 
 // Keeps track of sync attempts to prevent duplicate runs
 let isSyncing = false;
@@ -11,7 +12,8 @@ const ensureDbConnection = async () => {
   if (mongoose.connection.readyState !== 1) {
     console.error('❌ Database connection lost during auto-sync');
     try {
-      await mongoose.connect(process.env.MONGODB_URI || '');
+      const mongoUri = resolveMongoUri();
+      await mongoose.connect(mongoUri);
       console.log('✅ Database reconnected successfully');
     } catch (error) {
       console.error('❌ Failed to reconnect to database:', error);
