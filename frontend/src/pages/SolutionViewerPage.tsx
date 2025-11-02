@@ -31,10 +31,16 @@ export const SolutionViewerPage: React.FC = () => {
     const fetchSolution = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(apiClient.getSolutionViewer(id!));
+        // Optimized: Added timeout for faster failure detection
+        const response = await axios.get(apiClient.getSolutionViewer(id!), { 
+          timeout: 10000 
+        });
         setSolution(response.data);
-      } catch (err) {
-        setError('Failed to load solution');
+      } catch (err: any) {
+        const errorMsg = err.code === 'ECONNABORTED' 
+          ? 'Request timeout - solution took too long to load'
+          : 'Failed to load solution';
+        setError(errorMsg);
         console.error('Error fetching solution:', err);
       } finally {
         setLoading(false);

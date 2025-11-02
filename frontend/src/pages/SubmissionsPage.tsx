@@ -92,70 +92,31 @@ export const SubmissionsPage = () => {
     setError('');
 
     try {
-      const fetchStoredSolutions = async (): Promise<StoredSolution[]> => {
-        const aggregated: StoredSolution[] = [];
-        const pageSize = 500;
-        let skip = 0;
-        let total = Number.POSITIVE_INFINITY;
-
-        while (skip < total) {
-          const response = await axios.get(apiClient.getUserSolutions(targetUsername), {
-            params: { limit: pageSize, skip },
-          });
-
-          if (!response.data?.success || !Array.isArray(response.data.solutions)) {
-            break;
-          }
-
-          const { solutions, count = response.data.solutions.length, total: totalFromServer } = response.data;
-          aggregated.push(...solutions);
-
-          if (typeof totalFromServer === 'number' && Number.isFinite(totalFromServer)) {
-            total = totalFromServer;
-          }
-
-          if (count < pageSize) {
-            break;
-          }
-
-          skip += pageSize;
-        }
-
-        return aggregated;
-      };
-
-      const [legacyResponse, storedSolutionsRaw] = await Promise.all([
-        axios.get(apiClient.getUser(targetUsername)),
-        fetchStoredSolutions(),
+      // Optimized: Start with smaller batch for faster initial render, then load more in background
+      const initialLimit = 100; // Fast initial load
+      const fullLimit = 5000;   // Reduced from 10000 for better performance
+      
+      // Phase 1: Fast initial fetch (both in parallel)
+      const [legacyResponse, initialSolutionsResponse] = await Promise.all([
+        axios.get(apiClient.getUser(targetUsername), { timeout: 5000 }),
+        axios.get(apiClient.getUserSolutions(targetUsername), {
+          params: { limit: initialLimit, skip: 0 },
+          timeout: 5000
+        }),
       ]);
 
       const legacySubmissionsRaw: Submission[] = legacyResponse.data?.recentSubmissions || [];
-      const legacyMapped: Submission[] = legacySubmissionsRaw.map((legacy) => {
-        const timestampValue = Number(legacy.timestamp) * 1000;
-        const timestampMs = Number.isFinite(timestampValue) ? timestampValue : Date.now();
-        const id =
-          legacy.id ||
-          (legacy as any).submissionId ||
-          `${targetUsername}-${legacy.titleSlug || legacy.title || 'submission'}-${legacy.timestamp}`;
+      const initialSolutions: StoredSolution[] = initialSolutionsResponse.data?.solutions || [];
 
-        return {
-          ...legacy,
-          id,
-          title: legacy.title || (legacy as any).problemName || 'Unknown Problem',
-          lang: legacy.lang || 'Unknown',
-          timestamp: timestampMs.toString(),
-          timestampMs,
-          solvedAt: formatSolvedAt(timestampMs),
-          timeAgo: formatTimeAgo(timestampMs),
-          status: legacy.status || 'Accepted',
-        };
-      });
+      // Process and display initial data immediately
+      const submissionsMap = new Map<string, Submission>();
 
-      const storedMapped: Submission[] = (storedSolutionsRaw || []).map((sol) => {
+      // Process initial stored solutions
+      initialSolutions.forEach((sol) => {
         const timestampMs = sol.submittedAt ? new Date(sol.submittedAt).getTime() : sol.timestamp * 1000;
         const safeTimestamp = Number.isFinite(timestampMs) ? timestampMs : Date.now();
 
-        return {
+        submissionsMap.set(sol.submissionId, {
           id: sol.submissionId,
           title: sol.problemName || 'Unknown Problem',
           titleSlug: sol.problemSlug,
@@ -171,19 +132,35 @@ export const SubmissionsPage = () => {
           solutionUrl: '',
           submissionUrl: `https://leetcode.com/submissions/detail/${sol.submissionId}/`,
           code: sol.code,
-        };
+        });
       });
 
-      const combinedSolutions = [...storedMapped];
-      const existingIds = new Set(combinedSolutions.map((solution) => solution.id));
+      // Add legacy submissions
+      legacySubmissionsRaw.forEach((legacy) => {
+        const timestampValue = Number(legacy.timestamp) * 1000;
+        const timestampMs = Number.isFinite(timestampValue) ? timestampValue : Date.now();
+        const id =
+          legacy.id ||
+          (legacy as any).submissionId ||
+          `${targetUsername}-${legacy.titleSlug || legacy.title || 'submission'}-${legacy.timestamp}`;
 
-      legacyMapped.forEach((legacy) => {
-        if (!existingIds.has(legacy.id)) {
-          combinedSolutions.push(legacy);
+        if (!submissionsMap.has(id)) {
+          submissionsMap.set(id, {
+            ...legacy,
+            id,
+            title: legacy.title || (legacy as any).problemName || 'Unknown Problem',
+            lang: legacy.lang || 'Unknown',
+            timestamp: timestampMs.toString(),
+            timestampMs,
+            solvedAt: formatSolvedAt(timestampMs),
+            timeAgo: formatTimeAgo(timestampMs),
+            status: legacy.status || 'Accepted',
+          });
         }
       });
 
-      combinedSolutions.sort((a, b) => {
+      // Sort and display initial data
+      const initialCombined = Array.from(submissionsMap.values()).sort((a, b) => {
         const bValue = b.timestampMs ?? Number(b.timestamp) ?? 0;
         const aValue = a.timestampMs ?? Number(a.timestamp) ?? 0;
         return bValue - aValue;
@@ -191,13 +168,82 @@ export const SubmissionsPage = () => {
 
       setUserData({
         ...(legacyResponse.data as UserData),
-        recentSubmissions: legacyMapped,
+        recentSubmissions: legacySubmissionsRaw.map((legacy) => {
+          const timestampValue = Number(legacy.timestamp) * 1000;
+          const timestampMs = Number.isFinite(timestampValue) ? timestampValue : Date.now();
+          const id =
+            legacy.id ||
+            (legacy as any).submissionId ||
+            `${targetUsername}-${legacy.titleSlug || legacy.title || 'submission'}-${legacy.timestamp}`;
+          return {
+            ...legacy,
+            id,
+            title: legacy.title || (legacy as any).problemName || 'Unknown Problem',
+            lang: legacy.lang || 'Unknown',
+            timestamp: timestampMs.toString(),
+            timestampMs,
+            solvedAt: formatSolvedAt(timestampMs),
+            timeAgo: formatTimeAgo(timestampMs),
+            status: legacy.status || 'Accepted',
+          };
+        }),
       });
 
-      setAllSolutions(combinedSolutions.length > 0 ? combinedSolutions : legacyMapped);
+      setAllSolutions(initialCombined);
+      setLoading(false); // Show initial data immediately
+
+      // Phase 2: Load remaining data in background if there's more
+      const totalCount = initialSolutionsResponse.data?.total || initialSolutions.length;
+      if (totalCount > initialLimit) {
+        // Fetch remaining data in background
+        axios.get(apiClient.getUserSolutions(targetUsername), {
+          params: { limit: fullLimit - initialLimit, skip: initialLimit },
+          timeout: 10000
+        }).then(response => {
+          const remainingSolutions: StoredSolution[] = response.data?.solutions || [];
+          
+          // Merge with existing data
+          remainingSolutions.forEach((sol) => {
+            const timestampMs = sol.submittedAt ? new Date(sol.submittedAt).getTime() : sol.timestamp * 1000;
+            const safeTimestamp = Number.isFinite(timestampMs) ? timestampMs : Date.now();
+
+            if (!submissionsMap.has(sol.submissionId)) {
+              submissionsMap.set(sol.submissionId, {
+                id: sol.submissionId,
+                title: sol.problemName || 'Unknown Problem',
+                titleSlug: sol.problemSlug,
+                timestamp: safeTimestamp.toString(),
+                timestampMs: safeTimestamp,
+                solvedAt: formatSolvedAt(safeTimestamp),
+                timeAgo: formatTimeAgo(safeTimestamp),
+                lang: sol.language || 'Unknown',
+                runtime: sol.runtime || 'N/A',
+                memory: sol.memory || 'N/A',
+                status: sol.status || 'Accepted',
+                problemUrl: sol.problemUrl || (sol.problemSlug ? `https://leetcode.com/problems/${sol.problemSlug}/` : ''),
+                solutionUrl: '',
+                submissionUrl: `https://leetcode.com/submissions/detail/${sol.submissionId}/`,
+                code: sol.code,
+              });
+            }
+          });
+
+          // Update with complete data
+          const completeCombined = Array.from(submissionsMap.values()).sort((a, b) => {
+            const bValue = b.timestampMs ?? Number(b.timestamp) ?? 0;
+            const aValue = a.timestampMs ?? Number(a.timestamp) ?? 0;
+            return bValue - aValue;
+          });
+
+          setAllSolutions(completeCombined);
+        }).catch(err => {
+          console.error('Background fetch failed:', err);
+          // Initial data already displayed, no need to show error
+        });
+      }
+
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch user data');
-    } finally {
       setLoading(false);
     }
   };
@@ -361,26 +407,7 @@ export const SubmissionsPage = () => {
                     >
                       View code
                     </button>
-                    {sub.problemUrl && (
-                      <a
-                        href={sub.problemUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
-                      >
-                        Open problem
-                      </a>
-                    )}
-                    {sub.submissionUrl && (
-                      <a
-                        href={sub.submissionUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
-                      >
-                        View submission
-                      </a>
-                    )}
+                    {/* Removed external "Open problem" and "View submission" links per UI update request */}
                   </div>
                 </div>
               </div>

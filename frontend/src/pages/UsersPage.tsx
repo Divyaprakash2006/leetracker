@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiClient } from "../config/api";
@@ -25,18 +25,57 @@ export const UsersPage = () => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // Fetch data for all tracked users
-    trackedUsers.forEach(user => {
-      if (!usersData[user.username]) {
-        fetchUserData(user.username);
-      }
-    });
+    // Optimized: Fetch all users in parallel batch
+    const usersToFetch = trackedUsers.filter(user => !usersData[user.username]);
+    
+    if (usersToFetch.length > 0) {
+      fetchAllUsersData(usersToFetch.map(u => u.username));
+    }
   }, [trackedUsers]);
+
+  const fetchAllUsersData = async (usernames: string[]) => {
+    // Set loading state for all users
+    const loadingState = usernames.reduce((acc, username) => ({ ...acc, [username]: true }), {});
+    setLoading(prev => ({ ...prev, ...loadingState }));
+
+    try {
+      // Fetch all users in parallel with timeout
+      const promises = usernames.map(username => 
+        axios.get(apiClient.getUser(username), { timeout: 8000 })
+          .then(response => ({ username, data: response.data, error: null }))
+          .catch(error => ({ username, data: null, error }))
+      );
+
+      const results = await Promise.all(promises);
+
+      // Update state with all results at once
+      const newUsersData: Record<string, UserStats> = {};
+      const newLoadingState: Record<string, boolean> = {};
+
+      results.forEach(({ username, data, error }) => {
+        if (data) {
+          newUsersData[username] = data;
+        }
+        if (error) {
+          console.error(`Error fetching data for ${username}:`, error);
+        }
+        newLoadingState[username] = false;
+      });
+
+      setUsersData(prev => ({ ...prev, ...newUsersData }));
+      setLoading(prev => ({ ...prev, ...newLoadingState }));
+    } catch (error) {
+      console.error('Batch fetch error:', error);
+      // Clear all loading states on failure
+      const loadingState = usernames.reduce((acc, username) => ({ ...acc, [username]: false }), {});
+      setLoading(prev => ({ ...prev, ...loadingState }));
+    }
+  };
 
   const fetchUserData = async (username: string) => {
     setLoading(prev => ({ ...prev, [username]: true }));
     try {
-      const response = await axios.get(apiClient.getUser(username));
+      const response = await axios.get(apiClient.getUser(username), { timeout: 8000 });
       setUsersData(prev => ({ ...prev, [username]: response.data }));
     } catch (error) {
       console.error(`Error fetching data for ${username}:`, error);

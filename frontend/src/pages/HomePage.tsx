@@ -29,18 +29,19 @@ const HomePage = () => {
       setLoadingTotals(true);
 
       try {
-        const totals = await Promise.all(
-          trackedUsers.map(async (user) => {
-            try {
-              const response = await axios.get(apiClient.getUser(user.username), { timeout: 10000 });
-              const userTotal = response.data?.problems?.total;
-              return typeof userTotal === "number" && !Number.isNaN(userTotal) ? userTotal : 0;
-            } catch (error) {
-              console.error(`❌ Failed to fetch problems for ${user.username}:`, (error as Error)?.message ?? error);
-              return 0;
-            }
-          })
-        );
+        // Optimized: Parallel fetch with reduced timeout
+        const totalsPromises = trackedUsers.map(async (user) => {
+          try {
+            const response = await axios.get(apiClient.getUser(user.username), { timeout: 7000 });
+            const userTotal = response.data?.problems?.total;
+            return typeof userTotal === "number" && !Number.isNaN(userTotal) ? userTotal : 0;
+          } catch (error) {
+            console.error(`❌ Failed to fetch problems for ${user.username}:`, (error as Error)?.message ?? error);
+            return 0;
+          }
+        });
+
+        const totals = await Promise.all(totalsPromises);
 
         if (isMounted) {
           const combinedTotal = totals.reduce((sum, current) => sum + current, 0);

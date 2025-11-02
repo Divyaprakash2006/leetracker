@@ -201,12 +201,12 @@ export const SolutionViewer = ({
 
   if (!solution?.code) {
     return (
-      <div className="bg-leetcode-yellow/10 border-2 border-leetcode-yellow/50 rounded-lg p-4 my-4">
+      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 my-4">
         <div className="flex items-center">
-          <span className="text-leetcode-yellow text-xl mr-2">📝</span>
-          <h3 className="text-lg font-semibold text-leetcode-yellow">No Solution Found</h3>
+          <span className="text-2xl mr-3">📝</span>
+          <h3 className="text-lg font-semibold text-amber-900">No Solution Found</h3>
         </div>
-        <p className="text-leetcode-yellow/80 mt-2">
+        <p className="text-amber-700 mt-2">
           The solution code could not be loaded. Please try again later.
         </p>
       </div>
@@ -214,30 +214,36 @@ export const SolutionViewer = ({
   }
 
   return (
-    <div className="bg-leetcode-darker border border-leetcode-border rounded-lg shadow-sm">
-      <div className="border-b border-leetcode-border bg-leetcode-card p-4">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm">
+      <div className="border-b border-slate-200 bg-slate-50 p-6">
         <div className="flex items-center justify-between">
           <div>
             {solution.problemName && (
-              <h2 className="text-xl font-semibold text-leetcode-text-primary">
+              <h2 className="text-xl font-semibold text-slate-900">
                 {solution.problemName}
               </h2>
             )}
-            <div className="mt-1 text-sm text-leetcode-text">
-              Language: <span className="font-medium text-leetcode-orange">{solution.language}</span>
+            <div className="mt-2 flex flex-wrap gap-4 text-sm text-slate-600">
+              <span>
+                Language: <span className="font-semibold text-slate-900">{solution.language}</span>
+              </span>
               {solution.runtime && (
-                <span className="ml-4">Execution Time: <span className="font-medium text-leetcode-orange">{solution.runtime}</span></span>
+                <span>
+                  Runtime: <span className="font-semibold text-emerald-600">{solution.runtime}</span>
+                </span>
               )}
               {solution.memory && (
-                <span className="ml-4">Memory: <span className="font-medium text-leetcode-yellow">{solution.memory}</span></span>
+                <span>
+                  Memory: <span className="font-semibold text-blue-600">{solution.memory}</span>
+                </span>
               )}
             </div>
           </div>
           {solution.difficulty && (
-            <span className={`px-3 py-1 text-sm font-medium rounded-full border ${
-              solution.difficulty === 'Easy' ? 'bg-leetcode-easy/20 text-leetcode-easy border-leetcode-easy/50' :
-              solution.difficulty === 'Medium' ? 'bg-leetcode-medium/20 text-leetcode-medium border-leetcode-medium/50' :
-              'bg-leetcode-hard/20 text-leetcode-hard border-leetcode-hard/50'
+            <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
+              solution.difficulty === 'Easy' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+              solution.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+              'bg-red-100 text-red-700 border border-red-200'
             }`}>
               {solution.difficulty}
             </span>
@@ -245,7 +251,7 @@ export const SolutionViewer = ({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <pre className="p-4 text-sm">
+        <pre className="p-6 text-sm">
           <code
             className={`hljs language-${normalizedLanguage || 'plaintext'}`}
             dangerouslySetInnerHTML={{ __html: renderedHtml }}

@@ -69,14 +69,20 @@ export const SearchPage = () => {
       console.log(` Fetching user: ${username}`);
       console.log(` URL: ${apiClient.getUser(username)}`);
       
+      // Optimized: Reduced timeout and added abort controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
       const response = await axios.get(apiClient.getUser(username), {
-        timeout: 15000
+        timeout: 10000,
+        signal: controller.signal
       });
       
-  console.log('Response received:', response.data);
+      clearTimeout(timeoutId);
+      console.log('Response received:', response.data);
       setUserData(response.data);
     } catch (err: any) {
-  console.error('Error:', err);
+      console.error('Error:', err);
       const responseData = err.response?.data;
       const errorMessage = responseData?.message || err.message || 'Failed to fetch data from LeetCode API';
       const newSuggestions = responseData?.suggestions || [];

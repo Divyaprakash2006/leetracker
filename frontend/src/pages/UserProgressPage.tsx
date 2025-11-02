@@ -81,10 +81,16 @@ export const UserProgressPage = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(apiClient.getUser(targetUsername));
+      // Optimized: Added timeout and better error handling
+      const response = await axios.get(apiClient.getUser(targetUsername), { 
+        timeout: 10000 
+      });
       setUserData(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch user data');
+      const errorMsg = err.code === 'ECONNABORTED' 
+        ? 'Request timeout - server took too long to respond'
+        : err.response?.data?.message || 'Failed to fetch user data';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

@@ -42,11 +42,21 @@ export const AnalyticsPage = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
+      // Optimized: Parallel fetch with timeout and error handling
       const promises = trackedUsers.map(user =>
-        axios.get(apiClient.getUser(user.username))
+        axios.get(apiClient.getUser(user.username), { timeout: 8000 })
+          .catch(err => {
+            console.error(`Failed to fetch data for ${user.username}:`, err);
+            return null;
+          })
       );
+      
       const responses = await Promise.all(promises);
-      setUsersData(responses.map(r => r.data));
+      const validData = responses
+        .filter(r => r !== null)
+        .map(r => r!.data);
+      
+      setUsersData(validData);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
     } finally {

@@ -36,45 +36,41 @@ export const DashboardPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const stats = await Promise.all(
-          trackedUsers.map(async (user) => {
-            try {
-              const response = await axios.get(apiClient.getUser(user.username));
-              const data = response.data;
-              
-              const problems = data?.problems || { total: 0, easy: 0, medium: 0, hard: 0 };
-              const ranking = data?.ranking || 999999;
-              
-              const totalSolved = problems.total || 0;
-              const easySolved = problems.easy || 0;
-              const mediumSolved = problems.medium || 0;
-              const hardSolved = problems.hard || 0;
-              
-              return {
-                username: user.username,
-                problemsSolved: totalSolved,
-                totalSolved,
-                easySolved,
-                mediumSolved,
-                hardSolved,
-                ranking,
-                addedAt: user.addedAt
-              };
-            } catch (err) {
-              console.error(`Failed to fetch stats for ${'$'}{user.username}:`, err);
-              return {
-                username: user.username,
-                problemsSolved: 0,
-                totalSolved: 0,
-                easySolved: 0,
-                mediumSolved: 0,
-                hardSolved: 0,
-                ranking: 999999,
-                addedAt: user.addedAt
-              };
-            }
-          })
-        );
+        // Optimized: Parallel fetch with timeout and error handling
+        const statsPromises = trackedUsers.map(async (user) => {
+          try {
+            const response = await axios.get(apiClient.getUser(user.username), { timeout: 8000 });
+            const data = response.data;
+            
+            const problems = data?.problems || { total: 0, easy: 0, medium: 0, hard: 0 };
+            const ranking = data?.ranking || 999999;
+            
+            return {
+              username: user.username,
+              problemsSolved: problems.total || 0,
+              totalSolved: problems.total || 0,
+              easySolved: problems.easy || 0,
+              mediumSolved: problems.medium || 0,
+              hardSolved: problems.hard || 0,
+              ranking,
+              addedAt: user.addedAt
+            };
+          } catch (err) {
+            console.error(`Failed to fetch stats for ${user.username}:`, err);
+            return {
+              username: user.username,
+              problemsSolved: 0,
+              totalSolved: 0,
+              easySolved: 0,
+              mediumSolved: 0,
+              hardSolved: 0,
+              ranking: 999999,
+              addedAt: user.addedAt
+            };
+          }
+        });
+
+        const stats = await Promise.all(statsPromises);
         
         const sorted = stats.sort((a, b) => {
           if (b.totalSolved !== a.totalSolved) {
