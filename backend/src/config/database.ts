@@ -1,18 +1,20 @@
 import mongoose from 'mongoose';
 
 export const resolveMongoUri = (): string => {
+  // For cloud deployment (Render, Vercel, etc.), use LOCAL_MONGODB_URI with Atlas connection string
   const uri = process.env.LOCAL_MONGODB_URI?.trim();
   return uri && uri.length > 0 ? uri : 'mongodb://127.0.0.1:27017/leetracker';
 };
 
 export const connectDB = async () => {
-  // Always use local MongoDB Compass connection string
+  // Works with both local MongoDB Compass and cloud MongoDB Atlas
   const mongoUri = resolveMongoUri();
 
   try {
     console.log('🔍 Database config check:');
     console.log('   process.env.LOCAL_MONGODB_URI:', process.env.LOCAL_MONGODB_URI ? 'Found' : 'NOT FOUND');
-    console.log('   Using local MongoDB Compass connection.');
+    console.log('   Environment:', process.env.NODE_ENV || 'development');
+    console.log('   Connection type:', mongoUri.includes('mongodb+srv') ? 'Cloud (Atlas)' : 'Local (Compass)');
     console.log('   mongoUri length:', mongoUri.length);
 
     if (!mongoUri || mongoUri.trim() === '') {
@@ -55,18 +57,20 @@ export const connectDB = async () => {
     if (error.message.includes('authentication failed') || error.message.includes('bad auth')) {
       console.error('');
       console.error('🔐 Authentication Error - Please verify:');
-      console.error('   1. Check MongoDB Compass connection settings');
-      console.error('   2. Verify username and password if authentication is enabled');
-      console.error('   3. Ensure database user has proper permissions');
+      console.error('   1. Check database username and password');
+      console.error('   2. For Atlas: Verify credentials in MongoDB Atlas dashboard');
+      console.error('   3. For Compass: Ensure authentication is configured correctly');
+      console.error('   4. Password special characters should be URL-encoded');
       console.error('');
     }
 
     if (error.message.includes('ENOTFOUND') || error.message.includes('getaddrinfo')) {
       console.error('');
       console.error('🌐 Network Error - Please verify:');
-      console.error('   1. MongoDB Compass is installed and running');
-      console.error('   2. Connection string is correct (default: mongodb://127.0.0.1:27017)');
-      console.error('   3. Check localhost network configuration');
+      console.error('   1. For Atlas: Check cluster hostname in connection string');
+      console.error('   2. For Atlas: Verify IP whitelist includes 0.0.0.0/0 for Render');
+      console.error('   3. For Compass: Ensure MongoDB service is running locally');
+      console.error('   4. Check internet/network connection');
       console.error('');
     }
 
