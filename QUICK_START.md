@@ -5,7 +5,7 @@ Both servers are **RUNNING** and ready to use!
 
 - **Backend**: http://localhost:5000 ✅
 - **Frontend**: http://localhost:3000 ✅
-- **MongoDB**: Connected to Atlas ✅
+- **MongoDB**: Connected to Local MongoDB Compass ✅
 
 ## 📸 Screenshot Feature Active
 
@@ -73,7 +73,7 @@ npm run dev
 - No manual intervention needed
 
 ### ✅ MongoDB Storage
-- All data stored in MongoDB Atlas
+- All data stored in local MongoDB Compass
 - Fast retrieval and display
 
 ### ✅ Modern UI
@@ -137,8 +137,9 @@ npm run dev
 - Check backend terminal for error messages
 
 ### MongoDB Connection Issues?
-- Verify credentials in `backend/.env`
-- Check MongoDB Atlas is accessible
+- Ensure MongoDB Compass is installed and running
+- Verify MongoDB service is started (check Task Manager or `mongod` process)
+- Check `backend/.env` has correct LOCAL_MONGODB_URI
 - Look for connection errors in backend logs
 
 ## 📊 Sync Information

@@ -26,21 +26,18 @@ npm run dev
 ```
 Backend will run on http://localhost:5001
 
-#### Configure MongoDB (Atlas or Local Compass)
-Create a `.env` file inside the `backend/` folder with one of the following options:
+#### Configure MongoDB Compass (Local Database)
+Create a `.env` file inside the `backend/` folder:
 
-**MongoDB Atlas (recommended for production)**
 ```ini
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster-url/myDatabase?retryWrites=true&w=majority
-```
-
-**Local MongoDB / MongoDB Compass**
-```ini
-# Optional: overrides are only used when MONGODB_URI is missing
+# MongoDB Compass (Local) Configuration
 LOCAL_MONGODB_URI=mongodb://127.0.0.1:27017/leetracker
 ```
 
-If `MONGODB_URI` is not set the backend now falls back to `LOCAL_MONGODB_URI` (or `mongodb://127.0.0.1:27017/leetracker` by default) so you can connect directly to MongoDB Compass or a locally running `mongod` instance.
+**Requirements:**
+- Install MongoDB Compass from https://www.mongodb.com/try/download/compass
+- Start MongoDB service locally
+- The backend will automatically connect to `mongodb://127.0.0.1:27017/leetracker`
 
 ### Frontend Setup
 ```bash

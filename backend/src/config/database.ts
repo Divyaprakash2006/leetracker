@@ -55,19 +55,18 @@ export const connectDB = async () => {
     if (error.message.includes('authentication failed') || error.message.includes('bad auth')) {
       console.error('');
       console.error('🔐 Authentication Error - Please verify:');
-      console.error('   1. Username is correct: Check "Database Access" in MongoDB Atlas');
-      console.error('   2. Password is correct: Try resetting password in Atlas');
-      console.error('   3. Password is URL-encoded: Special chars like @ should be %40');
-      console.error('   4. User has proper permissions: "Read and write to any database"');
+      console.error('   1. Check MongoDB Compass connection settings');
+      console.error('   2. Verify username and password if authentication is enabled');
+      console.error('   3. Ensure database user has proper permissions');
       console.error('');
     }
 
     if (error.message.includes('ENOTFOUND') || error.message.includes('getaddrinfo')) {
       console.error('');
       console.error('🌐 Network Error - Please verify:');
-      console.error('   1. Cluster hostname is correct in connection string');
-      console.error('   2. Network Access allows your IP: 0.0.0.0/0 for testing');
-      console.error('   3. Internet connection is working');
+      console.error('   1. MongoDB Compass is installed and running');
+      console.error('   2. Connection string is correct (default: mongodb://127.0.0.1:27017)');
+      console.error('   3. Check localhost network configuration');
       console.error('');
     }
 
