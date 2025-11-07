@@ -466,15 +466,19 @@ const getDailyActivityData = () => {
                 <option value="all" className="bg-white text-gray-900 font-semibold py-2">
                   All Users Combined
                 </option>
-                {usersData.map(user => (
+                {usersData.map(user => {
+                  const trackedUser = trackedUsers.find(u => u.username === user.username);
+                  const displayName = trackedUser?.realName || user.username;
+                  return (
                   <option 
                     key={user.username} 
                     value={user.username} 
                     className="bg-white text-gray-600 font-normal py-2"
                   >
-                    {user.username}
+                    {displayName}{trackedUser?.realName ? ` (@${user.username})` : ''}
                   </option>
-                ))}
+                  );
+                })}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <svg
@@ -564,7 +568,10 @@ const getDailyActivityData = () => {
         <div className="space-y-2">
           {usersData
             .sort((a, b) => b.problems.total - a.problems.total)
-            .map((user, index) => (
+            .map((user, index) => {
+              const trackedUser = trackedUsers.find(u => u.username === user.username);
+              const displayName = trackedUser?.realName || user.username;
+              return (
               <div
                 key={user.username}
                 className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-300 hover:border-blue-500 transition-all duration-300 leetcode-hover group"
@@ -579,7 +586,10 @@ const getDailyActivityData = () => {
                     #{index + 1}
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900 group-hover:text-blue-500 transition-colors duration-300">{user.username}</div>
+                    <div className="font-semibold text-gray-900 group-hover:text-blue-500 transition-colors duration-300">{displayName}</div>
+                    {trackedUser?.realName && (
+                      <div className="text-xs text-gray-500">@{user.username}</div>
+                    )}
                     <div className="text-sm text-gray-600">
                       <span className="text-green-500">E:{user.problems.easy}</span> <span className="text-yellow-500">M:{user.problems.medium}</span> <span className="text-red-500">H:{user.problems.hard}</span>
                     </div>
@@ -587,7 +597,8 @@ const getDailyActivityData = () => {
                 </div>
                 <div className="text-2xl font-bold text-blue-500 group-hover:scale-110 transition-transform duration-300">{user.problems.total}</div>
               </div>
-            ))}
+              );
+            })}
         </div>
       </div>
       </div>

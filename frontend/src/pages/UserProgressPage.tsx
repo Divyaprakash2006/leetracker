@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { apiClient } from '../config/api';
 import { Loader } from '../components/Loader';
+import { useTrackedUsers } from '../context/UserContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -67,6 +68,7 @@ interface UserData {
 export const UserProgressPage = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
+  const { trackedUsers } = useTrackedUsers();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -267,7 +269,18 @@ export const UserProgressPage = () => {
                   </div>
                 )}
                 <div>
-                  <h1 className="text-4xl font-bold text-slate-900">{userData.username}</h1>
+                  {(() => {
+                    const trackedUser = trackedUsers.find(u => u.username === userData.username);
+                    const displayName = trackedUser?.realName || userData.username;
+                    return (
+                      <>
+                        <h1 className="text-4xl font-bold text-slate-900">{displayName}</h1>
+                        {trackedUser?.realName && (
+                          <p className="mt-1 text-lg text-slate-600">@{userData.username}</p>
+                        )}
+                      </>
+                    );
+                  })()}
                   <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
                     <span>{userData.country}</span>
                     <span className="h-1 w-1 rounded-full bg-slate-300"></span>

@@ -185,17 +185,24 @@ export const DashboardPage: React.FC = () => {
           </div>
         ) : userStats.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {userStats.slice(0, 3).map((user, index) => (
+            {userStats.slice(0, 3).map((user, index) => {
+              const trackedUser = trackedUsers.find(u => u.username === user.username);
+              const displayName = trackedUser?.realName || user.username;
+              
+              return (
               <Card key={user.username} className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
                       <AvatarFallback className="rounded-full bg-blue-100 text-lg font-semibold text-blue-600">
-                        {user.username.charAt(0).toUpperCase()}
+                        {displayName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                      <p className="text-base font-semibold text-slate-900">{user.username}</p>
+                      <p className="text-base font-semibold text-slate-900">{displayName}</p>
+                      {trackedUser?.realName && (
+                        <p className="text-xs text-slate-500">@{user.username}</p>
+                      )}
                       <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Rank #{user.ranking.toLocaleString()}</p>
                     </div>
                   </div>
@@ -239,7 +246,8 @@ export const DashboardPage: React.FC = () => {
                   </Button>
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <Card className="flex flex-col items-center gap-4 rounded-3xl border border-slate-200 bg-white px-8 py-12 text-center text-slate-900 shadow-sm">

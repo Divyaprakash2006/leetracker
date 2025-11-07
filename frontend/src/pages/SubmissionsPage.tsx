@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { apiClient } from '../config/api';
 import { Loader } from '../components/Loader';
+import { useTrackedUsers } from '../context/UserContext';
 
 interface Submission {
   id: string;
@@ -51,6 +52,7 @@ interface UserData {
 export const SubmissionsPage = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
+  const { trackedUsers } = useTrackedUsers();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [allSolutions, setAllSolutions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -314,8 +316,19 @@ export const SubmissionsPage = () => {
               </div>
             )}
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">{userData.username}'s submissions</h1>
-              <p className="text-sm text-slate-500">Problem timeline, accepted runs, and stored code.</p>
+              {(() => {
+                const trackedUser = trackedUsers.find(u => u.username === userData.username);
+                const displayName = trackedUser?.realName || userData.username;
+                return (
+                  <>
+                    <h1 className="text-3xl font-bold text-slate-900">{displayName}'s submissions</h1>
+                    {trackedUser?.realName && (
+                      <p className="text-sm text-slate-600">@{userData.username}</p>
+                    )}
+                    <p className="text-sm text-slate-500">Problem timeline, accepted runs, and stored code.</p>
+                  </>
+                );
+              })()}
             </div>
           </div>
           <button
