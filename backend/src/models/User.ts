@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IUser extends Document {
   username: string;
   profileUrl: string;
-  realName?: string;
+  realName?: string; // User's real/original name (optional)
   avatar?: string;
   ranking?: number;
   reputation?: number;
@@ -20,15 +20,16 @@ export interface IUser extends Document {
   autoSync: boolean;
   lastSyncStatus?: 'success' | 'failed';
   lastSyncError?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  addedBy?: string; // Who added this user (optional)
+  createdAt: Date; // Automatically set when user is first added
+  updatedAt: Date; // Automatically updated on any change
 }
 
 const UserSchema = new Schema<IUser>(
   {
     username: { type: String, required: true, unique: true, index: true },
     profileUrl: { type: String, required: true },
-    realName: { type: String },
+    realName: { type: String }, // User's real/display name
     avatar: { type: String },
     ranking: { type: Number },
     reputation: { type: Number },
@@ -45,9 +46,10 @@ const UserSchema = new Schema<IUser>(
     autoSync: { type: Boolean, default: true },
     lastSyncStatus: { type: String, enum: ['success', 'failed'] },
     lastSyncError: { type: String },
+    addedBy: { type: String }, // Optional: track who added this user
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt
   }
 );
 
