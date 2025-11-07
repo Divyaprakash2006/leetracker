@@ -40,6 +40,7 @@ interface UserData {
 
 export const SearchPage = () => {
   const [input, setInput] = useState('');
+  const [realName, setRealName] = useState('');
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -101,8 +102,9 @@ export const SearchPage = () => {
   const handleTrackUser = async () => {
     if (userData) {
       try {
-        await addUser(userData.username);
-        alert(`Started tracking ${userData.username}!`);
+        await addUser(userData.username, realName.trim() || undefined);
+        const displayName = realName.trim() ? `${realName} (${userData.username})` : userData.username;
+        alert(`Started tracking ${displayName}!`);
         navigate('/users');
       } catch (trackError: any) {
         console.error('❌ Failed to track user:', trackError);
@@ -121,41 +123,60 @@ export const SearchPage = () => {
         </header>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.8-5.8M16 10.1a5.9 5.9 0 11-11.8 0 5.9 5.9 0 0111.8 0z" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="Search by username or profile URL"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-medium text-slate-700 shadow-inner transition focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="btn-leetcode gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader size={16} />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.8-5.8M16 10.1a5.9 5.9 0 11-11.8 0 5.9 5.9 0 0111.8 0z" />
+                    </svg>
+                    Search
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Real Name Input - Optional */}
+            <div className="relative">
               <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.8-5.8M16 10.1a5.9 5.9 0 11-11.8 0 5.9 5.9 0 0111.8 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </span>
               <input
                 type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Search by username or profile URL"
+                value={realName}
+                onChange={(e) => setRealName(e.target.value)}
+                placeholder="Real name (optional) - e.g., Divya Prakash"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-medium text-slate-700 shadow-inner transition focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
             </div>
-            <button
-              onClick={handleSearch}
-              disabled={loading}
-              className="btn-leetcode gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader size={16} />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.8-5.8M16 10.1a5.9 5.9 0 11-11.8 0 5.9 5.9 0 0111.8 0z" />
-                  </svg>
-                  Search
-                </>
-              )}
-            </button>
+            <p className="text-xs text-slate-500">💡 Tip: Add a real name to easily identify users in your tracking list</p>
           </div>
 
           {error && (

@@ -172,7 +172,12 @@ export const UsersPage = () => {
                         </div>
                       )}
                       <div className="min-w-0 space-y-1">
-                        <h3 className="truncate text-xl font-semibold text-slate-900">{data.username}</h3>
+                        <h3 className="truncate text-xl font-semibold text-slate-900">
+                          {user.realName || data.username}
+                        </h3>
+                        {user.realName && (
+                          <p className="text-sm text-slate-600">@{data.username}</p>
+                        )}
                         <p className="flex items-center gap-2 text-sm text-slate-500">
                           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z" />

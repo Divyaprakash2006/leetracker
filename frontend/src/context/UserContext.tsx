@@ -5,6 +5,7 @@ import { apiClient } from '../config/api';
 interface TrackedUser {
   username: string;
   userId: string;
+  realName?: string;
   addedAt: number;
   lastUpdated?: number;
 }
@@ -14,7 +15,7 @@ interface UserContextType {
   loading: boolean;
   error: string | null;
   refreshTrackedUsers: () => Promise<void>;
-  addUser: (username: string) => Promise<void>;
+  addUser: (username: string, realName?: string) => Promise<void>;
   removeUser: (username: string) => Promise<void>;
   isUserTracked: (username: string) => boolean;
 }
@@ -52,6 +53,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       .map((user) => ({
         username: user.username,
         userId: user.userId || user.username,
+        realName: user.realName,
         addedAt: user.addedAt ? new Date(user.addedAt).getTime() : Date.now(),
         lastUpdated: user.updatedAt ? new Date(user.updatedAt).getTime() : undefined,
       }))
@@ -103,7 +105,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     [trackedUsers]
   );
 
-  const addUser = useCallback(async (username: string) => {
+  const addUser = useCallback(async (username: string, realName?: string) => {
     const trimmed = username.trim();
     if (!trimmed) {
       throw new Error('Username is required');
@@ -115,11 +117,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
-      const response = await axios.post(apiClient.addTrackedUser(), { username: trimmed });
+      const payload: { username: string; realName?: string } = { username: trimmed };
+      if (realName && realName.trim()) {
+        payload.realName = realName.trim();
+      }
+      
+      const response = await axios.post(apiClient.addTrackedUser(), payload);
       const userPayload = response.data?.user || { username: trimmed, userId: trimmed, addedAt: new Date().toISOString() };
       const newUser: TrackedUser = {
         username: userPayload.username,
         userId: userPayload.userId || userPayload.username,
+        realName: userPayload.realName,
         addedAt: userPayload.addedAt ? new Date(userPayload.addedAt).getTime() : Date.now(),
         lastUpdated: userPayload.updatedAt ? new Date(userPayload.updatedAt).getTime() : Date.now(),
       };

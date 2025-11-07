@@ -16,6 +16,8 @@ const formatTrackedUser = (trackedUser: TrackedUserLike) => {
   return {
     username: data.username,
     userId: data.userId,
+    realName: data.realName ?? null,
+    addedBy: data.addedBy ?? null,
     addedAt: data.addedAt,
     lastViewedAt: data.lastViewedAt ?? null,
     notes: data.notes ?? null,
@@ -46,6 +48,8 @@ router.post('/', async (req, res) => {
   try {
     const username: string = (req.body?.username || '').trim();
     const userId: string = (req.body?.userId || '').trim();
+    const realName: string | undefined = req.body?.realName?.trim() || undefined;
+    const addedBy: string | undefined = req.body?.addedBy?.trim() || undefined;
 
     if (!username) {
       return res.status(400).json({
@@ -61,11 +65,18 @@ router.post('/', async (req, res) => {
     let trackedUser = await TrackedUser.findOne({ normalizedUsername: normalized });
 
     if (trackedUser) {
+      // Update existing user
       if (trackedUser.username !== username) {
         trackedUser.username = username;
       }
       if (!trackedUser.userId || trackedUser.userId !== effectiveUserId) {
         trackedUser.userId = effectiveUserId;
+      }
+      if (realName && !trackedUser.realName) {
+        trackedUser.realName = realName;
+      }
+      if (addedBy && !trackedUser.addedBy) {
+        trackedUser.addedBy = addedBy;
       }
       trackedUser = await trackedUser.save();
 
@@ -76,7 +87,14 @@ router.post('/', async (req, res) => {
       });
     }
 
-    trackedUser = await new TrackedUser({ username, userId: effectiveUserId, addedAt: new Date() }).save();
+    // Create new tracked user
+    trackedUser = await new TrackedUser({ 
+      username, 
+      userId: effectiveUserId, 
+      realName,
+      addedBy,
+      addedAt: new Date() 
+    }).save();
 
     res.status(201).json({
       success: true,
