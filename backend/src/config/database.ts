@@ -1,12 +1,29 @@
 import mongoose from 'mongoose';
+import { checkMongoConfig, getConnectionAdvice } from '../utils/checkMongoConfig';
 
 export const resolveMongoUri = (): string => {
-  // For cloud deployment (Render, Vercel, etc.), use LOCAL_MONGODB_URI with Atlas connection string
+  // Get MongoDB URI from environment
   const uri = process.env.LOCAL_MONGODB_URI?.trim();
-  return uri && uri.length > 0 ? uri : 'mongodb://127.0.0.1:27017/leetracker';
+  
+  // If no URI provided, default to local MongoDB
+  if (!uri || uri.length === 0) {
+    return 'mongodb://127.0.0.1:27017/leetracker';
+  }
+  
+  // For production/cloud deployment, ensure using Atlas (mongodb+srv://)
+  if (process.env.NODE_ENV === 'production' && !uri.includes('mongodb+srv://')) {
+    console.warn('⚠️  WARNING: Production environment detected but not using Atlas connection!');
+    console.warn('⚠️  Localhost MongoDB will NOT work on Render/Vercel/cloud platforms.');
+    console.warn('⚠️  Please set LOCAL_MONGODB_URI to a MongoDB Atlas connection string.');
+  }
+  
+  return uri;
 };
 
 export const connectDB = async () => {
+  // Run diagnostics
+  checkMongoConfig();
+  
   // Works with both local MongoDB Compass and cloud MongoDB Atlas
   const mongoUri = resolveMongoUri();
 
@@ -52,6 +69,19 @@ export const connectDB = async () => {
 
   } catch (error: any) {
     console.error('❌ MongoDB connection error:', error.message);
+
+    // Get tailored advice based on the error
+    const advice = getConnectionAdvice(error);
+    if (advice.length > 0) {
+      console.error('');
+      console.error('📖 TROUBLESHOOTING ADVICE:');
+      console.error('='.repeat(60));
+      advice.forEach(line => console.error(line));
+      console.error('='.repeat(60));
+      console.error('');
+      console.error('🔗 Full setup guide: See RENDER_SETUP.md in your repository');
+      console.error('');
+    }
 
     // Provide helpful error messages
     if (error.message.includes('authentication failed') || error.message.includes('bad auth')) {
