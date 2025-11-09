@@ -9,6 +9,7 @@ import { Badge } from "../components/ui/badge";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Users, CheckCircle2, Clock, Plus } from "lucide-react";
 import { Loader } from "../components/Loader";
+import "../components/AnimatedButton.css";
 
 interface UserStats {
   username: string;
@@ -107,13 +108,38 @@ export const DashboardPage: React.FC = () => {
             <div className="space-y-3">
               <h1 className="text-4xl font-black uppercase sm:text-5xl text-[#121212]">LeetCode stats</h1>
             </div>
-            <Button
-              asChild
-              size="lg"
-              className="rounded-full bg-[#ffa116] px-8 py-2 text-base font-semibold text-[#1f1f1f] shadow-[0_15px_40px_-18px_rgba(255,161,22,0.7)] transition hover:bg-[#ff9502] focus-visible:ring-2 focus-visible:ring-[#ffd28a] focus-visible:ring-offset-2"
-            >
-              <Link to="/search">Track now</Link>
-            </Button>
+            <Link to="/search" className="animated-button">
+              <span className="fold"></span>
+              <div className="points_wrapper">
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+                <i className="point"></i>
+              </div>
+              <span className="inner">
+                <svg
+                  className="icon"
+                  fill="white"
+                  stroke="white"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  height="18px"
+                  width="18px"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"></path>
+                </svg>
+                Track now
+              </span>
+            </Link>
           </div>
         </div>
 

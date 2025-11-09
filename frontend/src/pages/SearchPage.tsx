@@ -45,6 +45,7 @@ export const SearchPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showRealNameModal, setShowRealNameModal] = useState(false);
   const { addUser, isUserTracked } = useTrackedUsers();
   const navigate = useNavigate();
 
@@ -101,10 +102,18 @@ export const SearchPage = () => {
 
   const handleTrackUser = async () => {
     if (userData) {
+      setShowRealNameModal(true);
+    }
+  };
+
+  const handleConfirmTrack = async () => {
+    if (userData) {
       try {
         await addUser(userData.username, realName.trim() || undefined);
         const displayName = realName.trim() ? `${realName} (${userData.username})` : userData.username;
         alert(`Started tracking ${displayName}!`);
+        setShowRealNameModal(false);
+        setRealName('');
         navigate('/users');
       } catch (trackError: any) {
         console.error('❌ Failed to track user:', trackError);
@@ -160,23 +169,6 @@ export const SearchPage = () => {
                 )}
               </button>
             </div>
-
-            {/* Real Name Input - Optional */}
-            <div className="relative">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={realName}
-                onChange={(e) => setRealName(e.target.value)}
-                placeholder="Real name (optional) - e.g., Divya Prakash"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-medium text-slate-700 shadow-inner transition focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-              />
-            </div>
-            <p className="text-xs text-slate-500">💡 Tip: Add a real name to easily identify users in your tracking list</p>
           </div>
 
           {error && (
@@ -314,6 +306,57 @@ export const SearchPage = () => {
           </section>
         )}
       </div>
+
+      {/* Real Name Modal */}
+      {showRealNameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-slate-900">Add Real Name</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  Enter a real name to easily identify this user (optional)
+                </p>
+              </div>
+
+              <div className="relative">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  value={realName}
+                  onChange={(e) => setRealName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConfirmTrack()}
+                  placeholder="Real name"
+                  autoFocus
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-medium text-slate-700 shadow-inner transition focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowRealNameModal(false);
+                    setRealName('');
+                  }}
+                  className="flex-1 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmTrack}
+                  className="flex-1 btn-leetcode"
+                >
+                  Track User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

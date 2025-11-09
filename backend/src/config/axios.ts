@@ -43,16 +43,18 @@ if (!leetcodeSession) {
 
 const leetcodeAxios: AxiosInstance = axios.create({
   baseURL: LEETCODE_API,
-  timeout: 30000,
+  timeout: 15000, // Reduced from 30000ms to 15000ms
   headers: leetcodeHeaders,
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false // Fix for self-signed certificate error
+    rejectUnauthorized: false, // Fix for self-signed certificate error
+    keepAlive: true, // Enable keep-alive for faster subsequent requests
+    maxSockets: 50 // Allow more concurrent connections
   })
 });
 
 // General purpose axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  timeout: 30000,
+  timeout: 15000, // Reduced from 30000ms to 15000ms
   headers: {
     'Content-Type': 'application/json',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -61,7 +63,9 @@ const axiosInstance: AxiosInstance = axios.create({
     'Pragma': 'no-cache'
   },
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false // Fix for self-signed certificate error
+    rejectUnauthorized: false, // Fix for self-signed certificate error
+    keepAlive: true, // Enable keep-alive
+    maxSockets: 50 // Allow more concurrent connections
   })
 });
 

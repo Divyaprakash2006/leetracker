@@ -241,175 +241,241 @@ export const UserProgressPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-50 py-12">
-      <div className="absolute inset-x-0 -top-32 -z-10 h-72 bg-gradient-to-b from-blue-100 via-transparent to-transparent"></div>
-      <div className="absolute bottom-0 left-1/2 -z-20 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-blue-100/40 blur-3xl"></div>
+    <div className="min-h-screen bg-[#f8f9fa]">
+      {/* Top Navigation Bar - LeetCode Style */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <button
+            onClick={() => navigate('/users')}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
 
-      <div className="mx-auto max-w-6xl px-4 space-y-8">
-        <button
-          onClick={() => navigate('/users')}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
-        >
-          ← Back to Users
-        </button>
-
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent"></div>
-          <div className="relative p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-5">
-                {userData.avatar && (
-                  <div className="relative">
-                    <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-500 to-sky-400 opacity-70 blur-lg"></div>
-                    <img
-                      src={userData.avatar}
-                      alt={userData.username}
-                      className="relative h-24 w-24 rounded-full border-4 border-white shadow-xl"
-                    />
-                  </div>
-                )}
-                <div>
-                  {(() => {
-                    const trackedUser = trackedUsers.find(u => u.username === userData.username);
-                    const displayName = trackedUser?.realName || userData.username;
-                    return (
-                      <>
-                        <h1 className="text-4xl font-bold text-slate-900">{displayName}</h1>
-                        {trackedUser?.realName && (
-                          <p className="mt-1 text-lg text-slate-600">@{userData.username}</p>
-                        )}
-                      </>
-                    );
-                  })()}
-                  <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500">
-                    <span>{userData.country}</span>
-                    <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-                    <span>Rank #{userData.ranking}</span>
-                  </p>
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        {/* User Profile Header - LeetCode Style */}
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex items-start gap-5">
+              {userData.avatar && (
+                <img
+                  src={userData.avatar}
+                  alt={userData.username}
+                  className="h-20 w-20 rounded-lg border border-gray-200"
+                />
+              )}
+              <div>
+                {(() => {
+                  const trackedUser = trackedUsers.find(u => u.username === userData.username);
+                  const displayName = trackedUser?.realName || userData.username;
+                  return (
+                    <>
+                      <h1 className="text-2xl font-semibold text-gray-900">{displayName}</h1>
+                      {trackedUser?.realName && (
+                        <p className="mt-1 text-base text-gray-600">@{userData.username}</p>
+                      )}
+                    </>
+                  );
+                })()}
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                    </svg>
+                    {userData.country}
+                  </span>
+                  <span className="text-gray-300">|</span>
+                  <span>Ranking: #{userData.ranking?.toLocaleString()}</span>
                 </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => navigate(`/user/${username}/submissions`)}
-                  className="group relative overflow-hidden rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition hover:bg-blue-700"
-                >
-                  <span className="absolute inset-0 bg-white/30 opacity-0 transition-opacity group-hover:opacity-20"></span>
-                  <span className="relative">View All Submissions</span>
-                </button>
-                <button
-                  onClick={() => username && fetchUserData(username)}
-                  className="rounded-full border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
-                >
-                  Refresh
-                </button>
               </div>
             </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                <div className="text-sm uppercase tracking-wide text-slate-500">Total Solved</div>
-                <div className="mt-3 text-4xl font-bold text-blue-600">{userData.problems.total}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                <div className="text-sm uppercase tracking-wide text-slate-500">Contest Rating</div>
-                <div className="mt-3 text-4xl font-bold text-amber-500">{userData.contestRating}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                <div className="text-sm uppercase tracking-wide text-slate-500">Contests</div>
-                <div className="mt-3 text-4xl font-bold text-emerald-500">{userData.contestStats.attendedContests}</div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => navigate(`/user/${username}/submissions`)}
+                className="rounded-lg bg-[#ffa116] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#ff9502]"
+              >
+                View Submissions
+              </button>
+              <button
+                onClick={() => username && fetchUserData(username)}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards - LeetCode Style */}
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="text-xs font-medium text-gray-500">Total Solved</div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <div className="text-3xl font-semibold text-gray-900">{userData.problems.total}</div>
+              <div className="text-sm text-gray-500">problems</div>
+            </div>
+          </div>
+          
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="text-xs font-medium text-gray-500">Contest Rating</div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <div className="text-3xl font-semibold text-[#ffa116]">{userData.contestRating}</div>
+              <div className="text-sm text-gray-500">rating</div>
+            </div>
+          </div>
+          
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="text-xs font-medium text-gray-500">Contests Attended</div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <div className="text-3xl font-semibold text-gray-900">{userData.contestStats.attendedContests}</div>
+              <div className="text-sm text-gray-500">contests</div>
+            </div>
+          </div>
+          
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="text-xs font-medium text-gray-500">Global Ranking</div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <div className="text-3xl font-semibold text-gray-900">
+                #{typeof userData.contestStats.globalRanking === 'number' 
+                  ? userData.contestStats.globalRanking.toLocaleString() 
+                  : userData.contestStats.globalRanking}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-slate-900">Problem Distribution</h3>
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Solved overview</span>
+        {/* Problem Solving - LeetCode Style */}
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-medium text-gray-900">Problem Solving</h2>
+          
+          {/* Progress Bars */}
+          <div className="space-y-4">
+            {/* Easy */}
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-medium text-gray-700">Easy</span>
+                <span className="text-gray-600">{userData.problems.easy} solved</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                <div 
+                  className="h-full rounded-full bg-[#00b8a3]" 
+                  style={{ width: `${Math.min((userData.problems.easy / 800) * 100, 100)}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="mt-6 h-64">
+
+            {/* Medium */}
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-medium text-gray-700">Medium</span>
+                <span className="text-gray-600">{userData.problems.medium} solved</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                <div 
+                  className="h-full rounded-full bg-[#ffc01e]" 
+                  style={{ width: `${Math.min((userData.problems.medium / 1700) * 100, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Hard */}
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-medium text-gray-700">Hard</span>
+                <span className="text-gray-600">{userData.problems.hard} solved</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                <div 
+                  className="h-full rounded-full bg-[#ff375f]" 
+                  style={{ width: `${Math.min((userData.problems.hard / 700) * 100, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Distribution Chart */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="mb-4 text-base font-medium text-gray-900">Distribution</h3>
+            <div className="h-64">
               <Bar data={distributionData} options={horizontalChartOptions} />
             </div>
           </div>
-
-          {userData.dailyActivity && userData.dailyActivity.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-slate-900">Daily Activity (Last 30 Days)</h3>
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Consistency timeline</span>
-              </div>
-              <div className="mt-6 h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={areaChartData} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
-                    <defs>
-                      <linearGradient id="leetcodeArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563eb" stopOpacity={0.55} />
-                        <stop offset="75%" stopColor="#2563eb" stopOpacity={0.18} />
-                        <stop offset="100%" stopColor="#2563eb" stopOpacity={0.04} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(226,232,240,0.6)" vertical={false} />
-                    <XAxis
-                      dataKey="date"
-                      tickLine={false}
-                      axisLine={{ stroke: 'rgba(203,213,225,0.8)' }}
-                      tick={{
-                        fill: axisTickColor,
-                        fontSize: 11,
-                        fontFamily: 'Inter, sans-serif',
-                      }}
-                      tickMargin={12}
-                      minTickGap={28}
-                      tickFormatter={(value) =>
-                        new Date(value).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      }
-                    />
-                    <RechartsTooltip
-                      cursor={{ stroke: '#2563eb', strokeWidth: 1.2, strokeDasharray: '4 4' }}
-                      content={customAreaTooltip}
-                    />
-                    <Area
-                      type="natural"
-                      dataKey="submissions"
-                      stroke="#2563eb"
-                      strokeWidth={2.5}
-                      fill="url(#leetcodeArea)"
-                      activeDot={{ r: 6, fill: '#2563eb', stroke: '#ffffff', strokeWidth: 2 }}
-                      dot={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-
-          {userData.recentSubmissions && userData.recentSubmissions.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-slate-900">Recent Submissions</h3>
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Latest activity</span>
-              </div>
-              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-                {userData.recentSubmissions.map((sub, idx) => (
-                  <div
-                    key={idx}
-                    className="group rounded-xl border border-slate-200 bg-slate-50 p-4 transition-all hover:-translate-y-1 hover:border-blue-300 hover:bg-white hover:shadow-md"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="font-semibold text-slate-900">{sub.title}</div>
-                      <div className="text-sm text-slate-500">{sub.timeAgo}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Daily Activity Chart */}
+        {userData.dailyActivity && userData.dailyActivity.length > 0 && (
+          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Submission Activity</h2>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={areaChartData} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="leetcodeArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ffa116" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#ffa116" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={{ stroke: '#d1d5db' }}
+                    tick={{
+                      fill: '#6b7280',
+                      fontSize: 12,
+                      fontFamily: 'system-ui, sans-serif',
+                    }}
+                    tickMargin={12}
+                    minTickGap={28}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    }
+                  />
+                  <RechartsTooltip
+                    cursor={{ stroke: '#ffa116', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    content={customAreaTooltip}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="submissions"
+                    stroke="#ffa116"
+                    strokeWidth={2}
+                    fill="url(#leetcodeArea)"
+                    activeDot={{ r: 5, fill: '#ffa116', stroke: '#ffffff', strokeWidth: 2 }}
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Submissions */}
+        {userData.recentSubmissions && userData.recentSubmissions.length > 0 && (
+          <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Recent Submissions</h2>
+            <div className="space-y-2">
+              {userData.recentSubmissions.slice(0, 10).map((sub, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-3 transition hover:border-gray-300 hover:bg-white"
+                >
+                  <div className="font-medium text-gray-900">{sub.title}</div>
+                  <div className="text-xs text-gray-500">{sub.timeAgo}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

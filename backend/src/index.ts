@@ -8,6 +8,7 @@ dotenv.config();
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import axios from 'axios';
 
 import { connectDB } from './config/database';
@@ -35,6 +36,7 @@ const PORT = parseInt(process.env.PORT || '5000', 10);
 const defaultOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://localhost:3002',
   'http://localhost:5000',
   'http://localhost:5001',
   'http://localhost:5173'
@@ -51,6 +53,9 @@ if (renderExternalUrl) {
 }
 
 const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
+
+// Enable compression for faster responses
+app.use(compression());
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -317,10 +322,21 @@ const getUserQuery = (username: string) => ({
 // Utility function to add delay between requests
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Main API endpoint with rate limiting
+// Cache for user data (5 minutes TTL)
+const userDataCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Main API endpoint with rate limiting and caching
 app.get('/api/user/:username', async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
+    
+    // Check cache first
+    const cached = userDataCache.get(username.toLowerCase());
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log(`📦 Returning cached data for ${username}`);
+      return res.json(cached.data);
+    }
     
     const query = getUserQuery(username).query;
     const variables = getUserQuery(username).variables;
@@ -337,7 +353,7 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
         if (error.response?.status === 429 || error.message.includes('rate')) {
           if (retries > 0) {
             console.log(`⏳ Rate limited, waiting before retry... (${retries} retries left)`);
-            await delay(2000); // Wait 2 seconds before retry
+            await delay(1000); // Reduced from 2000ms to 1000ms
             retries--;
             continue;
           }
@@ -454,6 +470,12 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
         solveRate: calculateSolveRate(problems)
       }
     };
+
+    // Cache the result
+    userDataCache.set(username.toLowerCase(), {
+      data: result,
+      timestamp: Date.now()
+    });
 
     res.json(result);
   } catch (error: any) {
