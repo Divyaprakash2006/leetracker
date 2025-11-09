@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiClient } from "../config/api";
 import { useTrackedUsers } from "../context/UserContext";
-import { Loader } from "../components/Loader";
 
 interface UserStats {
   username: string;
@@ -153,8 +152,37 @@ export const UsersPage = () => {
           return (
             <div key={user.username} className="group/card relative rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                 {isLoading ? (
-                  <div className="flex min-h-[320px] items-center justify-center p-12">
-                    <Loader size={32} />
+                  <div className="space-y-5 p-6">
+                    {/* Skeleton Loader */}
+                    <div className="flex items-start gap-4">
+                      {/* Avatar Skeleton */}
+                      <div className="h-16 w-16 animate-pulse rounded-full bg-slate-200"></div>
+                      {/* Text Skeleton */}
+                      <div className="flex flex-1 flex-col gap-2">
+                        <div className="h-6 w-32 animate-pulse rounded-full bg-slate-200"></div>
+                        <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200"></div>
+                        <div className="h-5 w-24 animate-pulse rounded-full bg-slate-200"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Stats Skeleton */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="h-20 animate-pulse rounded-2xl bg-slate-100"></div>
+                      <div className="h-20 animate-pulse rounded-2xl bg-slate-100"></div>
+                    </div>
+                    
+                    {/* Progress Bars Skeleton */}
+                    <div className="space-y-3">
+                      <div className="h-4 w-full animate-pulse rounded-full bg-slate-100"></div>
+                      <div className="h-4 w-full animate-pulse rounded-full bg-slate-100"></div>
+                      <div className="h-4 w-full animate-pulse rounded-full bg-slate-100"></div>
+                    </div>
+                    
+                    {/* Buttons Skeleton */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="h-10 animate-pulse rounded-full bg-slate-100"></div>
+                      <div className="h-10 animate-pulse rounded-full bg-slate-100"></div>
+                    </div>
                   </div>
                 ) : data ? (
                 <>
