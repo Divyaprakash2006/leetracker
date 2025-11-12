@@ -49,9 +49,16 @@ router.post('/register', async (req: Request, res: Response) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Check if user already exists
+    console.log('🔍 Checking for existing user with email:', normalizedEmail);
     const existingUser = await AuthUser.findOne({ email: normalizedEmail });
+    
     if (existingUser) {
-      console.log('❌ User already exists:', normalizedEmail, 'Provider:', existingUser.provider);
+      console.log('❌ User already exists!');
+      console.log('   Email:', normalizedEmail);
+      console.log('   Provider:', existingUser.provider);
+      console.log('   Name:', existingUser.name);
+      console.log('   Created:', existingUser.createdAt);
+      console.log('   User ID:', existingUser._id);
       
       // Provide more specific error message based on provider
       if (existingUser.provider !== 'local') {
@@ -66,6 +73,8 @@ router.post('/register', async (req: Request, res: Response) => {
         message: 'An account with this email already exists. Please sign in instead.',
       });
     }
+    
+    console.log('✅ Email is available - proceeding with registration');
 
     console.log('🔐 Hashing password...');
     // Hash password
@@ -274,6 +283,84 @@ if (process.env.NODE_ENV === 'development') {
       });
     } catch (error: any) {
       console.error('Check email error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+      });
+    }
+  });
+
+  // Get all registered users (for debugging)
+  router.get('/users', async (req: Request, res: Response) => {
+    try {
+      const users = await AuthUser.find({}).select('email name provider createdAt').sort({ createdAt: -1 });
+      
+      res.json({
+        success: true,
+        count: users.length,
+        users: users.map(user => ({
+          email: user.email,
+          name: user.name,
+          provider: user.provider,
+          createdAt: user.createdAt,
+        })),
+      });
+    } catch (error: any) {
+      console.error('Get users error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+      });
+    }
+  });
+
+  // Delete user by email (for testing)
+  router.delete('/users/:email', async (req: Request, res: Response) => {
+    try {
+      const email = req.params.email.toLowerCase().trim();
+      const result = await AuthUser.deleteOne({ email });
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      console.log('🗑️  Deleted user:', email);
+
+      res.json({
+        success: true,
+        message: `User ${email} deleted successfully`,
+      });
+    } catch (error: any) {
+      console.error('Delete user error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+      });
+    }
+  });
+
+  // Clear all test users (emails ending with @test.com or @example.com)
+  router.post('/clear-test-users', async (req: Request, res: Response) => {
+    try {
+      const result = await AuthUser.deleteMany({
+        $or: [
+          { email: { $regex: '@test\\.com$', $options: 'i' } },
+          { email: { $regex: '@example\\.com$', $options: 'i' } },
+        ],
+      });
+
+      console.log('🗑️  Cleared test users:', result.deletedCount);
+
+      res.json({
+        success: true,
+        message: `Cleared ${result.deletedCount} test user(s)`,
+        deletedCount: result.deletedCount,
+      });
+    } catch (error: any) {
+      console.error('Clear test users error:', error);
       res.status(500).json({
         success: false,
         message: 'Server error',

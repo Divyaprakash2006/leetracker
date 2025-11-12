@@ -124,6 +124,10 @@ app.use('/api/solutions/viewer', solutionViewerRoutes); // Must come before solu
 app.use('/api/solution', solutionRoutes);
 app.use('/api/tracked-users', trackedUserRoutes);
 
+// Admin routes (development only)
+import adminRoutes from './routes/adminRoutes';
+app.use('/api/admin', adminRoutes);
+
 // Connect to MongoDB
 connectDB();
 
