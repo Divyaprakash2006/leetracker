@@ -29,17 +29,25 @@ export const SolutionViewerPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSolution = async () => {
+      if (!id) {
+        setError('No solution ID provided');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        // Optimized: Added timeout for faster failure detection
-        const response = await axios.get(apiClient.getSolutionViewer(id!), { 
+        const url = apiClient.getSolutionViewer(id);
+        const response = await axios.get(url, { 
           timeout: 10000 
         });
         setSolution(response.data);
       } catch (err: any) {
         const errorMsg = err.code === 'ECONNABORTED' 
           ? 'Request timeout - solution took too long to load'
-          : 'Failed to load solution';
+          : err.response?.status === 404
+            ? 'Solution not found'
+            : 'Failed to load solution';
         setError(errorMsg);
         console.error('Error fetching solution:', err);
       } finally {

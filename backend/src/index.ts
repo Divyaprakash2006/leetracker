@@ -9,7 +9,9 @@ dotenv.config();
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import compression from 'compression';
+import session from 'express-session';
 import axios from 'axios';
+import passport from './config/passport';
 
 import { connectDB } from './config/database';
 import User from './models/User';
@@ -20,6 +22,7 @@ import { solutionViewerService } from './services/solutionViewerService';
 import solutionRoutes from './routes/solutionRoutes';
 import solutionViewerRoutes from './routes/solutionViewerRoutes';
 import trackedUserRoutes from './routes/trackedUserRoutes';
+import authRoutes from './routes/authRoutes';
 
 // Debug: Check environment configuration
 console.log('🔍 Environment check:');
@@ -85,6 +88,24 @@ app.use(cors({
   maxAge: 86400 // Cache preflight requests for 24 hours
 }));
 app.use(express.json());
+
+// Session configuration for OAuth
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 
 // Add error handling middleware
@@ -98,6 +119,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/solutions/viewer', solutionViewerRoutes); // Must come before solutionRoutes to avoid route conflicts
 app.use('/api/solution', solutionRoutes);
 app.use('/api/tracked-users', trackedUserRoutes);

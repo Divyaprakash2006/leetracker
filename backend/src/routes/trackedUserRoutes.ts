@@ -3,6 +3,7 @@ import { HydratedDocument } from 'mongoose';
 import TrackedUser, { ITrackedUser } from '../models/TrackedUser';
 import User from '../models/User';
 import Solution from '../models/Solution';
+import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -26,9 +27,16 @@ const formatTrackedUser = (trackedUser: TrackedUserLike) => {
   };
 };
 
-router.get('/', async (_req, res) => {
+// Get all tracked users for the logged-in user
+router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const trackedUsers = await TrackedUser.find().sort({ addedAt: 1 });
+    const authUserId = req.userId;
+    
+    console.log('📋 Fetching tracked users for authUser:', authUserId);
+    
+    const trackedUsers = await TrackedUser.find({ authUserId }).sort({ addedAt: 1 });
+
+    console.log(`✅ Found ${trackedUsers.length} tracked users`);
 
     res.json({
       success: true,
@@ -44,12 +52,17 @@ router.get('/', async (_req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+// Add a new tracked user for the logged-in user
+router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
+    const authUserId = req.userId;
+    const authUserName = req.user?.name;
+    
     const username: string = (req.body?.username || '').trim();
     const userId: string = (req.body?.userId || '').trim();
     const realName: string | undefined = req.body?.realName?.trim() || undefined;
-    const addedBy: string | undefined = req.body?.addedBy?.trim() || undefined;
+
+    console.log('➕ Adding tracked user:', { username, authUserId, authUserName });
 
     if (!username) {
       return res.status(400).json({
@@ -59,12 +72,16 @@ router.post('/', async (req, res) => {
     }
 
     const effectiveUserId = userId || username;
-
     const normalized = username.toLowerCase();
 
-    let trackedUser = await TrackedUser.findOne({ normalizedUsername: normalized });
+    // Check if this user is already tracked by this auth user
+    let trackedUser = await TrackedUser.findOne({ 
+      authUserId, 
+      normalizedUsername: normalized 
+    });
 
     if (trackedUser) {
+      console.log('ℹ️  User already tracked by this auth user');
       // Update existing user
       if (trackedUser.username !== username) {
         trackedUser.username = username;
@@ -74,9 +91,6 @@ router.post('/', async (req, res) => {
       }
       if (realName && !trackedUser.realName) {
         trackedUser.realName = realName;
-      }
-      if (addedBy && !trackedUser.addedBy) {
-        trackedUser.addedBy = addedBy;
       }
       trackedUser = await trackedUser.save();
 
@@ -92,9 +106,12 @@ router.post('/', async (req, res) => {
       username, 
       userId: effectiveUserId, 
       realName,
-      addedBy,
+      addedBy: authUserName,
+      authUserId,
       addedAt: new Date() 
     }).save();
+
+    console.log('✅ Tracked user created:', trackedUser._id);
 
     res.status(201).json({
       success: true,
@@ -111,17 +128,31 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/', async (_req, res) => {
+// Delete all tracked users for the logged-in user
+router.delete('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const [trackedResult, userResult, solutionResult] = await Promise.all([
-      TrackedUser.deleteMany({}),
-      User.deleteMany({}),
-      Solution.deleteMany({}),
+    const authUserId = req.userId;
+    
+    console.log('🗑️  Deleting all tracked users for authUser:', authUserId);
+    
+    // Get all tracked users for this auth user
+    const trackedUsers = await TrackedUser.find({ authUserId });
+    const usernames = trackedUsers.map(tu => tu.username);
+    
+    // Delete tracked users
+    const trackedResult = await TrackedUser.deleteMany({ authUserId });
+    
+    // Delete associated LeetCode data for these users
+    const [userResult, solutionResult] = await Promise.all([
+      User.deleteMany({ username: { $in: usernames } }),
+      Solution.deleteMany({ username: { $in: usernames } }),
     ]);
 
     const deletedCount = trackedResult.deletedCount ?? 0;
     const deletedUsers = userResult.deletedCount ?? 0;
     const deletedSolutions = solutionResult.deletedCount ?? 0;
+
+    console.log(`✅ Deleted ${deletedCount} tracked users, ${deletedUsers} user records, ${deletedSolutions} solutions`);
 
     res.json({
       success: true,
@@ -143,9 +174,13 @@ router.delete('/', async (_req, res) => {
   }
 });
 
-router.delete('/:username', async (req, res) => {
+// Delete a specific tracked user for the logged-in user
+router.delete('/:username', authenticateToken, async (req: AuthRequest, res) => {
   try {
+    const authUserId = req.userId;
     const username = (req.params.username || '').trim();
+
+    console.log('🗑️  Deleting tracked user:', { username, authUserId });
 
     if (!username) {
       return res.status(400).json({
@@ -156,21 +191,27 @@ router.delete('/:username', async (req, res) => {
 
     const normalized = username.toLowerCase();
 
-    const trackedUser = await TrackedUser.findOne({ normalizedUsername: normalized });
+    const trackedUser = await TrackedUser.findOne({ 
+      authUserId,
+      normalizedUsername: normalized 
+    });
 
     if (!trackedUser) {
       return res.status(404).json({
         success: false,
-        message: `User ${username} was not being tracked`,
+        message: `User ${username} was not being tracked by you`,
       });
     }
 
     await trackedUser.deleteOne();
 
+    // Delete associated LeetCode data
     const [userDeleteResult, solutionDeleteResult] = await Promise.all([
       User.deleteMany({ username: trackedUser.username }),
       Solution.deleteMany({ username: trackedUser.username }),
     ]);
+
+    console.log(`✅ Deleted tracked user and ${userDeleteResult.deletedCount} user records, ${solutionDeleteResult.deletedCount} solutions`);
 
     res.json({
       success: true,
@@ -189,8 +230,10 @@ router.delete('/:username', async (req, res) => {
   }
 });
 
-router.patch('/:username/viewed', async (req, res) => {
+// Update last viewed time for a tracked user
+router.patch('/:username/viewed', authenticateToken, async (req: AuthRequest, res) => {
   try {
+    const authUserId = req.userId;
     const username = (req.params.username || '').trim().toLowerCase();
 
     if (!username) {
@@ -201,7 +244,7 @@ router.patch('/:username/viewed', async (req, res) => {
     }
 
     const trackedUser = await TrackedUser.findOneAndUpdate(
-      { normalizedUsername: username },
+      { authUserId, normalizedUsername: username },
       { $set: { lastViewedAt: new Date() } },
       { new: true }
     );

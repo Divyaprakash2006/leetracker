@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useTrackedUsers } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
 
 export const Navigation = () => {
   const location = useLocation();
@@ -8,6 +9,12 @@ export const Navigation = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { trackedUsers } = useTrackedUsers();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   const navItems = [
     { path: '/', label: 'Home' },
@@ -145,6 +152,20 @@ export const Navigation = () => {
               </div>
             </div>
 
+            {/* User Info and Logout */}
+            <div className="hidden md:flex items-center gap-3 ml-2">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95"
+              >
+                Logout
+              </button>
+            </div>
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -216,6 +237,20 @@ export const Navigation = () => {
                     </button>
                   )}
                 </form>
+              </div>
+
+              {/* Mobile User Info and Logout */}
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                <div className="px-4 py-2 mb-2">
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg active:scale-95"
+                >
+                  Logout
+                </button>
               </div>
             </div>
           </div>

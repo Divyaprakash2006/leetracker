@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import hljs from 'highlight.js/lib/common';
-import { API_URL } from '../config/constants';
+import { buildApiUrl } from '../config/api';
 import './SolutionViewer.css';
 
 interface Solution {
@@ -93,12 +93,14 @@ export const SolutionViewer = ({
         setError(null);
 
         // Try viewer endpoint first
-        let response = await fetch(`${API_URL}/api/solutions/viewer/${submissionId}`);
+        const viewerUrl = buildApiUrl(`/api/solutions/viewer/${submissionId}`);
+        let response = await fetch(viewerUrl);
         let data = await response.json();
 
         // If first endpoint fails, try legacy endpoint
         if (!response.ok || !data.success) {
-          response = await fetch(`${API_URL}/api/solution/${submissionId}`);
+          const legacyUrl = buildApiUrl(`/api/solution/${submissionId}`);
+          response = await fetch(legacyUrl);
           data = await response.json();
         }
 

@@ -65,8 +65,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
+      const token = localStorage.getItem('auth_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
       const response = await axios.get(apiClient.listTrackedUsers(), {
         timeout: 10000,
+        headers,
       });
 
       const users = normalizeTrackedUsers(response.data?.users || []);
@@ -117,12 +121,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
       const payload: { username: string; realName?: string } = { username: trimmed };
       if (realName && realName.trim()) {
         payload.realName = realName.trim();
       }
       
-      const response = await axios.post(apiClient.addTrackedUser(), payload);
+      const response = await axios.post(apiClient.addTrackedUser(), payload, { headers });
       const userPayload = response.data?.user || { username: trimmed, userId: trimmed, addedAt: new Date().toISOString() };
       const newUser: TrackedUser = {
         username: userPayload.username,
@@ -155,7 +162,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
-      await axios.delete(apiClient.removeTrackedUser(trimmed));
+      const token = localStorage.getItem('auth_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      await axios.delete(apiClient.removeTrackedUser(trimmed), { headers });
       setTrackedUsers((prev) => {
         const next = prev.filter((user) => user.username.toLowerCase() !== trimmed.toLowerCase());
         persistToLocalStorage(next);
