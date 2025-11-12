@@ -78,19 +78,6 @@
   }
 }
 
-.logo-icon {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 24px;
-  filter: drop-shadow(0 4px 12px rgba(255, 161, 22, 0.3));
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
 .logo-text {
   font-size: 42px;
   font-weight: 700;
@@ -512,11 +499,6 @@
     padding: 50px 30px;
   }
   
-  .logo-icon {
-    width: 100px;
-    height: 100px;
-  }
-  
   .logo-text {
     font-size: 38px;
   }
@@ -576,12 +558,6 @@
     margin-bottom: 40px;
   }
   
-  .logo-icon {
-    width: 90px;
-    height: 90px;
-    margin-bottom: 20px;
-  }
-  
   .logo-text {
     font-size: 36px;
   }
@@ -626,12 +602,6 @@
   
   .logo-container {
     margin-bottom: 30px;
-  }
-  
-  .logo-icon {
-    width: 75px;
-    height: 75px;
-    margin-bottom: 16px;
   }
   
   .logo-text {
@@ -695,12 +665,6 @@
   
   .logo-container {
     margin-bottom: 25px;
-  }
-  
-  .logo-icon {
-    width: 65px;
-    height: 65px;
-    margin-bottom: 12px;
   }
   
   .logo-text {
@@ -797,12 +761,6 @@
     margin-bottom: 20px;
   }
   
-  .logo-icon {
-    width: 55px;
-    height: 55px;
-    margin-bottom: 10px;
-  }
-  
   .logo-text {
     font-size: 22px;
   }
@@ -871,11 +829,6 @@
   
   .logo-container {
     margin-bottom: 25px;
-  }
-  
-  .logo-icon {
-    width: 70px;
-    height: 70px;
   }
   
   .logo-text {

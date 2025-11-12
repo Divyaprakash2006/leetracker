@@ -35,9 +35,6 @@ export const LoginPage = () => {
       {/* Left side - Logo and Branding */}
       <div className="login-left">
         <div className="logo-container">
-          <svg className="logo-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21.469 23.907l-3.595 3.473c-.624.625-1.484.885-2.432.885s-1.807-.26-2.432-.885l-5.776-5.812c-.62-.625-.937-1.537-.937-2.485 0-.952.317-1.812.937-2.432l5.76-5.844c.62-.619 1.5-.859 2.448-.859s1.808.26 2.432.885l3.595 3.473c.619.62.937 1.537.937 2.489 0 .951-.317 1.812-.937 2.432zm-11.531-7.907c-.552 0-1 .448-1 1s.448 1 1 1h5c.552 0 1-.448 1-1s-.448-1-1-1h-5zm13.5 4c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z" fill="#ffa116"/>
-          </svg>
           <h1 className="logo-text">LeetCode Tracker</h1>
           <p className="logo-tagline">Track your progress, master your skills</p>
         </div>

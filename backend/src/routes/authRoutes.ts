@@ -26,13 +26,44 @@ router.post('/register', async (req: Request, res: Response) => {
       });
     }
 
-    // Check if user already exists
-    const existingUser = await AuthUser.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      console.log('❌ User already exists:', email);
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('❌ Invalid email format:', email);
       return res.status(400).json({
         success: false,
-        message: 'User with this email already exists',
+        message: 'Please provide a valid email address',
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      console.log('❌ Password too short');
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long',
+      });
+    }
+
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    const existingUser = await AuthUser.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      console.log('❌ User already exists:', normalizedEmail, 'Provider:', existingUser.provider);
+      
+      // Provide more specific error message based on provider
+      if (existingUser.provider !== 'local') {
+        return res.status(400).json({
+          success: false,
+          message: `An account with this email already exists. Please sign in with ${existingUser.provider === 'google' ? 'Google' : 'GitHub'}.`,
+        });
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email already exists. Please sign in instead.',
       });
     }
 
@@ -44,9 +75,9 @@ router.post('/register', async (req: Request, res: Response) => {
     console.log('👤 Creating user...');
     // Create new user
     const user = new AuthUser({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
-      name,
+      name: name.trim(),
       provider: 'local',
     });
 
@@ -64,7 +95,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'Account created successfully! Welcome to LeetCode Tracker.',
       token,
       user: {
         id: user._id,
@@ -75,17 +106,31 @@ router.post('/register', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('❌ Registration error:', error);
     console.error('Error details:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error name:', error.name);
+    
     if (error.code === 11000) {
-      // Duplicate key error
+      // Duplicate key error - email already exists
+      console.error('Duplicate key error - email:', error.keyValue);
       return res.status(400).json({
         success: false,
-        message: 'User with this email already exists',
+        message: 'An account with this email already exists. Please sign in instead.',
       });
     }
+    
+    if (error.name === 'ValidationError') {
+      // Mongoose validation error
+      const messages = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Server error during registration',
-      error: error.message,
+      message: 'Server error during registration. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -202,6 +247,40 @@ router.post('/logout', (req: Request, res: Response) => {
     message: 'Logout successful',
   });
 });
+
+// Development only - Check if email exists
+if (process.env.NODE_ENV === 'development') {
+  router.post('/check-email', async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is required',
+        });
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const existingUser = await AuthUser.findOne({ email: normalizedEmail });
+
+      res.json({
+        success: true,
+        exists: !!existingUser,
+        provider: existingUser?.provider || null,
+        message: existingUser 
+          ? `Email exists (registered with ${existingUser.provider})`
+          : 'Email available',
+      });
+    } catch (error: any) {
+      console.error('Check email error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+      });
+    }
+  });
+}
 
 // ============ PASSWORD RESET ROUTES ============
 

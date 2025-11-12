@@ -19,22 +19,40 @@ export const SignupPage = () => {
     setIsLoading(true);
     setError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
       setIsLoading(false);
       return;
     }
 
+    // Validate name
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters long');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       setIsLoading(false);
       return;
     }
 
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await register(email, password, name);
+      await register(email.trim().toLowerCase(), password, name.trim());
       navigate('/');
     } catch (err: any) {
+      console.error('Signup error:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -84,7 +102,15 @@ export const SignupPage = () => {
 
           {error && (
             <div className="error-message">
-              {error}
+              <strong>⚠️ {error}</strong>
+              {error.includes('already exists') && (
+                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                  Already have an account?{' '}
+                  <Link to="/login" style={{ color: '#ffa116', fontWeight: '600', textDecoration: 'underline' }}>
+                    Sign in here
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -120,7 +146,9 @@ export const SignupPage = () => {
             placeholder="Enter your Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={(e) => setEmail(e.target.value.trim().toLowerCase())}
             required
+            autoComplete="email"
           />
         </div>
 
