@@ -36,6 +36,7 @@ const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5001', 10);
+const HOST = process.env.HOST || '0.0.0.0';
 
 const defaultOrigins = [
   'http://localhost:3000',
@@ -1194,8 +1195,6 @@ if (fs.existsSync(frontendDistPath)) {
 } else {
   console.warn('⚠️ Frontend build directory not found at:', frontendDistPath);
 }
-
-const HOST = process.env.HOST || '0.0.0.0';
 
 app.listen(PORT, HOST, () => {
   console.log(`\n🚀 LeetCode Tracker Backend Server`);
