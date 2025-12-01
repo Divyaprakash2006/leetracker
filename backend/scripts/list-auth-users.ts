@@ -20,10 +20,11 @@ if (!MONGODB_URI) {
 (async () => {
   try {
     await mongoose.connect(MONGODB_URI);
-    const users = await AuthUser.find({}, { username: 1, name: 1, createdAt: 1 }).sort({ createdAt: 1 });
+    const users = await AuthUser.find({}, { username: 1, name: 1, userDatabaseName: 1, createdAt: 1 }).sort({ createdAt: 1 });
     console.log(`Found ${users.length} auth user(s):`);
     for (const user of users) {
-      console.log(`- ${user.username} (${user.name}) created ${user.createdAt?.toISOString?.()}`);
+      const displayName = user.name || 'N/A';
+      console.log(`- ${user.username} [db: ${user.userDatabaseName}] (name: ${displayName}) created ${user.createdAt?.toISOString?.()}`);
     }
   } catch (error) {
     console.error('Failed to list auth users:', error);

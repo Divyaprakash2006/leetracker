@@ -3,7 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IAuthUser extends Document {
   username: string;
   password: string;
-  name: string;
+  name?: string;
+  userDatabaseName: string;
   avatar?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,8 +25,12 @@ const authUserSchema = new Schema<IAuthUser>(
     },
     name: {
       type: String,
-      required: true,
       trim: true,
+    },
+    userDatabaseName: {
+      type: String,
+      required: true,
+      unique: true,
     },
     avatar: {
       type: String,
