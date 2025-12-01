@@ -27,15 +27,15 @@ import { authenticateToken, AuthRequest } from './middleware/auth';
 
 // Debug: Check environment configuration
 console.log('🔍 Environment check:');
-console.log('   LOCAL_MONGODB_URI:', process.env.LOCAL_MONGODB_URI ? 'Loaded ✅' : 'Using default mongodb://127.0.0.1:27017/leetracker');
-console.log('   PORT:', process.env.PORT || '5000');
+console.log('   MONGODB_URI:', process.env.MONGODB_URI ? 'Set ✅' : 'NOT SET ❌');
+console.log('   PORT:', process.env.PORT || '5001');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '5000', 10);
+const PORT = parseInt(process.env.PORT || '5001', 10);
 
 const defaultOrigins = [
   'http://localhost:3000',
