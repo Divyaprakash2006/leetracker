@@ -1,14 +1,61 @@
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { SolutionViewer } from '../components/SolutionViewer';
+import { apiClient, getAuthHeaders } from '../config/api';
 
 export const SubmissionViewerPage = () => {
   const { username, submissionId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const submission = location.state?.submission || null;
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [submission, setSubmission] = React.useState(location.state?.submission || null);
+  const [isLoading, setIsLoading] = React.useState(!location.state?.submission);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Fetch submission data if not provided via state
+  React.useEffect(() => {
+    const fetchSubmissionData = async () => {
+      if (submission || !submissionId || !username) {
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        console.log(`📊 Fetching submission data for ${submissionId}...`);
+        const response = await fetch(apiClient.getUser(username), {
+          headers: {
+            ...getAuthHeaders()
+          }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          setError('You need to sign in again to view this submission.');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const userData = await response.json();
+        
+        if (userData.recentSubmissions) {
+          const found = userData.recentSubmissions.find((s: any) => s.id === submissionId);
+          if (found) {
+            setSubmission(found);
+            console.log('✅ Submission data loaded');
+          } else {
+            setError('Submission not found');
+          }
+        }
+      } catch (err) {
+        console.error('❌ Failed to fetch submission:', err);
+        setError('Failed to load submission data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubmissionData();
+  }, [submissionId, username, submission]);
 
   // Loading state
   if (isLoading && !submission) {
@@ -102,6 +149,7 @@ export const SubmissionViewerPage = () => {
                 <SolutionViewer 
                   submissionId={submissionId!} 
                   language={submission.lang}
+                  username={username}
                   onError={(err) => setError(err)}
                   onLoading={(loading) => setIsLoading(loading)}
                 />

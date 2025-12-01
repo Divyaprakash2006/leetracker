@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useTrackedUsers } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 import { Loader } from '../components/Loader';
 
 interface UserData {
@@ -77,7 +77,8 @@ export const SearchPage = () => {
       
       const response = await axios.get(apiClient.getUser(username), {
         timeout: 10000,
-        signal: controller.signal
+        signal: controller.signal,
+        headers: getAuthHeaders()
       });
       
       clearTimeout(timeoutId);
@@ -86,7 +87,11 @@ export const SearchPage = () => {
     } catch (err: any) {
       console.error('Error:', err);
       const responseData = err.response?.data;
-      const errorMessage = responseData?.message || err.message || 'Failed to fetch data from LeetCode API';
+      const status = err?.response?.status;
+      const unauthorizedMessage = status === 401 || status === 403
+        ? 'Please sign in to search for users.'
+        : null;
+      const errorMessage = unauthorizedMessage || responseData?.message || err.message || 'Failed to fetch data from LeetCode API';
       const newSuggestions = responseData?.suggestions || [];
       
       setError(errorMessage);
@@ -126,9 +131,15 @@ export const SearchPage = () => {
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="mx-auto max-w-6xl px-4 space-y-10">
         <header className="space-y-3 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-400">Find tracked users</p>
-          <h1 className="text-4xl font-bold text-slate-900 md:text-5xl">Search LeetCode profiles instantly</h1>
-          <p className="text-base text-slate-500 md:text-lg">Enter a username or profile link to explore detailed progress, stats, and submissions.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-400">Search & Track</p>
+          <h1 className="text-4xl font-bold text-slate-900 md:text-5xl">Find LeetCode Users</h1>
+          <p className="text-base text-slate-500 md:text-lg">
+            Enter a username or profile link to explore detailed progress, stats, and submissions.
+            <br />
+            <span className="text-sm text-slate-400 mt-2 inline-block">
+              Track users to monitor their activity on your dashboard
+            </span>
+          </p>
         </header>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">

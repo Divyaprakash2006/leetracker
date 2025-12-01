@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackedUsers } from '../context/UserContext';
 import axios from 'axios';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 import {
   AreaChart,
   Area,
@@ -43,9 +43,14 @@ export const AnalyticsPage = () => {
     setLoading(true);
     try {
       // Optimized: Parallel fetch with timeout and error handling
+      const headers = getAuthHeaders();
       const promises = trackedUsers.map(user =>
-        axios.get(apiClient.getUser(user.username), { timeout: 8000 })
+        axios.get(apiClient.getUser(user.username), { timeout: 8000, headers })
           .catch(err => {
+            const status = err?.response?.status;
+            if (status === 401 || status === 403) {
+              throw err;
+            }
             console.error(`Failed to fetch data for ${user.username}:`, err);
             return null;
           })
@@ -57,8 +62,14 @@ export const AnalyticsPage = () => {
         .map(r => r!.data);
       
       setUsersData(validData);
-    } catch (error) {
-      console.error('Error fetching analytics data:', error);
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        console.warn('Authentication required to load analytics.');
+        setUsersData([]);
+      } else {
+        console.error('Error fetching analytics data:', error);
+      }
     } finally {
       setLoading(false);
     }

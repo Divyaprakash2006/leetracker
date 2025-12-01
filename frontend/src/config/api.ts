@@ -62,16 +62,30 @@ export const buildApiUrl = (path: string) => {
 };
 
 export const apiClient = {
-  getUser: (username: string) => buildApiUrl(`/user/${username}`),
-  getUserStats: (username: string) => buildApiUrl(`/user/${username}/stats`),
-  getUserSolutions: (username: string) => buildApiUrl(`/user/${username}/solutions`),
-  syncUser: (username: string) => buildApiUrl(`/user/${username}/sync`),
-  getSubmission: (submissionId: string) => buildApiUrl(`/submission/${submissionId}`),
-  getSolutionViewer: (submissionId: string) => buildApiUrl(`/solutions/viewer/${submissionId}`),
-  testLeetCode: () => buildApiUrl('/test-leetcode'),
+  getUser: (username: string) => buildApiUrl(`/api/user/${username}`),
+  getUserStats: (username: string) => buildApiUrl(`/api/user/${username}/stats`),
+  getUserSolutions: (username: string) => buildApiUrl(`/api/user/${username}/solutions`),
+  syncUser: (username: string) => buildApiUrl(`/api/user/${username}/sync`),
+  getSubmission: (submissionId: string) => buildApiUrl(`/api/submission/${submissionId}`),
+  getSolutionViewer: (submissionId: string) => buildApiUrl(`/api/solutions/viewer/${submissionId}`),
+  testLeetCode: () => buildApiUrl('/api/test-leetcode'),
   health: () => buildApiUrl('/health'),
-  listTrackedUsers: () => buildApiUrl('/tracked-users'),
-  addTrackedUser: () => buildApiUrl('/tracked-users'),
-  removeTrackedUser: (username: string) => buildApiUrl(`/tracked-users/${encodeURIComponent(username)}`),
-  touchTrackedUser: (username: string) => buildApiUrl(`/tracked-users/${encodeURIComponent(username)}/viewed`)
+  listTrackedUsers: () => buildApiUrl('/api/tracked-users'),
+  addTrackedUser: () => buildApiUrl('/api/tracked-users'),
+  removeTrackedUser: (username: string) => buildApiUrl(`/api/tracked-users/${encodeURIComponent(username)}`),
+  touchTrackedUser: (username: string) => buildApiUrl(`/api/tracked-users/${encodeURIComponent(username)}/viewed`)
+};
+
+export const getAuthHeaders = (): Record<string, string> => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const token = localStorage.getItem('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch (error) {
+    console.warn('Unable to read auth token from storage', error);
+    return {};
+  }
 };

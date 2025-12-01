@@ -45,10 +45,27 @@ export const connectDB = async () => {
     console.log('📍 URI:', redactedUri);
 
     await mongoose.connect(mongoUri, {
-      // Automatically create indexes for schemas
-      autoIndex: true,
-      // Automatically create collections
-      autoCreate: true,
+      // Connection pooling
+      maxPoolSize: 50, // Maximum number of connections
+      minPoolSize: 5,  // Minimum number of connections
+      maxIdleTimeMS: 30000, // Close idle connections after 30s
+      
+      // Timeouts
+      serverSelectionTimeoutMS: 10000, // Reduced from 30s to 10s
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000, // Reduced from 30s to 10s
+      
+      // Performance
+      autoIndex: true, // Automatically create indexes
+      autoCreate: true, // Automatically create collections
+      
+      // Reliability
+      retryWrites: true,
+      retryReads: true,
+      w: 'majority', // Write concern
+      
+      // Monitoring
+      heartbeatFrequencyMS: 10000, // Check connection every 10s
     });
 
     console.log('✅ MongoDB connected successfully');

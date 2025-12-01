@@ -3,6 +3,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface ISolution extends Document {
   submissionId: string;
   username: string;
+  normalizedUsername: string;
+  authUserId: mongoose.Types.ObjectId;
   problemName: string;
   problemSlug: string;
   problemUrl: string;
@@ -22,19 +24,22 @@ export interface ISolution extends Document {
 
 const SolutionSchema = new Schema<ISolution>(
   {
-    submissionId: { type: String, required: true, unique: true, index: true },
-    username: { type: String, required: true, index: true },
+    submissionId: { type: String, required: true, index: true },
+    username: { type: String, required: false, index: true, default: 'unknown', trim: true },
+    normalizedUsername: { type: String, required: true, lowercase: true, trim: true, index: true },
+    authUserId: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
     problemName: { type: String, required: true },
-    problemSlug: { type: String, required: true },
-    problemUrl: { type: String, required: true },
+    problemSlug: { type: String, required: false, default: '' },
+    problemUrl: { type: String, required: false, default: '' },
     difficulty: { 
       type: String, 
       required: true, 
-      enum: ['Easy', 'Medium', 'Hard'] 
+      enum: ['Easy', 'Medium', 'Hard'],
+      default: 'Medium'
     },
-    language: { type: String, required: true },
-    code: { type: String, required: true },
-    runtime: { type: String },
+    language: { type: String, required: true, default: 'Unknown' },
+    code: { type: String, required: false, default: '' },
+    runtime: { type: String, default: 'N/A' },
     memory: { type: String },
     status: { type: String, default: 'Accepted' },
     timestamp: { type: Number, required: true },
@@ -48,7 +53,15 @@ const SolutionSchema = new Schema<ISolution>(
 );
 
 // Compound index for efficient queries
-SolutionSchema.index({ username: 1, timestamp: -1 });
-SolutionSchema.index({ username: 1, difficulty: 1 });
+SolutionSchema.index({ authUserId: 1, normalizedUsername: 1, timestamp: -1 });
+SolutionSchema.index({ authUserId: 1, normalizedUsername: 1, difficulty: 1 });
+SolutionSchema.index({ authUserId: 1, submissionId: 1 }, { unique: true });
+
+SolutionSchema.pre('validate', function (next) {
+  if (this.isModified('username') || !this.normalizedUsername) {
+    this.normalizedUsername = (this.username || 'unknown').toLowerCase();
+  }
+  next();
+});
 
 export default mongoose.model<ISolution>('Solution', SolutionSchema);

@@ -12,16 +12,51 @@ backend/dist/
 .env
 backend/.env
 frontend/.env
+frontend/.env.development
+.env.local
+.env.*.local
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # IDE directories
 .vscode/
 .idea/
 .DS_Store
+*.swp
+*.swo
 
 # Coverage and reports
 coverage/
+
+# Uploads (user generated content)
+backend/uploads/screenshots/
+backend/uploads/**/*
+
+# Temporary and test files
+*.tmp
+*.bak
+*.backup
+*.old
+test_*.js
+test_*.html
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Development tools
+clearUsers.js
+check_and_create_user.html
+create_test_user.js
+DEV_USER_MANAGEMENT.html
+
+# Documentation (optional - uncomment if you want to exclude from repo)
+# *.md
+# !README.md
+
+# Images (excluding necessary ones)
+frontend/office-desk-workspace-bright-color-yellow-background.jpg

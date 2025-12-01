@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   username: string;
+  normalizedUsername: string;
   profileUrl: string;
   realName?: string; // User's real/original name (optional)
   avatar?: string;
@@ -21,13 +22,15 @@ export interface IUser extends Document {
   lastSyncStatus?: 'success' | 'failed';
   lastSyncError?: string;
   addedBy?: string; // Who added this user (optional)
+  authUserId: mongoose.Types.ObjectId;
   createdAt: Date; // Automatically set when user is first added
   updatedAt: Date; // Automatically updated on any change
 }
 
 const UserSchema = new Schema<IUser>(
   {
-    username: { type: String, required: true, unique: true, index: true },
+    username: { type: String, required: true, trim: true },
+    normalizedUsername: { type: String, required: true, lowercase: true, trim: true, index: true },
     profileUrl: { type: String, required: true },
     realName: { type: String }, // User's real/display name
     avatar: { type: String },
@@ -47,10 +50,20 @@ const UserSchema = new Schema<IUser>(
     lastSyncStatus: { type: String, enum: ['success', 'failed'] },
     lastSyncError: { type: String },
     addedBy: { type: String }, // Optional: track who added this user
+    authUserId: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt
   }
 );
+
+UserSchema.index({ authUserId: 1, normalizedUsername: 1 }, { unique: true });
+
+UserSchema.pre('validate', function (next) {
+  if (this.isModified('username') || !this.normalizedUsername) {
+    this.normalizedUsername = (this.username || '').toLowerCase();
+  }
+  next();
+});
 
 export default mongoose.model<IUser>('User', UserSchema);

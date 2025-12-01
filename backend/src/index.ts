@@ -11,11 +11,11 @@ import cors from 'cors';
 import compression from 'compression';
 import session from 'express-session';
 import axios from 'axios';
-import passport from './config/passport';
 
 import { connectDB } from './config/database';
 import User from './models/User';
 import Solution from './models/Solution';
+import TrackedUser from './models/TrackedUser';
 import { syncUserSolutions } from './services/leetcodeService';
 import { startAutoSync } from './services/cronService';
 import { solutionViewerService } from './services/solutionViewerService';
@@ -23,6 +23,7 @@ import solutionRoutes from './routes/solutionRoutes';
 import solutionViewerRoutes from './routes/solutionViewerRoutes';
 import trackedUserRoutes from './routes/trackedUserRoutes';
 import authRoutes from './routes/authRoutes';
+import { authenticateToken, AuthRequest } from './middleware/auth';
 
 // Debug: Check environment configuration
 console.log('🔍 Environment check:');
@@ -89,7 +90,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Session configuration for OAuth
+// Session configuration
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production',
@@ -103,9 +104,6 @@ app.use(
   })
 );
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 
 // Add error handling middleware
@@ -123,10 +121,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/solutions/viewer', solutionViewerRoutes); // Must come before solutionRoutes to avoid route conflicts
 app.use('/api/solution', solutionRoutes);
 app.use('/api/tracked-users', trackedUserRoutes);
-
-// Admin routes (development only)
-import adminRoutes from './routes/adminRoutes';
-app.use('/api/admin', adminRoutes);
 
 // Connect to MongoDB
 connectDB();
@@ -184,6 +178,21 @@ const calculateSolveRate = (problems: any): string => {
   if (total === 0) return '0%';
   const hardRate = ((problems.hard / total) * 100).toFixed(1);
   return `${hardRate}% hard`;
+};
+
+const findTrackedUserFor = async (authUserId: string, username: string) => {
+  const normalizedUsername = username.trim().toLowerCase();
+  return TrackedUser.findOne({ authUserId, normalizedUsername });
+};
+
+const ensureTrackedUserFor = async (authUserId: string, username: string) => {
+  const trackedUser = await findTrackedUserFor(authUserId, username);
+  if (!trackedUser) {
+    const error = new Error(`User ${username} is not tracked by this account`);
+    (error as any).statusCode = 404;
+    throw error;
+  }
+  return trackedUser;
 };
 
 // Helper function to calculate current streak
@@ -348,9 +357,36 @@ const getUserQuery = (username: string) => ({
 // Utility function to add delay between requests
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Cache for user data (5 minutes TTL)
+// Cache for user data with automatic cleanup
 const userDataCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 3 * 60 * 1000; // Reduced to 3 minutes for fresher data
+const MAX_CACHE_SIZE = 1000; // Maximum cache entries
+
+// Clean up old cache entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  let cleaned = 0;
+  
+  for (const [key, value] of userDataCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      userDataCache.delete(key);
+      cleaned++;
+    }
+  }
+  
+  // If cache is still too large, remove oldest entries
+  if (userDataCache.size > MAX_CACHE_SIZE) {
+    const entries = Array.from(userDataCache.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp);
+    const toRemove = entries.slice(0, userDataCache.size - MAX_CACHE_SIZE);
+    toRemove.forEach(([key]) => userDataCache.delete(key));
+    cleaned += toRemove.length;
+  }
+  
+  if (cleaned > 0 && process.env.NODE_ENV !== 'production') {
+    console.log(`🧹 Cleaned ${cleaned} cache entries`);
+  }
+}, 5 * 60 * 1000);
 
 // Main API endpoint with rate limiting and caching
 app.get('/api/user/:username', async (req: Request, res: Response) => {
@@ -379,7 +415,7 @@ app.get('/api/user/:username', async (req: Request, res: Response) => {
         if (error.response?.status === 429 || error.message.includes('rate')) {
           if (retries > 0) {
             console.log(`⏳ Rate limited, waiting before retry... (${retries} retries left)`);
-            await delay(1000); // Reduced from 2000ms to 1000ms
+            await delay(500 * (3 - retries)); // Progressive delay: 500ms, 1000ms
             retries--;
             continue;
           }
@@ -582,79 +618,200 @@ const getSubmissionDetailQuery = (submissionId: string) => ({
 });
 
 // Endpoint to fetch submission details with code
-app.get('/api/submission/:submissionId', async (req: Request, res: Response) => {
+app.get('/api/submission/:submissionId', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { submissionId } = req.params;
-    
-    console.log(`Fetching submission details for ID: ${submissionId}`);
+    const queryUsernameRaw = typeof req.query.username === 'string' ? req.query.username.trim() : undefined;
+    const authUserId = req.userId;
 
-    // Try to fetch from LeetCode's submission detail page
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    console.log(`📝 Fetching submission details for ID: ${submissionId}${queryUsernameRaw ? ` (user: ${queryUsernameRaw})` : ''}`);
+
+    const normalizedQuery = queryUsernameRaw?.toLowerCase();
+    let trackedUser = normalizedQuery ? await findTrackedUserFor(authUserId, queryUsernameRaw) : null;
+
+    console.log('📂 Step 1: Checking database for cached solution...');
+    let cachedSolution = await Solution.findOne({ submissionId, authUserId });
+
+    if (!trackedUser && cachedSolution) {
+      trackedUser = await findTrackedUserFor(authUserId, cachedSolution.username);
+    }
+
+    if (!trackedUser) {
+      return res.status(403).json({
+        success: false,
+        error: 'not_tracked',
+        message: 'Provide a tracked username to view this submission',
+      });
+    }
+
+    const username = trackedUser.username;
+    const normalizedUsername = trackedUser.normalizedUsername;
+
+    if (cachedSolution?.code) {
+      console.log(`✅ Found code in database for submission ${submissionId}`);
+      return res.json({
+        success: true,
+        solution: {
+          submissionId: cachedSolution.submissionId,
+          code: cachedSolution.code,
+          language: cachedSolution.language,
+          runtime: cachedSolution.runtime,
+          memory: cachedSolution.memory,
+          status: cachedSolution.status,
+          problemName: cachedSolution.problemName,
+          problemSlug: cachedSolution.problemSlug,
+          problemUrl: cachedSolution.problemUrl,
+          difficulty: cachedSolution.difficulty,
+          timestamp: cachedSolution.timestamp,
+        },
+      });
+    }
+
+    console.log('⚠️ No code in database, trying LeetCode API...');
+
     try {
+      console.log('🌐 Step 2: Fetching from LeetCode GraphQL API...');
       const query = getSubmissionDetailQuery(submissionId).query;
       const variables = getSubmissionDetailQuery(submissionId).variables;
       const result = await sendGraphQLQuery(query, variables);
 
-      const data = result.data.submissionDetails;
+      console.log(`📥 Raw response:`, JSON.stringify(result));
+      const data = result.data?.submissionDetails;
 
-      if (data && data.code) {
-        const result = {
+      if (!data) {
+        console.log(`❌ No submission details found for ${submissionId}`);
+        throw new Error('No submission details found');
+      }
+
+      if (data.code) {
+        console.log(`✅ Successfully fetched code from LeetCode API`);
+        const solutionData = {
           submissionId,
           code: data.code,
           language: data.lang?.verboseName || data.lang?.name || 'Unknown',
           runtime: data.runtimeDisplay || data.runtime,
-          runtimePercentile: data.runtimePercentile ? `${data.runtimePercentile.toFixed(2)}%` : 'N/A',
           memory: data.memoryDisplay || data.memory,
-          memoryPercentile: data.memoryPercentile ? `${data.memoryPercentile.toFixed(2)}%` : 'N/A',
           timestamp: data.timestamp,
-          timeAgo: getTimeAgo(data.timestamp),
           statusCode: data.statusCode,
-          question: {
-            id: data.question?.questionId,
-            title: data.question?.title,
-            titleSlug: data.question?.titleSlug,
-            difficulty: data.question?.difficulty,
-            category: data.question?.categoryTitle,
-            problemUrl: `https://leetcode.com/problems/${data.question?.titleSlug}/`,
-          },
-          topicTags: data.topicTags?.map((tag: any) => tag.name) || [],
-          notes: data.notes || '',
+          problemName: data.question?.title || 'Unknown',
+          problemSlug: data.question?.titleSlug || '',
+          problemUrl: data.question?.titleSlug ? `https://leetcode.com/problems/${data.question.titleSlug}/` : '',
+          difficulty: data.question?.difficulty || 'Medium',
         };
-        return res.json(result);
+
+        if (cachedSolution) {
+          Object.assign(cachedSolution, {
+            ...solutionData,
+            username,
+            normalizedUsername,
+          });
+          await cachedSolution.save();
+          console.log('💾 Updated solution in database');
+        } else {
+          cachedSolution = await Solution.findOneAndUpdate(
+            { submissionId, authUserId },
+            {
+              $set: {
+                ...solutionData,
+                username,
+                normalizedUsername,
+                authUserId,
+              },
+            },
+            { upsert: true, new: true }
+          );
+          console.log('💾 Stored solution fetched from LeetCode in database');
+        }
+
+        return res.json({
+          success: true,
+          solution: solutionData,
+        });
       }
-    } catch (graphqlError) {
-      console.log('⚠️ GraphQL fetch failed, trying solution viewer...');
+    } catch (graphqlError: any) {
+      console.log('⚠️ GraphQL fetch failed:', graphqlError.message);
     }
 
-    // Try using solutionViewerService as fallback
-    console.log(`🔄 Attempting to fetch using solutionViewerService for submission ${submissionId}...`);
-    const solutionViewerResult = await solutionViewerService.fetchSolution(submissionId);
-    
+    console.log(`🔄 Step 3: Trying solutionViewerService for submission ${submissionId}...`);
+    const solutionViewerResult = await solutionViewerService.fetchSolution(submissionId, {
+      username,
+      authUserId,
+    });
+
     if (solutionViewerResult.success && solutionViewerResult.solution) {
       console.log(`✅ Successfully fetched code for submission ${submissionId}`);
       return res.json({
-        submissionId,
-        code: solutionViewerResult.solution.code,
-        language: solutionViewerResult.solution.language,
-        message: 'Code retrieved from solution viewer'
+        success: true,
+        solution: {
+          submissionId,
+          code: solutionViewerResult.solution.code,
+          language: solutionViewerResult.solution.language,
+          runtime: solutionViewerResult.solution.runtime,
+          memory: solutionViewerResult.solution.memory,
+          problemName: solutionViewerResult.solution.problemName,
+          problemSlug: solutionViewerResult.solution.problemSlug,
+          problemUrl: solutionViewerResult.solution.problemUrl,
+          difficulty: solutionViewerResult.solution.difficulty,
+        },
       });
     }
 
-    // If everything fails, return error
-    console.log(`❌ All methods failed for submission ${submissionId}`);
-    return res.json({
-      submissionId,
-      error: 'authentication_required',
-      message: 'Submission code requires LeetCode authentication',
-      iframeUrl: `https://leetcode.com/submissions/detail/${submissionId}/`,
-      canEmbed: true
-    });
+    if (queryUsernameRaw) {
+      try {
+        console.log(`🔁 Step 4: Running targeted sync for user ${username} to retrieve submission ${submissionId}...`);
+        await syncUserSolutions(username, authUserId);
+        cachedSolution = await Solution.findOne({ submissionId, authUserId });
+        if (cachedSolution?.code) {
+          console.log('✅ Code retrieved after sync');
+          return res.json({
+            success: true,
+            solution: {
+              submissionId,
+              code: cachedSolution.code,
+              language: cachedSolution.language,
+              runtime: cachedSolution.runtime,
+              memory: cachedSolution.memory,
+              problemName: cachedSolution.problemName,
+              problemSlug: cachedSolution.problemSlug,
+              problemUrl: cachedSolution.problemUrl,
+              difficulty: cachedSolution.difficulty,
+            },
+          });
+        }
+      } catch (syncError: any) {
+        console.warn(`⚠️ Targeted sync failed: ${syncError.message}`);
+      }
+    }
 
+    console.log(`❌ All methods failed for submission ${submissionId}`);
+    return res.status(404).json({
+      success: false,
+      error: 'submission_not_accessible',
+      message: 'This submission code is not available. It may be private or require authentication.',
+      suggestions: [
+        'Make sure you have synced this user\'s solutions first',
+        'The submission may be from a private contest',
+        'Try viewing the submission directly on LeetCode',
+      ],
+      submissionId,
+      leetcodeUrl: `https://leetcode.com/submissions/detail/${submissionId}/`,
+    });
   } catch (error: any) {
-    console.error('Error fetching submission:', error.response?.data || error.message);
-    res.status(500).json({ 
-      error: 'Failed to fetch submission details',
-      message: error.response?.data?.errors?.[0]?.message || error.message,
-      submissionId: req.params.submissionId
+    console.error('❌ Error fetching submission:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'server_error',
+      message: 'Failed to fetch submission details',
+      details: error.message,
+      submissionId: req.params.submissionId,
     });
   }
 });
@@ -664,12 +821,23 @@ app.get('/api/submission/:submissionId', async (req: Request, res: Response) => 
 // ============================================
 
 // Sync user solutions - fetch from LeetCode and store in MongoDB
-app.post('/api/user/:username/sync', async (req: Request, res: Response) => {
+app.post('/api/user/:username/sync', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { username } = req.params;
+    const authUserId = req.userId;
+
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    const trackedUser = await ensureTrackedUserFor(authUserId, username);
     console.log(`\n🔄 Sync request received for user: ${username}`);
 
-    const result = await syncUserSolutions(username);
+    const result = await syncUserSolutions(trackedUser.username, authUserId);
 
     res.json({
       success: true,
@@ -678,6 +846,15 @@ app.post('/api/user/:username/sync', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Sync error:', error.message);
+
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'not_tracked',
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: 'Failed to sync user solutions',
@@ -687,19 +864,31 @@ app.post('/api/user/:username/sync', async (req: Request, res: Response) => {
 });
 
 // Get all solutions for a user from MongoDB
-app.get('/api/user/:username/solutions', async (req: Request, res: Response) => {
+app.get('/api/user/:username/solutions', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { username } = req.params;
     const { difficulty, language, limit = 50, skip = 0 } = req.query;
 
-    const query: any = { username };
+    const authUserId = req.userId;
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    const trackedUser = await ensureTrackedUserFor(authUserId, username);
+    const normalizedUsername = trackedUser.normalizedUsername;
+
+    const query: any = { authUserId, normalizedUsername };
     if (difficulty) query.difficulty = difficulty;
     if (language) query.language = language;
 
     const solutions = await Solution.find(query)
       .sort({ timestamp: -1 })
-      .limit(parseInt(limit as string))
-      .skip(parseInt(skip as string));
+      .limit(parseInt(limit as string, 10))
+      .skip(parseInt(skip as string, 10));
 
     const total = await Solution.countDocuments(query);
 
@@ -711,6 +900,15 @@ app.get('/api/user/:username/solutions', async (req: Request, res: Response) => 
     });
   } catch (error: any) {
     console.error('Error fetching solutions:', error.message);
+
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'not_tracked',
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: 'Failed to fetch solutions',
@@ -720,11 +918,22 @@ app.get('/api/user/:username/solutions', async (req: Request, res: Response) => 
 });
 
 // Get user stats and profile from MongoDB
-app.get('/api/user/:username/stats', async (req: Request, res: Response) => {
+app.get('/api/user/:username/stats', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { username } = req.params;
+    const authUserId = req.userId;
 
-    const user = await User.findOne({ username });
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    const trackedUser = await ensureTrackedUserFor(authUserId, username);
+
+    const user = await User.findOne({ authUserId, normalizedUsername: trackedUser.normalizedUsername });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -735,7 +944,7 @@ app.get('/api/user/:username/stats', async (req: Request, res: Response) => {
 
     // Get solution counts by difficulty
     const solutionCounts = await Solution.aggregate([
-      { $match: { username } },
+      { $match: { authUserId: trackedUser.authUserId, normalizedUsername: trackedUser.normalizedUsername } },
       {
         $group: {
           _id: '$difficulty',
@@ -766,6 +975,15 @@ app.get('/api/user/:username/stats', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error fetching user stats:', error.message);
+
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'not_tracked',
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: 'Failed to fetch user stats',
@@ -775,7 +993,7 @@ app.get('/api/user/:username/stats', async (req: Request, res: Response) => {
 });
 
 // Manually add/update code for a submission
-app.post('/api/solution/:submissionId/code', async (req: Request, res: Response) => {
+app.post('/api/solution/:submissionId/code', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { submissionId } = req.params;
     const { code, username, problemName, language, difficulty } = req.body;
@@ -787,19 +1005,42 @@ app.post('/api/solution/:submissionId/code', async (req: Request, res: Response)
       });
     }
 
+    const authUserId = req.userId;
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    if (!username || typeof username !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'username_required',
+        message: 'Username is required to associate code',
+      });
+    }
+
+    const trackedUser = await ensureTrackedUserFor(authUserId, username);
+
     // Check if solution already exists
-    let solution = await Solution.findOne({ submissionId });
+    let solution = await Solution.findOne({ submissionId, authUserId });
 
     if (solution) {
       // Update existing solution
       solution.code = code;
+      solution.username = trackedUser.username;
+      solution.normalizedUsername = trackedUser.normalizedUsername;
       await solution.save();
       console.log(`✅ Updated code for submission ${submissionId}`);
     } else {
       // Create new solution
       solution = new Solution({
         submissionId,
-        username: username || 'unknown',
+        username: trackedUser.username,
+        normalizedUsername: trackedUser.normalizedUsername,
+        authUserId: trackedUser.authUserId,
         problemName: problemName || 'Unknown Problem',
         problemSlug: '',
         problemUrl: '',
@@ -824,6 +1065,15 @@ app.post('/api/solution/:submissionId/code', async (req: Request, res: Response)
     });
   } catch (error: any) {
     console.error('Error saving code:', error.message);
+
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'not_tracked',
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: 'Failed to save code',
@@ -833,11 +1083,20 @@ app.post('/api/solution/:submissionId/code', async (req: Request, res: Response)
 });
 
 // Get a single solution by ID
-app.get('/api/solution/:submissionId/details', async (req: Request, res: Response) => {
+app.get('/api/solution/:submissionId/details', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { submissionId } = req.params;
+    const authUserId = req.userId;
 
-    const solution = await Solution.findOne({ submissionId });
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required',
+      });
+    }
+
+    const solution = await Solution.findOne({ submissionId, authUserId });
     if (!solution) {
       return res.status(404).json({
         success: false,

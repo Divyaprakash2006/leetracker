@@ -1,5 +1,6 @@
 import Solution from '../models/Solution';
 import { sendGraphQLQuery } from '../config/axios';
+import { resolveLeetCodeAuth } from '../utils/leetcodeAuth';
 
 export class SolutionViewerService {
   private getSubmissionDetailQuery = (submissionId: string) => ({
@@ -13,6 +14,12 @@ export class SolutionViewerService {
           code
           timestamp
           statusCode
+          user {
+            username
+            profile {
+              realName
+            }
+          }
           lang {
             name
             verboseName
@@ -35,11 +42,17 @@ export class SolutionViewerService {
     variables: { submissionId: parseInt(submissionId) }
   });
 
-  async fetchSolution(submissionId: string) {
+  async fetchSolution(submissionId: string, options: { username?: string; authUserId: string }) {
     try {
+      if (!options.authUserId) {
+        throw new Error('authUserId is required to fetch solution');
+      }
+
+      const normalizedUsernameHint = options.username?.toLowerCase().trim();
+
       // First, check if we already have this solution in the database
       console.log(`🔍 Checking if solution ${submissionId} exists in database`);
-      const existingSolution = await Solution.findOne({ submissionId });
+      const existingSolution = await Solution.findOne({ submissionId, authUserId: options.authUserId });
       if (existingSolution?.code) {
         console.log(`✅ Found solution ${submissionId} in database`);
         return {
@@ -48,11 +61,17 @@ export class SolutionViewerService {
         };
       }
 
+      const effectiveUsername = options.username || existingSolution?.username;
+      const auth = await resolveLeetCodeAuth(effectiveUsername);
+      console.log(`🔐 Using LeetCode auth source: ${auth.source}${auth.username ? ` (${auth.username})` : ''}`);
+
       // If not in database, fetch from LeetCode
       console.log(`🌐 Fetching solution ${submissionId} from LeetCode API`);
       const query = this.getSubmissionDetailQuery(submissionId);
       const result = await sendGraphQLQuery(query.query, query.variables, {
-        referer: `https://leetcode.com/submissions/detail/${submissionId}/`
+        referer: `https://leetcode.com/submissions/detail/${submissionId}/`,
+        sessionCookie: auth.session,
+        csrfToken: auth.csrfToken
       });
 
       const data = result.data?.submissionDetails;
@@ -60,7 +79,7 @@ export class SolutionViewerService {
         console.log(`⚠️ No submission details found for ${submissionId}`);
         return {
           success: false,
-          message: 'No submission details found'
+          message: 'This submission is not available. It may be private or require authentication with the correct LeetCode account. Only your own submissions can be viewed unless credentials are provided.'
         };
       }
 
@@ -68,11 +87,12 @@ export class SolutionViewerService {
         console.log(`⚠️ No code found in submission ${submissionId}`);
         return {
           success: false,
-          message: 'No code found in submission'
+          message: 'This submission exists but the code is not accessible. It may be private or you may not have permission to view it.'
         };
       }
 
       const solutionUpdate = {
+        username: data.user?.username || effectiveUsername || 'unknown',
         code: data.code,
         language: data.lang?.verboseName || data.lang?.name || 'Unknown',
         runtime: data.runtimeDisplay || data.runtime,
@@ -98,13 +118,18 @@ export class SolutionViewerService {
         };
       }
 
-      console.log(`ℹ️ Solution ${submissionId} not cached; returning fetched data without caching`);
+      console.log(`💾 Caching new solution ${submissionId} in database`);
+      const newSolution = new Solution({
+        submissionId,
+        ...solutionUpdate,
+        authUserId: options.authUserId,
+        normalizedUsername: (solutionUpdate.username || normalizedUsernameHint || 'unknown').toLowerCase()
+      });
+      await newSolution.save();
+
       return {
         success: true,
-        solution: {
-          submissionId,
-          ...solutionUpdate
-        }
+        solution: newSolution
       };
     } catch (error: any) {
       console.error(`❌ Error fetching solution ${submissionId}:`, error);

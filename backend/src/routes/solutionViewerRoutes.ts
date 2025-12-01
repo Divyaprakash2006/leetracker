@@ -1,14 +1,42 @@
 ﻿import express from 'express';
 import { solutionViewerService } from '../services/solutionViewerService';
+import TrackedUser from '../models/TrackedUser';
+import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
-router.get('/:submissionId', async (req, res) => {
+router.get('/:submissionId', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { submissionId } = req.params;
+    const queryUsername = (req.query.username as string | undefined)?.trim();
+    const authUserId = req.userId;
+
+    if (!authUserId) {
+      return res.status(401).json({
+        success: false,
+        error: 'auth_required',
+        message: 'Authentication required'
+      });
+    }
     console.log(`📝 Fetching solution for submission: ${submissionId}`);
+
+    const normalizedUsername = queryUsername?.toLowerCase();
+    const trackedUser = normalizedUsername
+      ? await TrackedUser.findOne({ authUserId, normalizedUsername })
+      : null;
+
+    if (!trackedUser) {
+      return res.status(403).json({
+        success: false,
+        error: 'not_tracked',
+        message: 'Provide a tracked username to load this submission'
+      });
+    }
     
-    const result = await solutionViewerService.fetchSolution(submissionId);
+    const result = await solutionViewerService.fetchSolution(submissionId, {
+      username: trackedUser.username,
+      authUserId,
+    });
     
     if (!result.success) {
       console.log(`❌ Failed to fetch solution: ${result.message}`);

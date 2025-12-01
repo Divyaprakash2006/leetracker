@@ -23,10 +23,10 @@ const ensureDbConnection = async () => {
 };
 
 // Helper to update user sync status
-const updateUserSyncStatus = async (username: string, success: boolean, error?: string) => {
+const updateUserSyncStatus = async (authUserId: string, username: string, success: boolean, error?: string) => {
   try {
     await User.findOneAndUpdate(
-      { username },
+      { authUserId, normalizedUsername: username.toLowerCase() },
       { 
         $set: { 
           lastSync: new Date(),
@@ -67,12 +67,18 @@ const performAutoSync = async () => {
     for (const user of users) {
       try {
         console.log(`\n🔄 Auto-syncing user: ${user.username}`);
+
+        const authUserId = user.authUserId?.toString();
+        if (!authUserId) {
+          console.warn(`⚠️ Skipping ${user.username} - missing authUserId`);
+          continue;
+        }
         
         // Perform the sync
-        const result = await syncUserSolutions(user.username);
+        const result = await syncUserSolutions(user.username, authUserId);
         
         // Update sync status
-        await updateUserSyncStatus(user.username, true);
+        await updateUserSyncStatus(authUserId, user.username, true);
         
         console.log(`✅ Auto-sync complete for ${user.username}`);
         console.log(`   💾 Saved/Updated: ${result.savedCount} solutions`);
@@ -82,7 +88,10 @@ const performAutoSync = async () => {
         await new Promise(resolve => setTimeout(resolve, 5000));
       } catch (error: any) {
         console.error(`❌ Auto-sync failed for ${user.username}:`, error.message);
-        await updateUserSyncStatus(user.username, false, error.message);
+        const authUserId = user.authUserId?.toString();
+        if (authUserId) {
+          await updateUserSyncStatus(authUserId, user.username, false, error.message);
+        }
         continue;
       }
     }

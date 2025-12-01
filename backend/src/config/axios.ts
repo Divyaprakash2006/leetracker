@@ -43,18 +43,25 @@ if (!leetcodeSession) {
 
 const leetcodeAxios: AxiosInstance = axios.create({
   baseURL: LEETCODE_API,
-  timeout: 15000, // Reduced from 30000ms to 15000ms
+  timeout: 10000, // Reduced to 10 seconds for faster failures
+  maxRedirects: 3,
+  maxContentLength: 50 * 1024 * 1024, // 50MB
   headers: leetcodeHeaders,
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false, // Fix for self-signed certificate error
-    keepAlive: true, // Enable keep-alive for faster subsequent requests
-    maxSockets: 50 // Allow more concurrent connections
+    rejectUnauthorized: false,
+    keepAlive: true,
+    keepAliveMsecs: 30000, // Keep connections alive for 30s
+    maxSockets: 100, // Increased for better concurrent handling
+    maxFreeSockets: 10,
+    timeout: 10000,
+    scheduling: 'fifo' // First in, first out scheduling
   })
 });
 
 // General purpose axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  timeout: 15000, // Reduced from 30000ms to 15000ms
+  timeout: 10000, // Reduced to 10 seconds
+  maxRedirects: 3,
   headers: {
     'Content-Type': 'application/json',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -63,23 +70,62 @@ const axiosInstance: AxiosInstance = axios.create({
     'Pragma': 'no-cache'
   },
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false, // Fix for self-signed certificate error
-    keepAlive: true, // Enable keep-alive
-    maxSockets: 50 // Allow more concurrent connections
+    rejectUnauthorized: false,
+    keepAlive: true,
+    keepAliveMsecs: 30000,
+    maxSockets: 100,
+    maxFreeSockets: 10,
+    timeout: 10000,
+    scheduling: 'fifo'
   })
 });
 
-// Add interceptors for better error handling
+// Add interceptors for better error handling and retry logic
 const addErrorInterceptor = (instance: AxiosInstance) => {
+  // Request interceptor for logging
+  instance.interceptors.request.use(
+    config => {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
+      }
+      return config;
+    },
+    error => Promise.reject(error)
+  );
+
+  // Response interceptor with retry logic
   instance.interceptors.response.use(
     response => response,
-    (error: AxiosError) => {
-      console.error('🔴 API Error:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        message: error.message,
-        data: error.response?.data
-      });
+    async (error: AxiosError) => {
+      const config = error.config as any;
+      
+      // Retry logic for network errors or 429 rate limiting
+      if (config && !config.__retryCount) {
+        config.__retryCount = 0;
+      }
+      
+      if (
+        config && 
+        config.__retryCount < 2 && 
+        (error.code === 'ECONNRESET' || 
+         error.code === 'ETIMEDOUT' ||
+         error.response?.status === 429)
+      ) {
+        config.__retryCount += 1;
+        const delay = config.__retryCount * 1000; // Exponential backoff
+        console.log(`🔄 Retry ${config.__retryCount}/2 after ${delay}ms`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return instance(config);
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('🔴 API Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          message: error.message,
+          code: error.code
+        });
+      }
       return Promise.reject(error);
     }
   );
@@ -91,6 +137,9 @@ addErrorInterceptor(leetcodeAxios);
 // Helper to send GraphQL queries
 interface GraphQLRequestOptions {
   referer?: string;
+  sessionCookie?: string;
+  csrfToken?: string;
+  headers?: Record<string, string>;
 }
 
 export const sendGraphQLQuery = async (
@@ -101,12 +150,32 @@ export const sendGraphQLQuery = async (
   try {
     console.log('📡 Sending GraphQL query:', { query, variables });
     
-    const requestConfig: AxiosRequestConfig = {};
+    const requestHeaders: Record<string, string> = {};
     if (options.referer) {
-      requestConfig.headers = {
-        ...(requestConfig.headers || {}),
-        Referer: options.referer
-      } as Record<string, string>;
+      requestHeaders.Referer = options.referer;
+    }
+
+    if (options.sessionCookie || options.csrfToken) {
+      const cookieParts: string[] = [];
+      if (options.sessionCookie) {
+        cookieParts.push(`LEETCODE_SESSION=${options.sessionCookie}`);
+      }
+      if (options.csrfToken) {
+        cookieParts.push(`csrftoken=${options.csrfToken}`);
+        requestHeaders['x-csrftoken'] = options.csrfToken;
+      }
+      if (cookieParts.length > 0) {
+        requestHeaders.Cookie = cookieParts.join('; ');
+      }
+    }
+
+    if (options.headers) {
+      Object.assign(requestHeaders, options.headers);
+    }
+
+    const requestConfig: AxiosRequestConfig = {};
+    if (Object.keys(requestHeaders).length > 0) {
+      requestConfig.headers = requestHeaders;
     }
     
     const response = await leetcodeAxios.post(
@@ -127,6 +196,11 @@ export const sendGraphQLQuery = async (
     
     return response.data;
   } catch (error: any) {
+    const safeHeaders = { ...(error.config?.headers || {}) } as Record<string, unknown>;
+    if (safeHeaders.Cookie) safeHeaders.Cookie = '[REDACTED]';
+    if (safeHeaders.cookie) safeHeaders.cookie = '[REDACTED]';
+    if (safeHeaders['x-csrftoken']) safeHeaders['x-csrftoken'] = '[REDACTED]';
+
     console.error('🔴 LeetCode API Error:', {
       message: error.message,
       response: error.response?.data,
@@ -134,7 +208,7 @@ export const sendGraphQLQuery = async (
       config: {
         url: error.config?.url,
         method: error.config?.method,
-        headers: error.config?.headers
+        headers: safeHeaders,
       }
     });
     throw error;

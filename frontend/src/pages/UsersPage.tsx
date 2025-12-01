@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { apiClient } from "../config/api";
+import { apiClient, getAuthHeaders } from "../config/api";
 import { useTrackedUsers } from "../context/UserContext";
 
 interface UserStats {
@@ -42,9 +42,10 @@ export const UsersPage = () => {
     setLoading(prev => ({ ...prev, ...loadingState }));
 
     try {
+      const headers = getAuthHeaders();
       // Fetch all users in parallel with timeout
       const promises = usernames.map(username => 
-        axios.get(apiClient.getUser(username), { timeout: 8000 })
+        axios.get(apiClient.getUser(username), { timeout: 8000, headers })
           .then(response => ({ username, data: response.data, error: null }))
           .catch(error => ({ username, data: null, error }))
       );
@@ -78,7 +79,10 @@ export const UsersPage = () => {
   const fetchUserData = async (username: string) => {
     setLoading(prev => ({ ...prev, [username]: true }));
     try {
-      const response = await axios.get(apiClient.getUser(username), { timeout: 8000 });
+      const response = await axios.get(apiClient.getUser(username), {
+        timeout: 8000,
+        headers: getAuthHeaders()
+      });
       setUsersData(prev => ({ ...prev, [username]: response.data }));
     } catch (error) {
       console.error(`Error fetching data for ${username}:`, error);

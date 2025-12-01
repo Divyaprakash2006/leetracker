@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 import { Loader } from '../components/Loader';
 import { useTrackedUsers } from '../context/UserContext';
 import {
@@ -85,13 +85,19 @@ export const UserProgressPage = () => {
     try {
       // Optimized: Added timeout and better error handling
       const response = await axios.get(apiClient.getUser(targetUsername), { 
-        timeout: 10000 
+        timeout: 10000,
+        headers: getAuthHeaders() 
       });
       setUserData(response.data);
     } catch (err: any) {
-      const errorMsg = err.code === 'ECONNABORTED' 
-        ? 'Request timeout - server took too long to respond'
-        : err.response?.data?.message || 'Failed to fetch user data';
+      const status = err?.response?.status;
+      const unauthorizedMessage = status === 401 || status === 403
+        ? 'Please sign in to view this user’s progress.'
+        : null;
+      const errorMsg = unauthorizedMessage
+        || (err.code === 'ECONNABORTED'
+          ? 'Request timeout - server took too long to respond'
+          : err.response?.data?.message || 'Failed to fetch user data');
       setError(errorMsg);
     } finally {
       setLoading(false);

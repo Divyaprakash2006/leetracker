@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 import { Loader } from '../components/Loader';
 import { useTrackedUsers } from '../context/UserContext';
 
@@ -92,23 +92,31 @@ export const SubmissionsPage = () => {
 
     setLoading(true);
     setError('');
+    
+    console.log(`📊 Fetching submissions for ${targetUsername}...`);
 
     try {
+      const headers = getAuthHeaders();
+
       // Optimized: Start with smaller batch for faster initial render, then load more in background
       const initialLimit = 100; // Fast initial load
       const fullLimit = 5000;   // Reduced from 10000 for better performance
       
       // Phase 1: Fast initial fetch (both in parallel)
+      console.log('🚀 Phase 1: Fetching initial data...');
       const [legacyResponse, initialSolutionsResponse] = await Promise.all([
-        axios.get(apiClient.getUser(targetUsername), { timeout: 5000 }),
+        axios.get(apiClient.getUser(targetUsername), { timeout: 5000, headers }),
         axios.get(apiClient.getUserSolutions(targetUsername), {
           params: { limit: initialLimit, skip: 0 },
-          timeout: 5000
+          timeout: 5000,
+          headers
         }),
       ]);
 
       const legacySubmissionsRaw: Submission[] = legacyResponse.data?.recentSubmissions || [];
       const initialSolutions: StoredSolution[] = initialSolutionsResponse.data?.solutions || [];
+      
+      console.log(`✅ Loaded ${legacySubmissionsRaw.length} recent + ${initialSolutions.length} stored solutions`);
 
       // Process and display initial data immediately
       const submissionsMap = new Map<string, Submission>();
@@ -200,7 +208,8 @@ export const SubmissionsPage = () => {
         // Fetch remaining data in background
         axios.get(apiClient.getUserSolutions(targetUsername), {
           params: { limit: fullLimit - initialLimit, skip: initialLimit },
-          timeout: 10000
+          timeout: 10000,
+          headers
         }).then(response => {
           const remainingSolutions: StoredSolution[] = response.data?.solutions || [];
           
@@ -245,7 +254,11 @@ export const SubmissionsPage = () => {
       }
 
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch user data');
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        setError('Please sign in again to view this user’s submissions.');
+      } else {
+        setError(err?.response?.data?.message || 'Failed to fetch user data');
+      }
       setLoading(false);
     }
   };

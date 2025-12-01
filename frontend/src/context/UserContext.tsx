@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import axios from 'axios';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 
 interface TrackedUser {
   username: string;
@@ -65,24 +65,38 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('auth_token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
+
+      if (!headers.Authorization) {
+        console.log('ℹ️  No auth token found, using local cache only');
+        const cached = loadLocalCache();
+        setTrackedUsers(cached);
+        setLoading(false);
+        return;
+      }
       
+      console.log('📡 Fetching tracked users from API...');
       const response = await axios.get(apiClient.listTrackedUsers(), {
         timeout: 10000,
         headers,
       });
 
       const users = normalizeTrackedUsers(response.data?.users || []);
+      console.log(`✅ Loaded ${users.length} tracked user(s) from API`);
       setTrackedUsers(users);
       persistToLocalStorage(users);
     } catch (err: any) {
       console.error('❌ Failed to load tracked users from API:', err?.message || err);
-      setError(err?.response?.data?.message || 'Failed to load tracked users');
+      
+      // Don't show error for 401 (not logged in)
+      if (err?.response?.status !== 401) {
+        setError(err?.response?.data?.message || 'Failed to load tracked users');
+      }
 
       // Fallback to local cache if available
       const cached = loadLocalCache();
       if (cached.length > 0) {
+        console.log(`📦 Using ${cached.length} cached user(s)`);
         setTrackedUsers(cached);
       }
     } finally {
@@ -121,8 +135,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
+      if (!headers.Authorization) {
+        setLoading(false);
+        const message = 'Please sign in to track users.';
+        setError(message);
+        throw new Error(message);
+      }
       
       const payload: { username: string; realName?: string } = { username: trimmed };
       if (realName && realName.trim()) {
@@ -146,7 +165,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       });
     } catch (err: any) {
       console.error('❌ Failed to add tracked user:', err?.message || err);
-      const errorMessage = err?.response?.data?.message || 'Failed to add tracked user';
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to add tracked user';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -162,8 +181,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers = getAuthHeaders();
+      if (!headers.Authorization) {
+        setLoading(false);
+        const message = 'Please sign in to update tracked users.';
+        setError(message);
+        throw new Error(message);
+      }
       
       await axios.delete(apiClient.removeTrackedUser(trimmed), { headers });
       setTrackedUsers((prev) => {
@@ -173,7 +197,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       });
     } catch (err: any) {
       console.error('❌ Failed to remove tracked user:', err?.message || err);
-      const errorMessage = err?.response?.data?.message || 'Failed to remove tracked user';
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to remove tracked user';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

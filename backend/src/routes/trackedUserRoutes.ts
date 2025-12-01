@@ -24,6 +24,7 @@ const formatTrackedUser = (trackedUser: TrackedUserLike) => {
     notes: data.notes ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
+    hasLeetCodeAuth: Boolean(data.leetcodeSessionUpdatedAt),
   };
 };
 
@@ -61,6 +62,8 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     const username: string = (req.body?.username || '').trim();
     const userId: string = (req.body?.userId || '').trim();
     const realName: string | undefined = req.body?.realName?.trim() || undefined;
+    const leetcodeSession: string | undefined = req.body?.leetcodeSession?.trim() || undefined;
+    const leetcodeCsrfToken: string | undefined = req.body?.leetcodeCsrfToken?.trim() || undefined;
 
     console.log('➕ Adding tracked user:', { username, authUserId, authUserName });
 
@@ -92,6 +95,15 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       if (realName && !trackedUser.realName) {
         trackedUser.realName = realName;
       }
+      if (leetcodeSession || leetcodeCsrfToken) {
+        if (leetcodeSession) {
+          trackedUser.leetcodeSession = leetcodeSession;
+          trackedUser.leetcodeSessionUpdatedAt = new Date();
+        }
+        if (leetcodeCsrfToken) {
+          trackedUser.leetcodeCsrfToken = leetcodeCsrfToken;
+        }
+      }
       trackedUser = await trackedUser.save();
 
       return res.json({
@@ -102,14 +114,17 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     }
 
     // Create new tracked user
-    trackedUser = await new TrackedUser({ 
-      username, 
-      userId: effectiveUserId, 
-      realName,
-      addedBy: authUserName,
-      authUserId,
-      addedAt: new Date() 
-    }).save();
+      trackedUser = await new TrackedUser({ 
+        username, 
+        userId: effectiveUserId, 
+        realName,
+        addedBy: authUserName,
+        authUserId,
+        addedAt: new Date(),
+        leetcodeSession,
+        leetcodeCsrfToken,
+        leetcodeSessionUpdatedAt: leetcodeSession ? new Date() : undefined,
+      }).save();
 
     console.log('✅ Tracked user created:', trackedUser._id);
 
@@ -138,14 +153,15 @@ router.delete('/', authenticateToken, async (req: AuthRequest, res) => {
     // Get all tracked users for this auth user
     const trackedUsers = await TrackedUser.find({ authUserId });
     const usernames = trackedUsers.map(tu => tu.username);
+    const normalizedUsernames = trackedUsers.map(tu => tu.normalizedUsername);
     
     // Delete tracked users
     const trackedResult = await TrackedUser.deleteMany({ authUserId });
     
     // Delete associated LeetCode data for these users
     const [userResult, solutionResult] = await Promise.all([
-      User.deleteMany({ username: { $in: usernames } }),
-      Solution.deleteMany({ username: { $in: usernames } }),
+      User.deleteMany({ authUserId, normalizedUsername: { $in: normalizedUsernames } }),
+      Solution.deleteMany({ authUserId, normalizedUsername: { $in: normalizedUsernames } }),
     ]);
 
     const deletedCount = trackedResult.deletedCount ?? 0;
@@ -207,8 +223,8 @@ router.delete('/:username', authenticateToken, async (req: AuthRequest, res) => 
 
     // Delete associated LeetCode data
     const [userDeleteResult, solutionDeleteResult] = await Promise.all([
-      User.deleteMany({ username: trackedUser.username }),
-      Solution.deleteMany({ username: trackedUser.username }),
+      User.deleteMany({ authUserId, normalizedUsername: trackedUser.normalizedUsername }),
+      Solution.deleteMany({ authUserId, normalizedUsername: trackedUser.normalizedUsername }),
     ]);
 
     console.log(`✅ Deleted tracked user and ${userDeleteResult.deletedCount} user records, ${solutionDeleteResult.deletedCount} solutions`);
@@ -265,6 +281,85 @@ router.patch('/:username/viewed', authenticateToken, async (req: AuthRequest, re
     res.status(500).json({
       success: false,
       message: 'Failed to update tracked user view time',
+      error: error.message,
+    });
+  }
+});
+
+// Update LeetCode auth tokens for a tracked user
+router.patch('/:username/auth', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const authUserId = req.userId;
+    const usernameParam = (req.params.username || '').trim();
+
+    if (!usernameParam) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is required',
+      });
+    }
+
+    const normalizedUsername = usernameParam.toLowerCase();
+
+    const trackedUser = await TrackedUser.findOne({
+      authUserId,
+      normalizedUsername,
+    }).select('+leetcodeSession +leetcodeCsrfToken');
+
+    if (!trackedUser) {
+      return res.status(404).json({
+        success: false,
+        message: `Tracked user ${usernameParam} not found`,
+      });
+    }
+
+    const rawSession = req.body?.leetcodeSession;
+    const rawCsrf = req.body?.leetcodeCsrfToken;
+    const clearAuth = req.body?.clear === true;
+
+    if (clearAuth) {
+      trackedUser.leetcodeSession = undefined;
+      trackedUser.leetcodeCsrfToken = undefined;
+      trackedUser.leetcodeSessionUpdatedAt = undefined;
+    } else {
+      const sessionToken = typeof rawSession === 'string' ? rawSession.trim() : undefined;
+      const csrfToken = typeof rawCsrf === 'string' ? rawCsrf.trim() : undefined;
+
+      if (!sessionToken && !csrfToken && rawSession === undefined && rawCsrf === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Provide leetcodeSession, leetcodeCsrfToken, or set clear=true to remove credentials',
+        });
+      }
+
+      if (sessionToken) {
+        trackedUser.leetcodeSession = sessionToken;
+        trackedUser.leetcodeSessionUpdatedAt = new Date();
+      } else if (rawSession === '') {
+        trackedUser.leetcodeSession = undefined;
+        trackedUser.leetcodeSessionUpdatedAt = undefined;
+      }
+
+      if (csrfToken !== undefined) {
+        trackedUser.leetcodeCsrfToken = csrfToken || undefined;
+        trackedUser.leetcodeSessionUpdatedAt = trackedUser.leetcodeSession
+          ? trackedUser.leetcodeSessionUpdatedAt ?? new Date()
+          : trackedUser.leetcodeSessionUpdatedAt;
+      }
+    }
+
+    await trackedUser.save();
+
+    res.json({
+      success: true,
+      message: clearAuth ? 'LeetCode credentials removed' : 'LeetCode credentials updated',
+      user: formatTrackedUser(trackedUser),
+    });
+  } catch (error: any) {
+    console.error('❌ Failed to update LeetCode credentials:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update LeetCode credentials',
       error: error.message,
     });
   }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTrackedUsers } from "../context/UserContext";
 import axios from "axios";
-import { apiClient } from "../config/api";
+import { apiClient, getAuthHeaders } from "../config/api";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -29,18 +29,29 @@ export const DashboardPage: React.FC = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
+    console.log('📊 DashboardPage: Tracked users updated', trackedUsers.length);
+  }, [trackedUsers]);
+
+  useEffect(() => {
     const fetchStats = async () => {
       if (trackedUsers.length === 0) {
         setLoading(false);
+        setUserStats([]);
         return;
       }
 
       try {
         setLoading(true);
+        console.log(`📊 Fetching stats for ${trackedUsers.length} tracked user(s)...`);
+        const headers = getAuthHeaders();
+        
         // Optimized: Parallel fetch with timeout and error handling
         const statsPromises = trackedUsers.map(async (user) => {
           try {
-            const response = await axios.get(apiClient.getUser(user.username), { timeout: 8000 });
+            const response = await axios.get(apiClient.getUser(user.username), {
+              timeout: 8000,
+              headers
+            });
             const data = response.data;
             
             const problems = data?.problems || { total: 0, easy: 0, medium: 0, hard: 0 };
@@ -57,6 +68,10 @@ export const DashboardPage: React.FC = () => {
               addedAt: user.addedAt
             };
           } catch (err) {
+            const status = (err as any)?.response?.status;
+            if (status === 401 || status === 403) {
+              throw err;
+            }
             console.error(`Failed to fetch stats for ${user.username}:`, err);
             return {
               username: user.username,
@@ -80,10 +95,18 @@ export const DashboardPage: React.FC = () => {
           return a.ranking - b.ranking;
         });
         
+        console.log('✅ Stats fetched successfully');
         setUserStats(sorted);
         setLastUpdate(new Date());
       } catch (err) {
-        console.error("Failed to fetch user stats:", err);
+        const status = (err as any)?.response?.status;
+        if (status === 401 || status === 403) {
+          console.warn('Authentication required to load dashboard stats.');
+          setUserStats([]);
+          setLastUpdate(null);
+        } else {
+          console.error("Failed to fetch user stats:", err);
+        }
       } finally {
         setLoading(false);
       }
@@ -106,7 +129,9 @@ export const DashboardPage: React.FC = () => {
           <div className="relative flex flex-col items-center gap-6 text-center text-[#2b2b2b]">
             <span className="text-xs uppercase tracking-[0.55em] text-[#f59f0b]">LeetTracker</span>
             <div className="space-y-3">
-              <h1 className="text-4xl font-black uppercase sm:text-5xl text-[#121212]">LeetCode stats</h1>
+              <h1 className="text-4xl font-black uppercase sm:text-5xl text-[#121212]">
+                {trackedUsers.length === 0 ? 'Start Tracking' : 'LeetCode Stats'}
+              </h1>
             </div>
             <Link to="/search" className="animated-button">
               <span className="fold"></span>
@@ -276,18 +301,28 @@ export const DashboardPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <Card className="flex flex-col items-center gap-4 rounded-3xl border border-slate-200 bg-white px-8 py-12 text-center text-slate-900 shadow-sm">
+          <Card className="flex flex-col items-center gap-6 rounded-3xl border border-slate-200 bg-white px-8 py-12 text-center text-slate-900 shadow-sm">
             <Avatar className="h-14 w-14">
               <AvatarFallback className="rounded-full bg-slate-100 text-lg font-semibold text-slate-500">
                 <Users className="h-6 w-6" />
               </AvatarFallback>
             </Avatar>
-            <h3 className="text-lg font-semibold text-slate-900">No users tracked yet</h3>
-            <p className="max-w-sm text-sm text-slate-500">Add a LeetCode profile to start monitoring activity and problem-solving stats here.</p>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-slate-900">Welcome to Your Personal Dashboard! 🎉</h3>
+              <p className="max-w-md text-sm text-slate-500">
+                Start tracking LeetCode profiles to monitor progress, compare stats, and view submissions. 
+                Your dashboard is private - only you can see the users you track.
+              </p>
+            </div>
+            <div className="space-y-2 text-xs text-slate-400 max-w-sm">
+              <p>✅ Your account is ready</p>
+              <p>✅ All data is private to you</p>
+              <p>✅ Track unlimited LeetCode users</p>
+            </div>
             <Button asChild className="btn-leetcode gap-2">
               <Link to="/search">
                 <Plus className="h-4 w-4" />
-                Add first user
+                Track Your First User
               </Link>
             </Button>
           </Card>

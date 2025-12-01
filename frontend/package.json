@@ -37,7 +37,8 @@
     "recharts": "^3.3.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.180.0"
+    "three": "^0.180.0",
+    "unsplash-js": "^7.0.20"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",

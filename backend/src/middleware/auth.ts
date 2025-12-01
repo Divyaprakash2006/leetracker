@@ -21,7 +21,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
     
     // Get user from database
     const user = await AuthUser.findById(decoded.userId).select('-password');
@@ -60,7 +60,7 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
       const user = await AuthUser.findById(decoded.userId).select('-password');
       
       if (user) {

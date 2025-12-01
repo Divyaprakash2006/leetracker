@@ -1,7 +1,7 @@
 // SolutionViewerPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { apiClient } from '../config/api';
+import { apiClient, getAuthHeaders } from '../config/api';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -39,15 +39,25 @@ export const SolutionViewerPage: React.FC = () => {
         setLoading(true);
         const url = apiClient.getSolutionViewer(id);
         const response = await axios.get(url, { 
-          timeout: 10000 
+          timeout: 10000,
+          headers: getAuthHeaders() 
         });
-        setSolution(response.data);
+        
+        // Backend returns { success: true, solution: {...} }
+        if (response.data.success && response.data.solution) {
+          setSolution(response.data.solution);
+        } else {
+          setError(response.data.message || 'Solution not found');
+        }
       } catch (err: any) {
-        const errorMsg = err.code === 'ECONNABORTED' 
-          ? 'Request timeout - solution took too long to load'
-          : err.response?.status === 404
-            ? 'Solution not found'
-            : 'Failed to load solution';
+        const status = err?.response?.status;
+        const errorMsg = status === 401 || status === 403
+          ? 'Please sign in to view this solution.'
+          : err.code === 'ECONNABORTED' 
+            ? 'Request timeout - solution took too long to load'
+            : status === 404
+              ? 'Solution not found'
+              : 'Failed to load solution';
         setError(errorMsg);
         console.error('Error fetching solution:', err);
       } finally {
@@ -64,13 +74,47 @@ export const SolutionViewerPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white">
-        <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Error</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Button asChild>
-            <a href="/solutions">Back to Solutions</a>
-          </Button>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-2xl mx-4">
+          <div className="mb-6">
+            <svg className="w-20 h-20 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Unable to Load Submission</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+          </div>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+            <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Why is this happening?
+            </h3>
+            <p className="text-sm text-blue-800 mb-3">
+              LeetCode's API only allows you to view your own submission code. This is a privacy feature by LeetCode.
+            </p>
+            <div className="text-sm text-blue-800">
+              <strong>Solutions:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                <li>Make sure your <code className="bg-blue-100 px-1 rounded">LEETCODE_SESSION</code> token matches the submission owner</li>
+                <li>Only submissions from user <strong>Divi_10</strong> can be viewed with your current setup</li>
+                <li>View the submission directly on LeetCode instead</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => window.location.href = '/submissions'} variant="outline">
+              Back to Submissions
+            </Button>
+            <Button 
+              onClick={() => window.open(`https://leetcode.com/submissions/detail/${id}/`, '_blank')}
+              className="bg-[#ffa116] hover:bg-[#ff8800]"
+            >
+              View on LeetCode →
+            </Button>
+          </div>
         </div>
       </div>
     );

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Award, BarChart3, Users, LineChart, Shield } from "lucide-react";
 import axios from "axios";
-import { apiClient } from "../config/api";
+import { apiClient, getAuthHeaders } from "../config/api";
 import { useTrackedUsers } from "../context/UserContext";
 
 const HomePage = () => {
@@ -30,9 +30,13 @@ const HomePage = () => {
 
       try {
         // Optimized: Parallel fetch with reduced timeout
+        const headers = getAuthHeaders();
         const totalsPromises = trackedUsers.map(async (user) => {
           try {
-            const response = await axios.get(apiClient.getUser(user.username), { timeout: 7000 });
+            const response = await axios.get(apiClient.getUser(user.username), {
+              timeout: 7000,
+              headers
+            });
             const userTotal = response.data?.problems?.total;
             return typeof userTotal === "number" && !Number.isNaN(userTotal) ? userTotal : 0;
           } catch (error) {
