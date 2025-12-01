@@ -73,7 +73,7 @@ app.use(cors({
 
     try {
       const hostname = new URL(origin).hostname;
-      if (/\.onrender\.com$/i.test(hostname)) {
+      if (/\.onrender\.com$/i.test(hostname) || /\.vercel\.app$/i.test(hostname)) {
         return callback(null, true);
       }
     } catch (error) {
