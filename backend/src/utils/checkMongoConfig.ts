@@ -3,7 +3,7 @@
  */
 
 export const checkMongoConfig = () => {
-  const uri = process.env.LOCAL_MONGODB_URI?.trim();
+  const uri = process.env.MONGODB_URI?.trim();
   const nodeEnv = process.env.NODE_ENV || 'development';
 
   console.log('\n' + '='.repeat(60));
@@ -12,11 +12,11 @@ export const checkMongoConfig = () => {
 
   // Check if URI is set
   if (!uri || uri.length === 0) {
-    console.log('❌ LOCAL_MONGODB_URI: NOT SET');
+    console.log('❌ MONGODB_URI: NOT SET');
     console.log('📝 Defaulting to: mongodb://127.0.0.1:27017/leetracker');
     console.log('⚠️  This will ONLY work for local development!');
   } else {
-    console.log('✅ LOCAL_MONGODB_URI: Found');
+    console.log('✅ MONGODB_URI: Found');
   }
 
   // Check environment
@@ -72,7 +72,7 @@ export const checkMongoConfig = () => {
       console.log('✅ This should work on cloud platforms');
     } else {
       console.log('⚠️  Connection Type: Unknown/Invalid');
-      console.log('   Check your LOCAL_MONGODB_URI format');
+      console.log('   Check your MONGODB_URI format');
     }
   } else {
     // No URI set
@@ -80,10 +80,10 @@ export const checkMongoConfig = () => {
       console.log('');
       console.log('🚨 CRITICAL ERROR: No database configuration in production!');
       console.log('='.repeat(60));
-      console.log('❌ LOCAL_MONGODB_URI environment variable is not set');
+      console.log('❌ MONGODB_URI environment variable is not set');
       console.log('');
       console.log('📖 Solution:');
-      console.log('   Set LOCAL_MONGODB_URI in Render environment variables');
+      console.log('   Set MONGODB_URI in Render environment variables');
       console.log('   Use MongoDB Atlas connection string:');
       console.log('   mongodb+srv://user:pass@cluster.mongodb.net/leetracker');
       console.log('');
@@ -112,7 +112,7 @@ export const getConnectionAdvice = (error: any): string[] => {
       advice.push('✅ Fix:');
       advice.push('   1. Set up MongoDB Atlas (free): https://www.mongodb.com/cloud/atlas');
       advice.push('   2. Get connection string: mongodb+srv://...');
-      advice.push('   3. Update LOCAL_MONGODB_URI in Render environment');
+      advice.push('   3. Update MONGODB_URI in Render environment');
       advice.push('   4. Redeploy your service');
     } else {
       advice.push('💻 Local Development Issues:');
