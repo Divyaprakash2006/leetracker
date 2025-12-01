@@ -7,6 +7,8 @@
 mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
 ```
 
+**Environment Variable Name**: `MONGODB_URI` (not LOCAL_MONGODB_URI)
+
 **Details:**
 - Username: `Divi_01`
 - Password: `Divi123`
@@ -53,9 +55,14 @@ mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=
 
 ## Connection String Formats
 
-### For Render/Railway Environment Variable
+### For Render/Railway/Vercel Environment Variable
 ```env
-LOCAL_MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
+```
+
+### For Local Development (backend/.env)
+```env
+MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
 ```
 
 ### If Password Has Special Characters
@@ -70,11 +77,11 @@ If your password contains special characters, URL encode them:
 Example: Password `P@ss:123` becomes `P%40ss%3A123`
 
 Your current password `Divi123` has no special characters ✅
-
----
-
-## Testing Connection
-
+### Test Locally First
+1. Update `backend/.env`:
+   ```env
+   MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
+   ```
 ### Test Locally First
 1. Update `backend/.env`:
    ```env

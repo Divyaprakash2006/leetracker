@@ -24,7 +24,7 @@
 Click "Advanced" → "Add Environment Variable" and add these:
 
 ```env
-LOCAL_MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=your-super-secret-jwt-key-change-in-production-make-it-long-and-random-at-least-32-characters
 SESSION_SECRET=your-session-secret-also-change-this-to-random-string
 PORT=5001

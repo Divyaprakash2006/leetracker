@@ -1,18 +1,18 @@
 # Copilot Instructions for leetracker
 
 ## MongoDB Connection
-- This project is configured to connect ONLY to a local MongoDB instance (MongoDB Compass).
-- Atlas and remote cluster support is removed; do not use `MONGODB_URI`.
+- This project uses ONLY MongoDB Atlas cloud connection.
+- Local MongoDB is NOT supported - Atlas connection is required.
 - Set your connection string in `backend/.env` as:
   ```ini
-  LOCAL_MONGODB_URI=mongodb://127.0.0.1:27017/leetracker
+  MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
   ```
-- The backend will always use `LOCAL_MONGODB_URI` or default to `mongodb://127.0.0.1:27017/leetracker` if unset.
-- Ensure MongoDB is running locally before starting the backend.
+- The backend will require `MONGODB_URI` environment variable.
+- Ensure MongoDB Atlas Network Access allows connections (0.0.0.0/0 for development).
 
 ## Quick Start
-- Start MongoDB locally (use MongoDB Compass or run `mongod`).
-- In `backend/.env`, confirm or set the local URI as above.
+- Ensure MongoDB Atlas Network Access allows your IP.
+- In `backend/.env`, set the MongoDB Atlas connection string as above.
 - Start backend:
   ```cmd
   cd backend
@@ -21,8 +21,8 @@
   ```
 
 ## Troubleshooting
-- If you see `ECONNREFUSED 127.0.0.1:27017`, MongoDB is not running or the port is blocked.
-- Use MongoDB Compass to verify the connection and database.
+- If you see connection errors, verify MongoDB Atlas Network Access allows 0.0.0.0/0.
+- Use MongoDB Atlas dashboard to verify the connection string.
 
 ---
-For all database operations, only local MongoDB is supported. Do not attempt to use Atlas or remote clusters.
+For all database operations, only MongoDB Atlas cloud connection is supported.

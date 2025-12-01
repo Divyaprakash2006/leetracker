@@ -3,7 +3,7 @@
 ## ✅ Current Status (Based on Screenshot)
 
 ### Environment Variables Set:
-- ✅ LOCAL_MONGODB_URI (verify full string is there)
+- ✅ MONGODB_URI (verify full string is there)
 - ✅ PORT = 5001
 - ✅ NODE_ENV = production
 - ⚠️ JWT_SECRET = needs update (currently placeholder)
@@ -43,7 +43,7 @@ RADafFeyKYbojL3t1mzvs7pSGNPiVuI68wUEghB4
 3. Replace with: `3RTu7QqPN5k9MzHYbnZh0KU1EOl8C6doaVLsBvwc`
 4. Save
 
-### 3. Verify LOCAL_MONGODB_URI (IMPORTANT!)
+### 3. Verify MONGODB_URI (IMPORTANT!)
 The value appears cut off in screenshot. Make sure it's the COMPLETE string:
 
 ```
@@ -51,7 +51,7 @@ mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=
 ```
 
 **Steps**:
-1. Click on `LOCAL_MONGODB_URI` value field
+1. Click on `MONGODB_URI` value field
 2. Scroll right to see full value
 3. If it's truncated, update with full string above
 4. Save
