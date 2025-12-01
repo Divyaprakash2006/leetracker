@@ -11,6 +11,7 @@ backend/dist/
 # Environment files
 .env
 backend/.env
+backend/.env.production
 frontend/.env
 frontend/.env.development
 frontend/.env.production

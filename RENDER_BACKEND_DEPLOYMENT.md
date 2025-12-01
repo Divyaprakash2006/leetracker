@@ -24,7 +24,7 @@
 Click "Advanced" → "Add Environment Variable" and add these:
 
 ```env
-LOCAL_MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority
+LOCAL_MONGODB_URI=mongodb+srv://Divi_01:Divi123@cluster0.tpjds.mongodb.net/leetracker?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=your-super-secret-jwt-key-change-in-production-make-it-long-and-random-at-least-32-characters
 SESSION_SECRET=your-session-secret-also-change-this-to-random-string
 PORT=5001
@@ -34,7 +34,10 @@ LEETCODE_SESSION=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfYXV0aF91c2VyX2lkIjoiMT
 LEETCODE_CSRF_TOKEN=FJ5PdAzDRzwwLL4MxZitg7dMCGi25UC5
 ```
 
-**IMPORTANT**: Change `JWT_SECRET` and `SESSION_SECRET` to random strings!
+**IMPORTANT**: 
+- ✅ Your MongoDB Atlas connection string is already configured
+- ⚠️ CHANGE `JWT_SECRET` and `SESSION_SECRET` to random secure strings!
+- ⚠️ See "Generate Secure Secrets" section below for commands
 
 ### Step 4: Deploy
 1. Click "Create Web Service"
@@ -42,14 +45,26 @@ LEETCODE_CSRF_TOKEN=FJ5PdAzDRzwwLL4MxZitg7dMCGi25UC5
 3. Copy your backend URL (e.g., `https://leetracker-backend.onrender.com`)
 
 ### Step 5: Configure MongoDB Atlas (Required!)
-Your MongoDB needs to allow connections from Render:
+Your MongoDB Atlas cluster needs to allow connections from Render:
 
 1. Go to https://cloud.mongodb.com
-2. Select your cluster
-3. Click "Network Access" (left sidebar)
-4. Click "Add IP Address"
-5. Click "Allow Access from Anywhere" → "Confirm"
-   - Or add Render's IP ranges specifically
+2. Select your cluster: **Cluster0**
+3. Click **"Network Access"** (left sidebar under Security)
+4. Click **"Add IP Address"** button
+5. Choose one option:
+   - **Option A (Easiest)**: Click **"Allow Access from Anywhere"** 
+     - Adds: `0.0.0.0/0` (allows all IPs)
+     - Click **"Confirm"**
+   - **Option B (More Secure)**: Add Render's specific IP ranges
+     - Check Render documentation for current IP ranges
+6. Wait 1-2 minutes for changes to propagate
+
+**Verify your MongoDB connection string**:
+- Username: `Divi_01`
+- Password: `Divi123`
+- Cluster: `cluster0.tpjds.mongodb.net`
+- Database: `leetracker`
+- Connection string format is correct ✅
 
 ### Step 6: Update Vercel Environment Variable
 1. Go to https://vercel.com/dashboard
