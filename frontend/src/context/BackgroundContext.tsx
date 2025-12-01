@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getCuratedBackgroundUrls } from '../services/unsplashService';
+import { getCuratedBackgroundUrls, getEducationalBackgrounds } from '../services/unsplashService';
 
 interface BackgroundContextType {
   currentBgIndex: number;
@@ -16,40 +16,60 @@ export const BackgroundProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Load backgrounds instantly - no API delays
   useEffect(() => {
-    const loadBackgrounds = () => {
-      // Use cached images for instant load
+    let cancelled = false;
+
+    const loadBackgrounds = async () => {
       const cachedImages = localStorage.getItem('bg_images_cache');
       let images: string[] = [];
-      
+
       if (cachedImages) {
         try {
           images = JSON.parse(cachedImages);
           console.log('✅ Loaded cached background images');
-        } catch (e) {
+        } catch (error) {
           console.warn('Cache parse failed, using curated images');
         }
       }
-      
-      // Fallback to curated images if no cache or cache failed
+
       if (!images || images.length === 0) {
         images = getCuratedBackgroundUrls();
-        // Cache for next time
         localStorage.setItem('bg_images_cache', JSON.stringify(images));
       }
-      
-      // Set images immediately - no delays
-      setBackgroundImages(images);
-      setImagesLoaded(true);
-      
-      // Preload first 5 images in background for smooth transitions
-      images.slice(0, 5).forEach((src) => {
-        const img = new Image();
-        img.src = src;
-      });
+
+      if (!cancelled) {
+        setBackgroundImages(images);
+        setImagesLoaded(true);
+      }
+
+      try {
+        const freshImages = await getEducationalBackgrounds();
+        if (!cancelled && Array.isArray(freshImages) && freshImages.length > 0) {
+          setBackgroundImages(freshImages);
+          setCurrentBgIndex(0);
+          localStorage.setItem('bg_images_cache', JSON.stringify(freshImages));
+        }
+      } catch (error) {
+        console.warn('Unable to refresh Unsplash backgrounds:', error);
+      }
     };
-    
+
     loadBackgrounds();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!imagesLoaded || backgroundImages.length === 0) {
+      return;
+    }
+
+    backgroundImages.slice(0, 5).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [backgroundImages, imagesLoaded]);
 
   // Auto-change background every 10 seconds
   useEffect(() => {

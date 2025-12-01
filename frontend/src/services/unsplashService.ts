@@ -11,7 +11,8 @@ export const fetchUnsplashPhotos = async (query: string, count: number = 8): Pro
       `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&count=${count}&orientation=landscape&content_filter=high`,
       {
         headers: {
-          'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`
+          'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+          'Accept-Version': 'v1'
         },
         signal: controller.signal
       }

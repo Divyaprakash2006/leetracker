@@ -67,25 +67,27 @@ export const SearchPage = () => {
     setSuggestions([]);
     setUserData(null);
 
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
     try {
       console.log(` Fetching user: ${username}`);
       console.log(` URL: ${apiClient.getUser(username)}`);
-      
-      // Optimized: Reduced timeout and added abort controller
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
+
       const response = await axios.get(apiClient.getUser(username), {
         timeout: 10000,
         signal: controller.signal,
         headers: getAuthHeaders()
       });
-      
-      clearTimeout(timeoutId);
+
       console.log('Response received:', response.data);
       setUserData(response.data);
     } catch (err: any) {
       console.error('Error:', err);
+      if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') {
+        setError('The request timed out before the server could respond. Please try again.');
+        return;
+      }
       const responseData = err.response?.data;
       const status = err?.response?.status;
       const unauthorizedMessage = status === 401 || status === 403
@@ -101,6 +103,7 @@ export const SearchPage = () => {
         console.log('Suggestions:', newSuggestions);
       }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
