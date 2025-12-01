@@ -1,10 +1,30 @@
+import crypto from 'crypto';
 import mongoose from 'mongoose';
+import AuthUser from '../models/AuthUser';
 
 const USER_DB_PREFIX = 'user_';
 const USER_DB_SUFFIX = '_db';
 
-export const buildUserDatabaseName = (normalizedUsername: string) =>
-  `${USER_DB_PREFIX}${normalizedUsername}${USER_DB_SUFFIX}`;
+const createCandidateName = (normalizedUsername: string) => {
+  const safeUsername = normalizedUsername.replace(/[^a-z0-9]/g, '');
+  const randomSuffix = crypto.randomBytes(6).toString('hex');
+  return `${USER_DB_PREFIX}${safeUsername}_${randomSuffix}${USER_DB_SUFFIX}`;
+};
+
+export const generateUniqueUserDatabaseName = async (
+  normalizedUsername: string,
+  maxAttempts = 5
+): Promise<string> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const candidate = createCandidateName(normalizedUsername);
+    const exists = await AuthUser.exists({ userDatabaseName: candidate });
+    if (!exists) {
+      return candidate;
+    }
+  }
+
+  throw new Error('Failed to generate a unique database name for the user');
+};
 
 const ensureMongoUri = (): string => {
   const uri = process.env.MONGODB_URI;
@@ -30,8 +50,3 @@ export const createUserDatabase = async (dbName: string) => {
   }
 };
 
-export const ensureUserDatabase = async (normalizedUsername: string) => {
-  const dbName = buildUserDatabaseName(normalizedUsername);
-  await createUserDatabase(dbName);
-  return dbName;
-};

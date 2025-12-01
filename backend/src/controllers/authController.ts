@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AuthUser from '../models/AuthUser';
-import { buildUserDatabaseName, createUserDatabase } from '../utils/userDatabase';
+import { createUserDatabase, generateUniqueUserDatabaseName } from '../utils/userDatabase';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
 const JWT_EXPIRES_IN = '7d';
@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const userDatabaseName = buildUserDatabaseName(normalizedUsername);
+    const userDatabaseName = await generateUniqueUserDatabaseName(normalizedUsername);
 
     const user = new AuthUser({
       username: normalizedUsername,
@@ -87,7 +87,6 @@ export const registerUser = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         name: user.name,
-        userDatabaseName: user.userDatabaseName,
       },
     });
   } catch (error: any) {
@@ -146,7 +145,6 @@ export const loginUser = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         name: user.name,
-        userDatabaseName: user.userDatabaseName,
       },
     });
   } catch (error) {
@@ -176,7 +174,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         name: user.name,
-        userDatabaseName: user.userDatabaseName,
       },
     });
   } catch (error) {
