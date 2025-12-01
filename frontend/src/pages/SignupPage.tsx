@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
@@ -21,6 +21,14 @@ export const SignupPage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
   const { currentBgIndex, backgroundImages } = useBackground();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
