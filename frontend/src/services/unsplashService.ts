@@ -33,7 +33,7 @@ export const fetchUnsplashPhotos = async (query: string, count: number = 8): Pro
   }
 };
 
-// Get curated background URLs - optimized for fast loading
+// Get curated background URLs - optimized for instant loading
 export const getCuratedBackgroundUrls = (): string[] => {
   const imageIds = [
     'XJXWbfSo2f0', // Bright colorful desk with plants
@@ -43,12 +43,20 @@ export const getCuratedBackgroundUrls = (): string[] => {
     'hpjSkU2UYSU', // Colorful office desk
     'gyRa86ExKTw', // Natural light workspace
     'IuLgi9PWETU', // Creative desk setup
-    'GnvurwJsKaY'  // Modern study room
+    'GnvurwJsKaY', // Modern study room
+    'Im7lZjxeLhg', // Laptop on desk
+    '4Mw7nkQDByk', // Modern office
+    'Wpnoqo2plFA', // Clean workspace
+    '505eectW54k', // Developer desk
+    'jrh5lAq-mIs', // Coding setup
+    'wD1LRb9OeEo', // Study desk
+    'bwki71ap-y8', // Tech workspace
+    'ute2XAFQU2I'  // Creative desk
   ];
   
-  // Optimized: Smaller size with WebP format for faster loading
+  // Optimized: Smaller size, WebP format, aggressive caching for instant loading
   return imageIds.map(id => 
-    `https://images.unsplash.com/photo-${id}?w=1600&h=900&fit=crop&q=85&fm=webp&auto=format,compress`
+    `https://images.unsplash.com/photo-${id}?w=1400&h=800&fit=crop&q=80&fm=webp&auto=format,compress&cache=max`
   );
 };
 

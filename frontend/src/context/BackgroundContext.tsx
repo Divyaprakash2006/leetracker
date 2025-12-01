@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getEducationalBackgrounds, getCuratedBackgroundUrls } from '../services/unsplashService';
+import { getCuratedBackgroundUrls } from '../services/unsplashService';
 
 interface BackgroundContextType {
   currentBgIndex: number;
@@ -11,46 +11,40 @@ const BackgroundContext = createContext<BackgroundContextType | undefined>(undef
 
 export const BackgroundProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
-  const [backgroundImages, setBackgroundImages] = useState<string[]>(getCuratedBackgroundUrls());
+  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  // Load and preload backgrounds once on app startup
+  // Load backgrounds instantly - no API delays
   useEffect(() => {
-    const loadBackgrounds = async () => {
-      // Show curated images immediately (no preloading delay)
-      const curatedImages = getCuratedBackgroundUrls();
-      setBackgroundImages(curatedImages);
-      setImagesLoaded(true); // Enable transitions immediately
+    const loadBackgrounds = () => {
+      // Use cached images for instant load
+      const cachedImages = localStorage.getItem('bg_images_cache');
+      let images: string[] = [];
       
-      // Preload first 3 images only for instant display
-      const quickPreload = curatedImages.slice(0, 3).map((src) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = resolve;
-          img.onerror = resolve;
-          img.src = src;
-        });
-      });
-      
-      await Promise.all(quickPreload);
-      
-      // Fetch fresh images from Unsplash API in background (non-blocking)
-      getEducationalBackgrounds().then((images) => {
-        // Only update if we got valid images
-        if (images && images.length > 0) {
-          // Lazy preload API images in background
-          images.forEach((src) => {
-            const img = new Image();
-            img.src = src;
-          });
-          
-          // Switch to API images after brief delay
-          setTimeout(() => {
-            setBackgroundImages(images);
-          }, 1000);
+      if (cachedImages) {
+        try {
+          images = JSON.parse(cachedImages);
+          console.log('✅ Loaded cached background images');
+        } catch (e) {
+          console.warn('Cache parse failed, using curated images');
         }
-      }).catch(() => {
-        console.log('Using curated images (API unavailable)');
+      }
+      
+      // Fallback to curated images if no cache or cache failed
+      if (!images || images.length === 0) {
+        images = getCuratedBackgroundUrls();
+        // Cache for next time
+        localStorage.setItem('bg_images_cache', JSON.stringify(images));
+      }
+      
+      // Set images immediately - no delays
+      setBackgroundImages(images);
+      setImagesLoaded(true);
+      
+      // Preload first 5 images in background for smooth transitions
+      images.slice(0, 5).forEach((src) => {
+        const img = new Image();
+        img.src = src;
       });
     };
     
