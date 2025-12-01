@@ -88,8 +88,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       console.error('❌ Failed to load tracked users from API:', err?.message || err);
       
-      // Don't show error for 401 (not logged in)
-      if (err?.response?.status !== 401) {
+      // Handle authentication errors silently
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        console.warn('⚠️ Invalid or expired token, clearing authentication');
+        localStorage.removeItem('auth_token');
+        // Don't show error for auth issues - user will be redirected to login
+      } else {
         setError(err?.response?.data?.message || 'Failed to load tracked users');
       }
 

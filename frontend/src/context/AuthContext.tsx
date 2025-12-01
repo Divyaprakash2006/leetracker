@@ -27,6 +27,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('auth_token'));
   const [isLoading, setIsLoading] = useState(true);
 
+  // Setup axios interceptor to handle 401 errors globally
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.warn('⚠️ Received 401/403, clearing invalid token');
+          localStorage.removeItem('auth_token');
+          setToken(null);
+          setUser(null);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (response.data.success && response.data.user) {
           setUser(response.data.user);
           setToken(savedToken);
-          console.log('✅ User authenticated:', response.data.user.email);
+          console.log('✅ User authenticated:', response.data.user.username);
         } else {
           console.log('⚠️ Invalid auth response, clearing token');
           localStorage.removeItem('auth_token');
@@ -58,8 +78,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         }
       } catch (error: any) {
-        console.error('❌ Auth check failed:', error.message);
-        // Clear invalid token
+        console.warn('⚠️ Token validation failed, clearing invalid token');
+        // Silently clear invalid token without logging error
         localStorage.removeItem('auth_token');
         setToken(null);
         setUser(null);
