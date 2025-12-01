@@ -1195,9 +1195,13 @@ if (fs.existsSync(frontendDistPath)) {
   console.warn('⚠️ Frontend build directory not found at:', frontendDistPath);
 }
 
-app.listen(PORT, () => {
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
   console.log(`\n🚀 LeetCode Tracker Backend Server`);
-  console.log(`📍 Server: http://localhost:${PORT}`);
+  console.log(`📍 Server: ${process.env.RENDER_EXTERNAL_URL || `http://${HOST}:${PORT}`}`);
+  console.log(`🌍 Host: ${HOST}`);
+  console.log(`🔌 Port: ${PORT}`);
   console.log(`\n📋 API Endpoints:`);
   console.log(`   GET  /api/user/:username - Legacy user data`);
   console.log(`   POST /api/user/:username/sync - Sync solutions to MongoDB`);
