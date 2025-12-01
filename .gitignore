@@ -13,8 +13,13 @@ backend/dist/
 backend/.env
 frontend/.env
 frontend/.env.development
+frontend/.env.production
 .env.local
 .env.*.local
+# Keep template files for deployment reference
+!.env.vercel
+!frontend/.env.example
+!backend/.env.example
 
 # Logs
 npm-debug.log*
