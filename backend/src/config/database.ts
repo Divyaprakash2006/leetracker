@@ -22,7 +22,6 @@ export const connectDB = async () => {
   // Run diagnostics
   checkMongoConfig();
   
-  // Works with both local MongoDB Compass and cloud MongoDB Atlas
   const mongoUri = resolveMongoUri();
 
   try {
@@ -63,11 +62,11 @@ export const connectDB = async () => {
       heartbeatFrequencyMS: 10000, // Check connection every 10s
     });
 
-    console.log('✅ MongoDB connected successfully');
-    console.log('📦 Database:', mongoose.connection.db?.databaseName || 'Unknown');
-
     console.log('✅ MongoDB Atlas connected successfully');
     console.log('📦 Database:', mongoose.connection.db?.databaseName || 'leetracker');
+
+    // Listen for connection events
+    mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB error:', err.message);
     });
 
