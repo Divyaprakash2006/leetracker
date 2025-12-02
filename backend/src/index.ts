@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 
 // Load environment variables FIRST before any other imports that use them
 dotenv.config();
@@ -30,8 +29,7 @@ console.log('🔍 Environment check:');
 console.log('   MONGODB_URI:', process.env.MONGODB_URI ? 'Set ✅' : 'NOT SET ❌');
 console.log('   PORT:', process.env.PORT || '5001');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CommonJS __dirname is available directly
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 
 const app = express();
