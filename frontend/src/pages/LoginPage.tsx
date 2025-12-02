@@ -18,7 +18,7 @@ export const LoginPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (token) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [navigate]);
 
@@ -59,8 +59,8 @@ export const LoginPage = () => {
       
       await login(normalizedUsername, password);
       
-      console.log('✅ Login successful, redirecting to dashboard...');
-      navigate('/dashboard', { replace: true });
+      console.log('✅ Login successful, redirecting to home...');
+      navigate('/', { replace: true });
     } catch (err: any) {
       console.error('❌ Login failed:', err);
       

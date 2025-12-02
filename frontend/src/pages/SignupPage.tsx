@@ -26,7 +26,7 @@ export const SignupPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (token) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [navigate]);
 
@@ -66,8 +66,8 @@ export const SignupPage = () => {
 
     try {
       await register(username.trim().toLowerCase(), password, name.trim());
-      console.log('✅ Registration successful, redirecting to dashboard...');
-      navigate('/dashboard', { replace: true });
+      console.log('✅ Registration successful, redirecting to home...');
+      navigate('/', { replace: true });
     } catch (err: any) {
       console.error('Signup error:', err);
       const rawMessage = (err?.response?.data?.message || err?.message || 'Registration failed. Please try again.') as string;
