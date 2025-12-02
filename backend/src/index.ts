@@ -636,7 +636,12 @@ app.get('/api/submission/:submissionId', authenticateToken, async (req: AuthRequ
     console.log(`📝 Fetching submission details for ID: ${submissionId}${queryUsernameRaw ? ` (user: ${queryUsernameRaw})` : ''}`);
 
     const normalizedQuery = queryUsernameRaw?.toLowerCase();
-    let trackedUser = normalizedQuery ? await findTrackedUserFor(authUserId, queryUsernameRaw) : null;
+    type TrackedUserLookup = Awaited<ReturnType<typeof findTrackedUserFor>>;
+    let trackedUser: TrackedUserLookup = null;
+
+    if (normalizedQuery && queryUsernameRaw) {
+      trackedUser = await findTrackedUserFor(authUserId, queryUsernameRaw);
+    }
 
     console.log('📂 Step 1: Checking database for cached solution...');
     let cachedSolution = await Solution.findOne({ submissionId, authUserId });
