@@ -90,20 +90,23 @@ app.use(cors({
 app.use(express.json());
 
 // Session configuration (MemoryStore is sufficient for this app's stateless JWT auth)
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    },
-    // Suppress warning - we use JWT for auth, sessions are minimal
-    ...(process.env.NODE_ENV === 'production' ? { store: undefined } : {})
-  })
-);
+const sessionConfig: any = {
+  secret: process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+};
+
+// Suppress MemoryStore warning - we use JWT for auth, sessions are minimal
+if (process.env.NODE_ENV === 'production') {
+  sessionConfig.store = null as any;
+}
+
+app.use(session(sessionConfig));
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -1203,6 +1206,23 @@ app.get('/api/test-leetcode', async (req: Request, res: Response) => {
 if (fs.existsSync(frontendDistPath)) {
   app.get('*', (req, res) => {
     res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else {
+  // API-only mode (frontend deployed separately)
+  app.get('*', (req, res) => {
+    res.status(200).json({
+      name: 'LeetCode Tracker API',
+      version: '1.0.0',
+      status: 'running',
+      message: 'Backend API is operational. Frontend is deployed separately.',
+      endpoints: {
+        health: '/health',
+        auth: '/api/auth/*',
+        users: '/api/user/:username',
+        solutions: '/api/solution/:id',
+        trackedUsers: '/api/tracked-users'
+      }
+    });
   });
 }
 
