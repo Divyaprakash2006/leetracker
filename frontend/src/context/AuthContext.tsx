@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 interface User {
   id: string;
+  userId?: string;
   username?: string;
   email?: string;
   name: string;
@@ -117,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         setToken(newToken);
-        setUser(userData);
+        setUser({ ...userData, userId: userData.userId ?? userData.id });
         localStorage.setItem('auth_token', newToken);
         
         console.log('✅ Login successful for user:', userData.username);
@@ -165,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.data.success) {
         const { token: newToken, user: userData } = response.data;
         setToken(newToken);
-        setUser(userData);
+        setUser({ ...userData, userId: userData.userId ?? userData.id });
         localStorage.setItem('auth_token', newToken);
       } else {
         throw new Error(response.data.message || 'Registration failed');
@@ -178,9 +179,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    const activeUserId = user?.userId ?? user?.id;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('trackedUsers');
+      if (activeUserId) {
+        localStorage.removeItem(`trackedUsers_${activeUserId}`);
+      }
+    }
+
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
   };
 
   const value = {

@@ -16,9 +16,11 @@
    - **Environment**: `Node`
    - **Region**: Choose closest to you
    - **Branch**: `main`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+   - **Build Command**: `npm ci --only=production && npm run build`
+   - **Start Command**: `npm run start`
    - **Instance Type**: Free
+
+   > ✅ `npm ci` installs only production dependencies and skips lockfile rewrites. The new `npm run build` step compiles TypeScript into `dist/` so the start script can launch the pre-built server with `node dist/index.js`.
 
 ### Step 3: Add Environment Variables
 Click "Advanced" → "Add Environment Variable" and add these:
@@ -39,12 +41,19 @@ LEETCODE_CSRF_TOKEN=FJ5PdAzDRzwwLL4MxZitg7dMCGi25UC5
 - ⚠️ CHANGE `JWT_SECRET` and `SESSION_SECRET` to random secure strings!
 - ⚠️ See "Generate Secure Secrets" section below for commands
 
-### Step 4: Deploy
+### Step 4: Configure Scaling (avoid cold starts)
+1. Open the **Scaling** tab inside the Render service
+2. Set **Autoscale** to **ON**
+3. Set **Min Instances** to **1**
+
+Keeping one instance warm prevents the 30–60s cold-start delay on the free tier.
+
+### Step 5: Deploy
 1. Click "Create Web Service"
 2. Wait 5-10 minutes for deployment
 3. Copy your backend URL (e.g., `https://leetracker-backend.onrender.com`)
 
-### Step 5: Configure MongoDB Atlas (Required!)
+### Step 6: Configure MongoDB Atlas (Required!)
 Your MongoDB Atlas cluster needs to allow connections from Render:
 
 1. Go to https://cloud.mongodb.com
@@ -66,7 +75,7 @@ Your MongoDB Atlas cluster needs to allow connections from Render:
 - Database: `leetracker`
 - Connection string format is correct ✅
 
-### Step 6: Update Vercel Environment Variable
+### Step 7: Update Vercel Environment Variable
 1. Go to https://vercel.com/dashboard
 2. Select your project
 3. Go to "Settings" → "Environment Variables"
@@ -78,7 +87,7 @@ Your MongoDB Atlas cluster needs to allow connections from Render:
 6. Go to "Deployments" tab
 7. Click the "..." menu on latest deployment → "Redeploy"
 
-### Step 7: Test Your Deployment
+### Step 8: Test Your Deployment
 1. Visit your Vercel URL
 2. Try to sign up
 3. Should work without "Network Error"!
@@ -100,8 +109,20 @@ Your MongoDB Atlas cluster needs to allow connections from Render:
 
 ### Backend is slow
 - Render free tier has "cold starts" (takes 30-60 seconds to wake up)
-- First request after inactivity will be slow
+- Enable Autoscale with **Min Instances = 1** to keep one worker warm
+- First request after inactivity will still be slower on the free tier
 - Consider upgrading to paid tier for faster response
+
+### Faster local production build/run
+
+```bash
+cd backend
+npm ci --only=production
+npm run build
+npm run start
+```
+
+`npm run start:local` remains available if you want to execute the TypeScript entry directly with `tsx` during development.
 
 ---
 

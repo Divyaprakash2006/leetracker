@@ -45,9 +45,9 @@ export const connectDB = async () => {
       maxIdleTimeMS: 30000, // Close idle connections after 30s
       
       // Timeouts
-      serverSelectionTimeoutMS: 10000, // Reduced from 30s to 10s
+      serverSelectionTimeoutMS: 5000, // Fail fast if cluster is unreachable
       socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000, // Reduced from 30s to 10s
+      connectTimeoutMS: 5000,
       
       // Performance
       autoIndex: true, // Automatically create indexes

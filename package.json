@@ -5,7 +5,7 @@
   "scripts": {
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "start:backend": "cd backend && npm start",
+    "start:backend": "cd backend && npm run start:local",
     "start:frontend": "cd frontend && npm start",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
@@ -14,7 +14,7 @@
     "vercel-build": "cd frontend && npm install && npm run build",
     "render:prepare": "npm install --prefix backend && npm install --prefix frontend",
     "render:build": "npm run render:prepare && npm run build --prefix frontend",
-    "render:start": "cd backend && npm start"
+    "render:start": "cd backend && npm run start"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

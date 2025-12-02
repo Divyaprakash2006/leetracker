@@ -22,9 +22,10 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
+    const userId = typeof decoded.userId === 'string' ? decoded.userId : String(decoded.userId);
     
     // Get user from database
-    const user = await AuthUser.findById(decoded.userId).select('-password');
+    const user = await AuthUser.findById(userId).select('-password');
     
     if (!user) {
       return res.status(401).json({
@@ -35,7 +36,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
 
     // Attach user to request
     req.user = user;
-    req.userId = user._id.toString();
+    req.userId = userId;
     
     next();
   } catch (error: any) {
@@ -61,11 +62,12 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
 
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
-      const user = await AuthUser.findById(decoded.userId).select('-password');
+      const userId = typeof decoded.userId === 'string' ? decoded.userId : String(decoded.userId);
+      const user = await AuthUser.findById(userId).select('-password');
       
       if (user) {
         req.user = user;
-        req.userId = user._id.toString();
+        req.userId = userId;
       }
     }
     

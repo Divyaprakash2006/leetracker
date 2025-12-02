@@ -34,15 +34,35 @@ const ensureMongoUri = (): string => {
   return uri;
 };
 
+const REQUIRED_COLLECTIONS = ['tracked_users', 'tracked_profiles', 'tracked_solutions'];
+
 export const createUserDatabase = async (dbName: string) => {
   const mongoUri = ensureMongoUri();
   const connection = await mongoose.createConnection(mongoUri, { dbName }).asPromise();
 
   try {
-    await connection.collection('metadata').insertOne({
-      initializedAt: new Date(),
-      note: 'Initialized during user registration',
-    });
+    const existingCollections = await connection.db
+      .listCollections({}, { nameOnly: true })
+      .toArray();
+    const existingNames = new Set(existingCollections.map((item) => item.name));
+
+    for (const collectionName of REQUIRED_COLLECTIONS) {
+      if (!existingNames.has(collectionName)) {
+        await connection.db.createCollection(collectionName);
+      }
+    }
+
+    await connection.collection('metadata').updateOne(
+      { key: 'database-info' },
+      {
+        $set: {
+          key: 'database-info',
+          initializedAt: new Date(),
+          collections: Array.from(new Set([...existingNames, ...REQUIRED_COLLECTIONS])).sort(),
+        },
+      },
+      { upsert: true }
+    );
   } catch (error) {
     throw error;
   } finally {

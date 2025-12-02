@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import axios from 'axios';
 import { apiClient, getAuthHeaders } from '../config/api';
+import { useAuth } from './AuthContext';
 
 interface TrackedUser {
   username: string;
@@ -26,12 +27,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [trackedUsers, setTrackedUsers] = useState<TrackedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const storageKey = user?.userId || user?.id ? `trackedUsers_${user.userId ?? user.id}` : 'trackedUsers_guest';
 
   const persistToLocalStorage = useCallback((users: TrackedUser[]) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('trackedUsers', JSON.stringify(users));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(users));
+      } catch (storageError) {
+        console.warn('⚠️ Failed to persist tracked users cache', storageError);
+      }
     }
-  }, []);
+  }, [storageKey]);
 
   const loadLocalCache = useCallback((): TrackedUser[] => {
     if (typeof window === 'undefined') {
@@ -39,13 +47,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const stored = localStorage.getItem('trackedUsers');
-      return stored ? JSON.parse(stored) : [];
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+
+      const legacy = localStorage.getItem('trackedUsers');
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        localStorage.removeItem('trackedUsers');
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        return parsed;
+      }
+
+      return [];
     } catch (storageError) {
       console.warn('⚠️ Failed to parse trackedUsers from localStorage', storageError);
       return [];
     }
-  }, []);
+  }, [storageKey]);
 
   const normalizeTrackedUsers = useCallback((users: any[]): TrackedUser[] => {
     return users
@@ -115,7 +135,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
 
     refreshTrackedUsers();
-  }, [loadLocalCache, refreshTrackedUsers]);
+  }, [loadLocalCache, refreshTrackedUsers, storageKey]);
 
   useEffect(() => {
     persistToLocalStorage(trackedUsers);

@@ -73,8 +73,9 @@ export const registerUser = async (req: Request, res: Response) => {
       throw error;
     }
 
+    const userId = user._id.toString();
     const token = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId, username: user.username },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
@@ -84,7 +85,8 @@ export const registerUser = async (req: Request, res: Response) => {
       message: 'User registered and DB created successfully',
       token,
       user: {
-        id: user._id,
+        id: userId,
+        userId,
         username: user.username,
         name: user.name,
       },
@@ -131,8 +133,9 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    const userId = user._id.toString();
     const token = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId, username: user.username },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
@@ -142,7 +145,8 @@ export const loginUser = async (req: Request, res: Response) => {
       message: 'Login successful',
       token,
       user: {
-        id: user._id,
+        id: userId,
+        userId,
         username: user.username,
         name: user.name,
       },
@@ -168,10 +172,12 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    const userId = user._id.toString();
     return res.json({
       success: true,
       user: {
-        id: user._id,
+        id: userId,
+        userId,
         username: user.username,
         name: user.name,
       },
@@ -196,6 +202,8 @@ export const listUsers = async (_req: Request, res: Response) => {
       success: true,
       count: users.length,
       users: users.map((user) => ({
+        id: user._id.toString(),
+        userId: user._id.toString(),
         username: user.username,
         name: user.name,
         userDatabaseName: user.userDatabaseName,
