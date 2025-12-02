@@ -79,11 +79,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         }
       } catch (error: any) {
-        console.warn('⚠️ Token validation failed, clearing invalid token');
-        // Silently clear invalid token without logging error
-        localStorage.removeItem('auth_token');
-        setToken(null);
-        setUser(null);
+        // Only clear token if it's actually invalid (401/403), not for network errors
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.warn('⚠️ Token is invalid or expired, clearing');
+          localStorage.removeItem('auth_token');
+          setToken(null);
+          setUser(null);
+        } else {
+          // Network error or server down - keep token and assume still valid
+          console.warn('⚠️ Could not verify token (network issue), keeping session');
+          setToken(savedToken);
+          // Try to restore user from previous session if available
+          const cachedUser = localStorage.getItem('cached_user');
+          if (cachedUser) {
+            try {
+              setUser(JSON.parse(cachedUser));
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
       } finally {
         setIsLoading(false);
       }
@@ -120,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(newToken);
         setUser({ ...userData, userId: userData.userId ?? userData.id });
         localStorage.setItem('auth_token', newToken);
+        localStorage.setItem('cached_user', JSON.stringify({ ...userData, userId: userData.userId ?? userData.id }));
         
         console.log('✅ Login successful for user:', userData.username);
       } else {
@@ -168,6 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(newToken);
         setUser({ ...userData, userId: userData.userId ?? userData.id });
         localStorage.setItem('auth_token', newToken);
+        localStorage.setItem('cached_user', JSON.stringify({ ...userData, userId: userData.userId ?? userData.id }));
       } else {
         throw new Error(response.data.message || 'Registration failed');
       }
@@ -182,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const activeUserId = user?.userId ?? user?.id;
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('cached_user');
       localStorage.removeItem('trackedUsers');
       if (activeUserId) {
         localStorage.removeItem(`trackedUsers_${activeUserId}`);
