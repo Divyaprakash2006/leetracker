@@ -16,8 +16,8 @@
    - **Environment**: `Node`
    - **Region**: Choose closest to you
    - **Branch**: `main`
-   - **Build Command**: `npm ci --only=production && npm run build`
-   - **Start Command**: `npm run start`
+   - **Build Command**: `npm run render:build`
+   - **Start Command**: `npm run render:start`
    - **Instance Type**: Free
 
    > ✅ `npm ci` installs only production dependencies and skips lockfile rewrites. The new `npm run build` step compiles TypeScript into `dist/` so the start script can launch the pre-built server with `node dist/index.js`.

@@ -12,8 +12,7 @@
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm install && npm run build",
     "vercel-build": "cd frontend && npm install && npm run build",
-    "render:prepare": "npm install --prefix backend && npm install --prefix frontend",
-    "render:build": "npm run render:prepare && npm run build --prefix frontend",
+    "render:build": "npm ci --prefix backend && npm run build --prefix backend",
     "render:start": "cd backend && npm run start"
   },
   "devDependencies": {
