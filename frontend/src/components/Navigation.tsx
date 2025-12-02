@@ -193,7 +193,7 @@ export const Navigation = () => {
                       <button
                         onClick={() => {
                           setProfileMenuOpen(false);
-                          navigate('/dashboard');
+                          navigate('/profile');
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors duration-150 flex items-center gap-3"
                       >

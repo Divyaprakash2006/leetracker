@@ -16,6 +16,7 @@ const SubmissionViewerPage = lazy(() => import('./pages/SubmissionViewerPage').t
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then((m) => ({ default: m.SignupPage })));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 
 function App() {
   const renderFallback = () => (
@@ -82,6 +83,17 @@ function App() {
                     <Navigation />
                     <div className="w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
                       <AnalyticsPage />
+                    </div>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Navigation />
+                    <div className="w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+                      <ProfilePage />
                     </div>
                   </PrivateRoute>
                 }
